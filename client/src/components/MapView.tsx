@@ -1,0 +1,76 @@
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { createPriceIcon } from './PriceMarker';
+import type { Listing } from '../data/mockListings';
+import 'leaflet/dist/leaflet.css';
+
+interface MapViewProps {
+  listings: Listing[];
+}
+
+// Google Satellite tiles (matching reference design)
+const SATELLITE_URL = 'https://mt1.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}';
+const SATELLITE_ATTR = 'Dữ liệu bản đồ &copy;2026 Google, Hình ảnh &copy;2026 Airbus, CNES / Airbus, Maxar Technologies';
+
+const MapView = ({ listings }: MapViewProps) => {
+  return (
+    <div className="flex-1 h-full relative bg-[#1a1a2e]">
+      <MapContainer
+        center={[10.79, 106.685]}
+        zoom={14}
+        className="w-full h-full z-0"
+        zoomControl={true}
+        scrollWheelZoom={true}
+        attributionControl={false}
+      >
+        {/* Google Satellite + Labels hybrid */}
+        <TileLayer
+          url={SATELLITE_URL}
+          attribution={SATELLITE_ATTR}
+          maxZoom={20}
+          subdomains={['mt0', 'mt1', 'mt2', 'mt3']}
+        />
+
+        {/* Price markers */}
+        {listings.map((listing) => (
+          <Marker
+            key={listing.id}
+            position={[listing.lat, listing.lng]}
+            icon={createPriceIcon(listing)}
+          >
+            <Popup closeButton={false} offset={[0, -10]}>
+              <div className="text-left w-[240px] flex flex-col group">
+                <div className="relative w-full h-[160px] mb-3 rounded-xl overflow-hidden shadow-sm">
+                  <img
+                    src={listing.image}
+                    alt={listing.title}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+                  <div className="absolute top-2 right-2 bg-white/90 backdrop-blur px-2 py-0.5 rounded-full text-[10px] font-bold text-emerald-700 shadow-sm">
+                    Mới
+                  </div>
+                </div>
+                
+                <h3 className="font-extrabold text-base text-slate-900 leading-tight mb-1">
+                  {listing.title}
+                </h3>
+                <p className="text-xs text-slate-500 mb-2 line-clamp-1">{listing.address}</p>
+                <div className="flex justify-between items-end mt-1">
+                  <div className="flex items-baseline gap-1">
+                    <span className="font-extrabold text-xl text-slate-900">
+                      {listing.price % 1 === 0
+                        ? listing.price
+                        : listing.price.toFixed(1)}
+                    </span>
+                    <span className="text-slate-600 text-sm font-semibold">Trđ<span className="text-slate-400 font-normal">/tháng</span></span>
+                  </div>
+                </div>
+              </div>
+            </Popup>
+          </Marker>
+        ))}
+      </MapContainer>
+    </div>
+  );
+};
+
+export default MapView;
