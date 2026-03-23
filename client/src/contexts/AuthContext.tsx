@@ -1,6 +1,8 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { api } from '../lib/api';
+import type { UserRole, SubscriptionTier, Profile } from '../../../shared/types';
 
+// Extended User interface with profile data
 interface User {
   id: string;
   email?: string;
@@ -8,6 +10,7 @@ interface User {
     full_name?: string;
     [key: string]: unknown;
   };
+  profile?: Profile;
 }
 
 interface Session {
@@ -18,9 +21,19 @@ interface Session {
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  role: UserRole;
+  subscription: SubscriptionTier;
+  isAuthenticated: boolean;
+  isLandlord: boolean;
+  isBroker: boolean;
+  isAdmin: boolean;
+  canPost: boolean;
+  canManageBuildings: boolean;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
-  signUp: (email: string, password: string, fullName: string) => Promise<{ error: string | null }>;
+  signUp: (email: string, password: string, fullName: string, role?: UserRole, phone?: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
+  updateProfile: (data: Partial<Profile>) => Promise<{ error: string | null }>;
+  refreshProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -29,8 +42,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Derive role and permissions from user
+  const role: UserRole = user?.profile?.role || 'user';
+  const subscription: SubscriptionTier = user?.profile?.subscription || 'free';
+  const isAuthenticated = !!user;
+  const isLandlord = role === 'landlord';
+  const isBroker = role === 'broker';
+  const isAdmin = role === 'admin';
+  const canPost = isLandlord || isBroker || isAdmin;
+  const canManageBuildings = isLandlord || isBroker || isAdmin;
+
   // Save session tokens to localStorage
-  const saveSession = (session: Session | null) => {
+  const saveSession = useCallback((session: Session | null) => {
     if (session) {
       localStorage.setItem('access_token', session.access_token);
       localStorage.setItem('refresh_token', session.refresh_token);
@@ -38,7 +61,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
     }
-  };
+  }, []);
+
+  // Refresh profile data from server
+  const refreshProfile = useCallback(async () => {
+    const { data, error } = await api.get<{ user: User }>('/api/auth/me');
+    if (!error && data) {
+      setUser(data.user);
+    }
+  }, []);
 
   // Check for existing session on mount
   useEffect(() => {
@@ -74,7 +105,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     checkAuth();
-  }, []);
+  }, [saveSession]);
 
   const signIn = async (email: string, password: string) => {
     const { data, error } = await api.post<{ user: User; session: Session }>(
@@ -91,10 +122,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return { error: null };
   };
 
-  const signUp = async (email: string, password: string, fullName: string) => {
+  const signUp = async (
+    email: string,
+    password: string,
+    fullName: string,
+    role: UserRole = 'user',
+    phone?: string
+  ) => {
     const { data, error } = await api.post<{ user: User; session: Session }>(
       '/api/auth/register',
-      { email, password, fullName }
+      { email, password, fullName, role, phone }
     );
 
     if (error || !data) {
@@ -116,8 +153,41 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setUser(null);
   };
 
+  const updateProfile = async (profileData: Partial<Profile>) => {
+    const { error } = await api.put<{ profile: Profile }>(
+      '/api/auth/profile',
+      profileData
+    );
+
+    if (error) {
+      return { error };
+    }
+
+    // Refresh user data to get updated profile
+    await refreshProfile();
+    return { error: null };
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        role,
+        subscription,
+        isAuthenticated,
+        isLandlord,
+        isBroker,
+        isAdmin,
+        canPost,
+        canManageBuildings,
+        signIn,
+        signUp,
+        signOut,
+        updateProfile,
+        refreshProfile,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

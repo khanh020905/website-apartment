@@ -5,10 +5,17 @@ import { AuthProvider } from './contexts/AuthContext';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
 import MapView from './components/MapView';
+import ProtectedRoute from './components/ProtectedRoute';
 import RegisterPage from './pages/RegisterPage';
-import AdminDashboard from './pages/AdminDashboard';
 import LoginPage from './pages/LoginPage';
 import ContactPage from './pages/ContactPage';
+import SearchPage from './pages/SearchPage';
+import ListingDetailPage from './pages/ListingDetailPage';
+import CreateListingPage from './pages/CreateListingPage';
+import MyListingsPage from './pages/MyListingsPage';
+import DashboardPage from './pages/DashboardPage';
+import AdminVerificationPage from './pages/AdminVerificationPage';
+import QRStatusPage from './pages/QRStatusPage';
 import { mockListings } from './data/mockListings';
 import type { Listing } from './data/mockListings';
 
@@ -37,13 +44,46 @@ function App() {
     <Router>
       <AuthProvider>
         <div className="h-screen w-screen flex flex-col overflow-hidden font-sans bg-white">
-          <Navbar />
           <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/contact" element={<ContactPage />} />
-          <Route path="/admin" element={<AdminDashboard />} />
+            {/* QR Status page — no navbar, standalone  */}
+            <Route path="/qr/:code" element={<QRStatusPage />} />
+
+            {/* All other routes with navbar */}
+            <Route path="*" element={
+              <>
+                <Navbar />
+                <Routes>
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/register" element={<RegisterPage />} />
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/contact" element={<ContactPage />} />
+                  <Route path="/search" element={<SearchPage />} />
+                  <Route path="/listings/:id" element={<ListingDetailPage />} />
+
+                  {/* Authenticated routes */}
+                  <Route path="/create-listing" element={
+                    <ProtectedRoute roles={['landlord', 'broker', 'admin']}>
+                      <CreateListingPage />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/my-listings" element={
+                    <ProtectedRoute>
+                      <MyListingsPage />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/dashboard" element={
+                    <ProtectedRoute roles={['landlord', 'broker', 'admin']}>
+                      <DashboardPage />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/admin" element={
+                    <ProtectedRoute roles={['admin']}>
+                      <AdminVerificationPage />
+                    </ProtectedRoute>
+                  } />
+                </Routes>
+              </>
+            } />
           </Routes>
         </div>
       </AuthProvider>

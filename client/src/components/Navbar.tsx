@@ -6,11 +6,10 @@ import { useAuth } from '../contexts/AuthContext';
 const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, loading, signOut } = useAuth();
+  const { user, loading, signOut, role, canPost, isAdmin } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
@@ -25,6 +24,13 @@ const Navbar = () => {
     setDropdownOpen(false);
     await signOut();
     navigate('/');
+  };
+
+  const ROLE_LABELS: Record<string, string> = {
+    user: 'Khách',
+    landlord: 'Chủ trọ',
+    broker: 'Môi giới',
+    admin: 'Admin',
   };
 
   return (
@@ -47,45 +53,63 @@ const Navbar = () => {
         <span className="text-xl font-extrabold text-white tracking-tight">HomeSpot</span>
       </Link>
 
-      {/* Right — Actions */}
-      <div className="flex items-center gap-5">
-        <motion.button
-          whileHover={{ scale: 1.03 }}
-          whileTap={{ scale: 0.97 }}
-          className="flex items-center gap-2 px-6 py-2 bg-white text-slate-900 rounded-full text-sm font-semibold hover:bg-white/90 transition-all cursor-pointer shadow-sm"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <circle cx="12" cy="12" r="10" />
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v8m4-4H8" />
-          </svg>
-          Đăng tin cho thuê
-        </motion.button>
+      {/* Center — Nav links */}
+      <div className="hidden md:flex items-center gap-6">
+        <Link to="/search" className={`text-sm font-medium transition-colors ${location.pathname === '/search' ? 'text-white' : 'text-white/70 hover:text-white'}`}>
+          Tìm kiếm
+        </Link>
+        {canPost && (
+          <>
+            <Link to="/dashboard" className={`text-sm font-medium transition-colors ${location.pathname === '/dashboard' ? 'text-white' : 'text-white/70 hover:text-white'}`}>
+              Bảng điều khiển
+            </Link>
+            <Link to="/my-listings" className={`text-sm font-medium transition-colors ${location.pathname === '/my-listings' ? 'text-white' : 'text-white/70 hover:text-white'}`}>
+              Tin của tôi
+            </Link>
+          </>
+        )}
+        {isAdmin && (
+          <Link to="/admin" className={`text-sm font-medium transition-colors ${location.pathname === '/admin' ? 'text-white' : 'text-white/70 hover:text-white'}`}>
+            Quản trị
+          </Link>
+        )}
+      </div>
 
-        <Link to="/contact" className="flex items-center gap-1.5 text-sm text-white/80 hover:text-white transition-colors">
+      {/* Right — Actions */}
+      <div className="flex items-center gap-4">
+        {canPost && (
+          <Link to="/create-listing">
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              className="flex items-center gap-2 px-5 py-2 bg-white text-slate-900 rounded-full text-sm font-semibold hover:bg-white/90 transition-all cursor-pointer shadow-sm"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <circle cx="12" cy="12" r="10" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v8m4-4H8" />
+              </svg>
+              Đăng tin
+            </motion.button>
+          </Link>
+        )}
+
+        <Link to="/contact" className="flex items-center gap-1.5 text-sm text-white/70 hover:text-white transition-colors">
           <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
           </svg>
           Liên hệ
         </Link>
 
-        {/* Notification bell */}
-        <button className="relative text-white/70 hover:text-white transition-colors cursor-pointer">
-          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
-          </svg>
-          <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-[16px] bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center px-0.5">
-            56
-          </span>
-        </button>
-
         {loading ? null : user ? (
-          /* Logged in — Avatar with dropdown */
           <div className="relative" ref={dropdownRef}>
             <button
               onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="w-9 h-9 bg-emerald-600 rounded-full flex items-center justify-center text-white text-sm font-bold cursor-pointer hover:ring-2 hover:ring-white/30 transition-all"
+              className="flex items-center gap-2 cursor-pointer"
             >
-              {(user.user_metadata?.full_name?.[0] || user.email?.[0] || 'U').toUpperCase()}
+              <div className="w-9 h-9 bg-emerald-600 rounded-full flex items-center justify-center text-white text-sm font-bold hover:ring-2 hover:ring-white/30 transition-all">
+                {(user.user_metadata?.full_name?.[0] || user.email?.[0] || 'U').toUpperCase()}
+              </div>
+              <span className="hidden md:block text-xs text-emerald-300 font-semibold">{ROLE_LABELS[role] || role}</span>
             </button>
 
             <AnimatePresence>
@@ -97,50 +121,53 @@ const Navbar = () => {
                   transition={{ duration: 0.15 }}
                   className="absolute right-0 top-[calc(100%+8px)] w-[220px] bg-white rounded-xl shadow-xl shadow-black/10 border border-slate-100 overflow-hidden z-50"
                 >
-                  {/* User info */}
                   <div className="px-4 py-3 border-b border-slate-100">
                     <p className="text-sm font-bold text-slate-800 truncate">
                       {user.user_metadata?.full_name || 'Người dùng'}
                     </p>
                     <p className="text-xs text-slate-400 truncate">{user.email}</p>
+                    <span className="inline-block mt-1 px-2 py-0.5 bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded-full">
+                      {ROLE_LABELS[role] || role}
+                    </span>
                   </div>
 
-                  {/* Links */}
                   <div className="py-1">
-                    <Link
-                      to="/admin"
-                      onClick={() => setDropdownOpen(false)}
-                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
-                    >
+                    {canPost && (
+                      <>
+                        <Link to="/dashboard" onClick={() => setDropdownOpen(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
+                          <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zm0 9.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zm9.75-9.75A2.25 2.25 0 0115.75 3.75H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6z" />
+                          </svg>
+                          Bảng điều khiển
+                        </Link>
+                        <Link to="/my-listings" onClick={() => setDropdownOpen(false)}
+                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
+                          <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                          </svg>
+                          Tin đăng của tôi
+                        </Link>
+                      </>
+                    )}
+                    {isAdmin && (
+                      <Link to="/admin" onClick={() => setDropdownOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
+                        <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                        </svg>
+                        Quản trị
+                      </Link>
+                    )}
+                    <Link to="/search" onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
                       <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zm0 9.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zm9.75-9.75A2.25 2.25 0 0115.75 3.75H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
                       </svg>
-                      Bảng điều khiển
-                    </Link>
-                    <Link
-                      to="/"
-                      onClick={() => setDropdownOpen(false)}
-                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
-                    >
-                      <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                      </svg>
-                      Hồ sơ cá nhân
-                    </Link>
-                    <Link
-                      to="/"
-                      onClick={() => setDropdownOpen(false)}
-                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
-                    >
-                      <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                      Cài đặt
+                      Tìm kiếm nâng cao
                     </Link>
                   </div>
 
-                  {/* Logout */}
                   <div className="border-t border-slate-100 py-1">
                     <button
                       onClick={handleSignOut}
@@ -157,7 +184,6 @@ const Navbar = () => {
             </AnimatePresence>
           </div>
         ) : (
-          /* Logged out state */
           <>
             <Link to="/login" className={`text-sm font-medium transition-colors ${
               location.pathname === '/login' ? 'text-white underline underline-offset-4' : 'text-white/80 hover:text-white'

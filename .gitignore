@@ -22,3 +22,8 @@ server/dist/
 # OS
 .DS_Store
 Thumbs.db
+
+
+#Files
+
+rental_platform_srs.docx

@@ -2,6 +2,13 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import type { UserRole } from '../../../shared/types';
+
+const ROLE_OPTIONS: { value: UserRole; label: string; desc: string; icon: string }[] = [
+  { value: 'user', label: 'Khách', desc: 'Tìm kiếm phòng trọ', icon: '🔍' },
+  { value: 'landlord', label: 'Chủ trọ', desc: 'Quản lý nhà trọ', icon: '🏠' },
+  { value: 'broker', label: 'Môi giới', desc: 'Đăng tin cho thuê', icon: '🤝' },
+];
 
 const RegisterPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -9,8 +16,10 @@ const RegisterPage = () => {
   const [agreed, setAgreed] = useState(false);
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [selectedRole, setSelectedRole] = useState<UserRole>('user');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
@@ -34,7 +43,7 @@ const RegisterPage = () => {
     }
 
     setLoading(true);
-    const { error } = await signUp(email, password, fullName);
+    const { error } = await signUp(email, password, fullName, selectedRole, phone || undefined);
     setLoading(false);
 
     if (error) {
@@ -179,6 +188,43 @@ const RegisterPage = () => {
                 required
                 className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-700/10 transition-all"
               />
+            </div>
+
+            {/* Phone */}
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Số điện thoại</label>
+              <input
+                type="tel"
+                placeholder="0901234567"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-700/10 transition-all"
+              />
+            </div>
+
+            {/* Role Selection */}
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">Bạn là</label>
+              <div className="grid grid-cols-3 gap-2">
+                {ROLE_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setSelectedRole(opt.value)}
+                    className={`flex flex-col items-center gap-1 p-3 rounded-xl border-2 transition-all text-center cursor-pointer ${
+                      selectedRole === opt.value
+                        ? 'border-emerald-600 bg-emerald-50 shadow-sm'
+                        : 'border-slate-200 hover:border-slate-300'
+                    }`}
+                  >
+                    <span className="text-xl">{opt.icon}</span>
+                    <span className={`text-xs font-bold ${selectedRole === opt.value ? 'text-emerald-700' : 'text-slate-700'}`}>
+                      {opt.label}
+                    </span>
+                    <span className="text-[10px] text-slate-400 leading-tight">{opt.desc}</span>
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Password */}
