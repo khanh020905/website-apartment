@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { 
   X, Home, Layers, Maximize, DollarSign, Users, 
-  FileText, Check, Plus, Trash2, LayoutGrid, Sofa 
 } from 'lucide-react';
 import type { Room, CreateRoomInput, RoomStatus, FurnitureStatus, Amenity } from '../../../../shared/types';
 import { ROOM_STATUS_LABELS, FURNITURE_LABELS } from '../../../../shared/types';

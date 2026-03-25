@@ -1,15 +1,14 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
   AreaChart, Area 
 } from 'recharts';
 import { 
-  Building2, Home, Users, Settings, TrendingUp, Calendar, AlertCircle, 
-  ArrowUpRight, ArrowDownRight, DollarSign, PieChart 
+  Building2, Home, Users, TrendingUp, Calendar, AlertCircle, 
+  ArrowUpRight, ArrowDownRight, DollarSign
 } from 'lucide-react';
 import type { DashboardStats, Contract } from '../../../../shared/types';
-import { ROOM_STATUS_LABELS } from '../../../../shared/types';
 
 interface SummaryCardProps {
   label: string;

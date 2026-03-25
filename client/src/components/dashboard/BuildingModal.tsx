@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
-  X, Building2, MapPin, Layers, FileText, 
-  Map, Check, Trash2, LayoutGrid, Sofa 
+  X, Building2, MapPin, Layers
 } from 'lucide-react';
 import type { Building, CreateBuildingInput } from '../../../../shared/types';
 

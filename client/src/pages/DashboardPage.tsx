@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Building2, LayoutGrid, PieChart, Users, Settings, Plus, 
-  ChevronRight, ArrowLeft, RefreshCw, AlertCircle
+  Building2, LayoutGrid, PieChart, RefreshCw, AlertCircle
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../lib/api';
