@@ -16,7 +16,7 @@ import CreateListingPage from './pages/CreateListingPage';
 import MyListingsPage from './pages/MyListingsPage';
 import DashboardPage from './pages/DashboardPage';
 import AdminVerificationPage from './pages/AdminVerificationPage';
-import QRStatusPage from './pages/QRStatusPage';
+import BuildingStatusPage from './pages/BuildingStatusPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import type { Listing } from '../../shared/types';
 
@@ -86,7 +86,7 @@ function App() {
         <div className="h-screen w-screen flex flex-col overflow-hidden font-sans bg-white">
           <Routes>
             {/* QR Status page — no navbar, standalone  */}
-            <Route path="/qr/:code" element={<QRStatusPage />} />
+            <Route path="/qr/:code" element={<BuildingStatusPage />} />
 
             {/* All other routes with navbar */}
             <Route path="*" element={

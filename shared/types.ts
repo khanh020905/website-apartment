@@ -273,3 +273,23 @@ export interface SearchFilters {
   page?: number;
   limit?: number;
 }
+
+export interface DashboardStats {
+  totalRooms: number;
+  statusCounts: {
+    available: number;
+    occupied: number;
+    maintenance: number;
+  };
+  revenue: {
+    current: number;
+    last: number;
+  };
+  expiringContracts: {
+    d7: Contract[];
+    d14: Contract[];
+    d30: Contract[];
+  };
+  occupancyRate: number;
+  buildingCount: number;
+}
