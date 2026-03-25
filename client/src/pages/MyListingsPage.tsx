@@ -14,7 +14,9 @@ const STATUS_STYLES: Record<ListingStatus, { bg: string; text: string; label: st
 
 export default function MyListingsPage() {
   const { isAuthenticated } = useAuth();
-  const [listings, setListings] = useState<Listing[]>([]);
+  const [listings, setListings] = useState<(Listing & {
+    listing_reviews?: { action: 'approved' | 'rejected'; notes: string | null; reviewed_at: string }[];
+  })[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<ListingStatus | 'all'>('all');
 
@@ -97,6 +99,12 @@ export default function MyListingsPage() {
                     <span>{listing.bedrooms} PN • {listing.bathrooms} WC</span>
                     <span>👁 {listing.view_count}</span>
                   </div>
+                  {listing.status === 'rejected' && listing.listing_reviews && listing.listing_reviews.length > 0 && (
+                    <div className="mt-2 p-2 bg-red-50 border border-red-100 rounded-lg text-xs text-red-700">
+                      <span className="font-semibold">Lý do từ chối:</span>{' '}
+                      {listing.listing_reviews[0].notes || 'Không có ghi chú từ quản trị viên'}
+                    </div>
+                  )}
                   <div className="flex-1" />
                   <div className="flex gap-2 mt-2">
                     <button onClick={() => handleDelete(listing.id)} className="px-3 py-1.5 text-xs text-red-500 hover:bg-red-50 rounded-lg cursor-pointer font-semibold">

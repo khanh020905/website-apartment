@@ -1,9 +1,53 @@
-import { Router, Response } from 'express';
+import { Router, Response, Request, NextFunction } from 'express';
 import { getSupabase } from '../lib/supabase';
 import { authenticate, requireRole } from '../middleware/auth';
 import type { AuthRequest } from '../middleware/auth';
+import multer from 'multer';
 
 const router = Router();
+const MAX_IMAGE_COUNT = 15;
+const MIN_IMAGE_COUNT = 3;
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
+const ALLOWED_MIME_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
+const LISTING_IMAGE_BUCKET = 'listing-images';
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: MAX_FILE_SIZE,
+    files: MAX_IMAGE_COUNT,
+  },
+  fileFilter: (_req, file, cb) => {
+    if (!ALLOWED_MIME_TYPES.has(file.mimetype)) {
+      cb(new Error('Chỉ chấp nhận file JPG, PNG hoặc WebP'));
+      return;
+    }
+    cb(null, true);
+  },
+});
+
+function uploadListingImages(req: Request, res: Response, next: NextFunction): void {
+  upload.array('images', MAX_IMAGE_COUNT)(req, res, (err: unknown) => {
+    if (!err) {
+      next();
+      return;
+    }
+
+    if (err instanceof multer.MulterError) {
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        res.status(400).json({ error: 'Mỗi ảnh tối đa 5MB' });
+        return;
+      }
+      if (err.code === 'LIMIT_FILE_COUNT') {
+        res.status(400).json({ error: 'Tối đa 15 ảnh mỗi lần upload' });
+        return;
+      }
+    }
+
+    const message = err instanceof Error ? err.message : 'Upload ảnh thất bại';
+    res.status(400).json({ error: message });
+  });
+}
 
 // GET /api/listings — Public: list approved listings, or own listings if authenticated
 router.get('/', async (req: AuthRequest, res: Response) => {
@@ -43,7 +87,7 @@ router.get('/my', authenticate, async (req: AuthRequest, res: Response) => {
 
   const { data, error } = await getSupabase()
     .from('listings')
-    .select('*')
+    .select('*, listing_reviews(action, notes, reviewed_at)')
     .eq('posted_by', req.user.id)
     .order('created_at', { ascending: false });
 
@@ -73,6 +117,73 @@ router.get('/:id', async (req: AuthRequest, res: Response) => {
   res.json({ listing: data });
 });
 
+// POST /api/listings/upload-images — Upload listing images to Supabase storage
+router.post(
+  '/upload-images',
+  authenticate,
+  requireRole('landlord', 'broker', 'admin'),
+  uploadListingImages,
+  async (req: AuthRequest, res: Response) => {
+    if (!req.user) {
+      res.status(401).json({ error: 'Chưa xác thực' });
+      return;
+    }
+
+    const files = (req.files as Express.Multer.File[] | undefined) || [];
+    if (files.length === 0) {
+      res.status(400).json({ error: 'Vui lòng chọn ít nhất 1 ảnh' });
+      return;
+    }
+
+    const supabase = getSupabase();
+    const { data: bucket, error: bucketError } = await supabase.storage.getBucket(LISTING_IMAGE_BUCKET);
+    if (bucketError && !bucketError.message.toLowerCase().includes('not found')) {
+      res.status(400).json({ error: `Không thể kiểm tra bucket ảnh: ${bucketError.message}` });
+      return;
+    }
+    if (!bucket) {
+      const { error: createBucketError } = await supabase.storage.createBucket(LISTING_IMAGE_BUCKET, {
+        public: true,
+        fileSizeLimit: `${MAX_FILE_SIZE}`,
+        allowedMimeTypes: Array.from(ALLOWED_MIME_TYPES),
+      });
+      if (createBucketError && !createBucketError.message.toLowerCase().includes('already exists')) {
+        res.status(400).json({ error: `Không thể tạo bucket ảnh: ${createBucketError.message}` });
+        return;
+      }
+    }
+
+    const uploaded: { url: string; order: number }[] = [];
+
+    for (let i = 0; i < files.length; i += 1) {
+      const file = files[i];
+      const extension = file.mimetype === 'image/png'
+        ? 'png'
+        : file.mimetype === 'image/webp'
+          ? 'webp'
+          : 'jpg';
+      const filePath = `${req.user.id}/${Date.now()}-${i}.${extension}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from(LISTING_IMAGE_BUCKET)
+        .upload(filePath, file.buffer, {
+          contentType: file.mimetype,
+          upsert: false,
+        });
+
+      if (uploadError) {
+        res.status(400).json({ error: uploadError.message });
+        return;
+      }
+
+      const { data: publicUrlData } = supabase.storage.from(LISTING_IMAGE_BUCKET).getPublicUrl(filePath);
+      uploaded.push({ url: publicUrlData.publicUrl, order: i });
+    }
+
+    res.json({ images: uploaded });
+  }
+);
+
 // POST /api/listings — Create listing
 // SRS §2.2: Verified accounts bypass Check Legit review
 router.post('/', authenticate, requireRole('landlord', 'broker', 'admin'), async (req: AuthRequest, res: Response) => {
@@ -91,9 +202,43 @@ router.post('/', authenticate, requireRole('landlord', 'broker', 'admin'), async
     res.status(400).json({ error: 'Tiêu đề, giá thuê và số điện thoại là bắt buộc' });
     return;
   }
+  const normalizedTitle = String(title).trim();
+  const normalizedPhone = String(contact_phone).trim();
+  const normalizedPrice = Number(price);
+  const normalizedArea = Number(area);
 
-  if (title.length > 100) {
+  if (!normalizedTitle || !normalizedPhone) {
+    res.status(400).json({ error: 'Tiêu đề và số điện thoại không hợp lệ' });
+    return;
+  }
+  if (Number.isNaN(normalizedPrice) || normalizedPrice <= 0) {
+    res.status(400).json({ error: 'Giá thuê phải lớn hơn 0' });
+    return;
+  }
+  if (Number.isNaN(normalizedArea) || normalizedArea <= 0) {
+    res.status(400).json({ error: 'Diện tích phải lớn hơn 0' });
+    return;
+  }
+
+  if (normalizedTitle.length > 100) {
     res.status(400).json({ error: 'Tiêu đề không được quá 100 ký tự' });
+    return;
+  }
+  if (!Array.isArray(images) || images.length < MIN_IMAGE_COUNT || images.length > MAX_IMAGE_COUNT) {
+    res.status(400).json({ error: 'Cần từ 3 đến 15 ảnh cho tin đăng' });
+    return;
+  }
+  const imageShapeValid = images.every(
+    (img: unknown) =>
+      typeof img === 'object' &&
+      img !== null &&
+      'url' in img &&
+      'order' in img &&
+      typeof (img as { url: unknown }).url === 'string' &&
+      typeof (img as { order: unknown }).order === 'number'
+  );
+  if (!imageShapeValid) {
+    res.status(400).json({ error: 'Danh sách ảnh không hợp lệ' });
     return;
   }
 
@@ -114,10 +259,10 @@ router.post('/', authenticate, requireRole('landlord', 'broker', 'admin'), async
     .insert({
       posted_by: req.user.id,
       room_id: room_id || null,
-      title,
+      title: normalizedTitle,
       description: description || null,
-      price,
-      area: area || null,
+      price: normalizedPrice,
+      area: normalizedArea,
       bedrooms: bedrooms || 0,
       bathrooms: bathrooms || 0,
       property_type: property_type || 'phong_tro',
@@ -128,7 +273,7 @@ router.post('/', authenticate, requireRole('landlord', 'broker', 'admin'), async
       city: city || null,
       lat: lat || null,
       lng: lng || null,
-      contact_phone,
+      contact_phone: normalizedPhone,
       contact_name: contact_name || null,
       images: images || [],
       amenity_ids: amenity_ids || [],

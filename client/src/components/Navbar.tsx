@@ -73,6 +73,11 @@ const Navbar = () => {
             Quản trị
           </Link>
         )}
+        {!canPost && !loading && (
+          <Link to="/create-listing" className={`text-sm font-medium transition-colors ${location.pathname === '/create-listing' ? 'text-white' : 'text-white/70 hover:text-white'}`}>
+            Đăng tin
+          </Link>
+        )}
       </div>
 
       {/* Right — Actions */}
@@ -83,6 +88,21 @@ const Navbar = () => {
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
               className="flex items-center gap-2 px-5 py-2 bg-white text-slate-900 rounded-full text-sm font-semibold hover:bg-white/90 transition-all cursor-pointer shadow-sm"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <circle cx="12" cy="12" r="10" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v8m4-4H8" />
+              </svg>
+              Đăng tin
+            </motion.button>
+          </Link>
+        )}
+        {!canPost && !loading && (
+          <Link to="/create-listing">
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.97 }}
+              className="flex items-center gap-2 px-5 py-2 border border-white/50 text-white rounded-full text-sm font-semibold hover:bg-white/10 transition-all cursor-pointer"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <circle cx="12" cy="12" r="10" />
@@ -165,6 +185,13 @@ const Navbar = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
                       </svg>
                       Tìm kiếm nâng cao
+                    </Link>
+                    <Link to="/create-listing" onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
+                      <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                      </svg>
+                      Đăng tin cho thuê
                     </Link>
                   </div>
 

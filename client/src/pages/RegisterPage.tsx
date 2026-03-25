@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
+import type { UserRole } from '../../../shared/types';
 
 
 const RegisterPage = () => {
@@ -14,6 +15,7 @@ const RegisterPage = () => {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [accountRole, setAccountRole] = useState<UserRole>('user');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
@@ -55,7 +57,7 @@ const RegisterPage = () => {
     }
 
     setLoading(true);
-    const { error } = await signUp(email, password, fullName, 'user', phone || undefined);
+    const { error } = await signUp(email, password, fullName, accountRole, phone || undefined);
     
     // Activate cooldown
     setCooldown(true);
@@ -235,6 +237,31 @@ const RegisterPage = () => {
                 onChange={(e) => setPhone(e.target.value)}
                 className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-700/10 transition-all"
               />
+            </div>
+
+            {/* Account role */}
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Loại tài khoản</label>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { value: 'user' as const, label: 'Khách' },
+                  { value: 'landlord' as const, label: 'Chủ trọ' },
+                  { value: 'broker' as const, label: 'Môi giới' },
+                ].map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setAccountRole(opt.value)}
+                    className={`py-2.5 rounded-lg text-sm font-semibold cursor-pointer transition-all ${
+                      accountRole === opt.value
+                        ? 'bg-emerald-700 text-white'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Password */}

@@ -8,6 +8,7 @@ const router = Router();
 
 // Valid roles for registration (admin is assigned manually)
 const VALID_ROLES: UserRole[] = ['user', 'landlord', 'broker'];
+const ALL_ROLES: UserRole[] = ['user', 'landlord', 'broker', 'admin'];
 
 
 /**
@@ -45,8 +46,11 @@ async function logAudit(
 // POST /api/auth/register
 router.post('/register', async (req: Request, res: Response) => {
   const { email, password, fullName, phone, role } = req.body;
+  const normalizedEmail = String(email || '').trim().toLowerCase();
+  const normalizedPhone = typeof phone === 'string' ? phone.trim() : phone;
+  const normalizedFullName = typeof fullName === 'string' ? fullName.trim() : '';
 
-  if (!email || !password) {
+  if (!normalizedEmail || !password) {
     res.status(400).json({ error: 'Email và mật khẩu là bắt buộc' });
     return;
   }
@@ -57,42 +61,86 @@ router.post('/register', async (req: Request, res: Response) => {
   const supabase = getSupabase();
   const clientIP = req.headers['x-forwarded-for']?.toString().split(',')[0]?.trim() || req.ip;
 
+  const ensureProfile = async (userId: string) => {
+    const { data: existingProfile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', userId)
+      .maybeSingle();
+
+    const existingRole = existingProfile?.role;
+    // Promote to selected role on registration flow (except admin which is manual only).
+    let roleToPersist: UserRole = selectedRole;
+    if (existingRole && ALL_ROLES.includes(existingRole as UserRole)) {
+      roleToPersist = existingRole as UserRole;
+      if (selectedRole !== 'user' && existingRole !== 'admin') {
+        roleToPersist = selectedRole;
+      }
+    }
+
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .upsert({
+        id: userId,
+        email: normalizedEmail,
+        full_name: normalizedFullName || '',
+        phone: normalizedPhone || null,
+        role: roleToPersist,
+        registration_ip: clientIP,
+      }, { onConflict: 'id' });
+
+    if (profileError) {
+      console.error('[PROFILE UPSERT ERROR]', profileError.message);
+    }
+  };
+
   // 1. Create auth user
   const { data, error } = await supabase.auth.signUp({
-    email,
+    email: normalizedEmail,
     password,
     options: {
       data: {
-        full_name: fullName || '',
+        full_name: normalizedFullName,
       },
     },
   });
 
   if (error) {
+    // If user already exists, guide user to login flow and auto-heal missing profile
+    if (error.message.toLowerCase().includes('already registered')) {
+      const loginResult = await supabase.auth.signInWithPassword({
+        email: normalizedEmail,
+        password,
+      });
+
+      if (loginResult.error || !loginResult.data.user) {
+        await logAudit('REGISTER_FAILURE', null, req, { email: normalizedEmail, error: error.message });
+        res.status(409).json({ error: 'Email đã tồn tại. Vui lòng đăng nhập hoặc dùng email khác.' });
+        return;
+      }
+
+      await ensureProfile(loginResult.data.user.id);
+      await logAudit('REGISTER_EXISTING_USER_LOGIN', loginResult.data.user.id, req, { email: normalizedEmail });
+
+      res.json({
+        user: loginResult.data.user,
+        session: loginResult.data.session,
+        message: 'Email đã tồn tại, hệ thống đã đăng nhập tài khoản này cho bạn.',
+      });
+      return;
+    }
+
     console.error('[REGISTER ERROR]', error.message);
-    await logAudit('REGISTER_FAILURE', null, req, { email, error: error.message });
+    await logAudit('REGISTER_FAILURE', null, req, { email: normalizedEmail, error: error.message });
     res.status(400).json({ error: error.message });
     return;
   }
 
   // 2. Create/Update profile row explicitly
   if (data.user) {
-    const { error: profileError } = await supabase
-      .from('profiles')
-      .upsert({
-        id: data.user.id,
-        email,
-        full_name: fullName || '',
-        phone: phone || null,
-        role: selectedRole,
-        registration_ip: clientIP,
-      }, { onConflict: 'id' });
-
-    if (profileError) {
-      console.error('[PROFILE CREATE ERROR]', profileError.message);
-    }
+    await ensureProfile(data.user.id);
     
-    await logAudit('REGISTER_SUCCESS', data.user.id, req, { email, role: selectedRole });
+    await logAudit('REGISTER_SUCCESS', data.user.id, req, { email: normalizedEmail, role: selectedRole });
   }
 
   res.json({
@@ -104,19 +152,20 @@ router.post('/register', async (req: Request, res: Response) => {
 // POST /api/auth/login
 router.post('/login', async (req: Request, res: Response) => {
   const { email, password } = req.body;
+  const normalizedEmail = String(email || '').trim().toLowerCase();
 
-  if (!email || !password) {
+  if (!normalizedEmail || !password) {
     res.status(400).json({ error: 'Email và mật khẩu là bắt buộc' });
     return;
   }
 
   const { data, error } = await getSupabase().auth.signInWithPassword({
-    email,
+    email: normalizedEmail,
     password,
   });
 
   if (error || !data.user) {
-    await logAudit('LOGIN_FAILURE', null, req, { email, error: error?.message || 'Không tìm thấy người dùng' });
+    await logAudit('LOGIN_FAILURE', null, req, { email: normalizedEmail, error: error?.message || 'Không tìm thấy người dùng' });
     res.status(401).json({ error: error?.message || 'Email hoặc mật khẩu không chính xác' });
     return;
   }
@@ -137,7 +186,7 @@ router.post('/login', async (req: Request, res: Response) => {
     })
     .eq('id', data.user.id);
 
-  await logAudit('LOGIN_SUCCESS', data.user.id, req, { email });
+  await logAudit('LOGIN_SUCCESS', data.user.id, req, { email: normalizedEmail });
 
   res.json({
     user: {

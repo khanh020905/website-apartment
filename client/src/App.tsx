@@ -102,11 +102,7 @@ function App() {
                   <Route path="/listings/:id" element={<ListingDetailPage />} />
 
                   {/* Authenticated routes */}
-                  <Route path="/create-listing" element={
-                    <ProtectedRoute roles={['landlord', 'broker', 'admin']}>
-                      <CreateListingPage />
-                    </ProtectedRoute>
-                  } />
+                  <Route path="/create-listing" element={<CreateListingPage />} />
                   <Route path="/my-listings" element={
                     <ProtectedRoute>
                       <MyListingsPage />

@@ -142,6 +142,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (data.session) {
       saveSession(data.session);
       setUser(data.user);
+      await refreshProfile();
     }
 
     return { error: null };

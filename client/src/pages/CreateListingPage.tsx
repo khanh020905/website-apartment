@@ -1,9 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../lib/api';
-import type { Amenity, PropertyType, FurnitureStatus } from '../../../shared/types';
+import type { Amenity, PropertyType, FurnitureStatus, ListingStatus } from '../../../shared/types';
+import { MapContainer, Marker, TileLayer, useMapEvents } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 
 const PROPERTY_TYPES: { value: PropertyType; label: string }[] = [
   { value: 'phong_tro', label: 'Phòng trọ' },
@@ -18,6 +21,30 @@ const FURNITURE_OPTIONS: { value: FurnitureStatus; label: string }[] = [
   { value: 'none', label: 'Không nội thất' },
 ];
 
+const markerIcon = L.divIcon({
+  className: 'custom-location-marker',
+  html: `
+    <div style="width: 24px; height: 24px; border-radius: 9999px; background: #059669; border: 3px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.25);"></div>
+  `,
+  iconSize: [24, 24],
+  iconAnchor: [12, 12],
+});
+
+interface LocationPickerProps {
+  value: { lat: number; lng: number };
+  onPick: (lat: number, lng: number) => void;
+}
+
+function LocationPicker({ value, onPick }: LocationPickerProps) {
+  useMapEvents({
+    click: (e) => {
+      onPick(e.latlng.lat, e.latlng.lng);
+    },
+  });
+
+  return <Marker position={[value.lat, value.lng]} icon={markerIcon} />;
+}
+
 export default function CreateListingPage() {
   const navigate = useNavigate();
   const { canPost, role } = useAuth();
@@ -27,6 +54,16 @@ export default function CreateListingPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [step, setStep] = useState(1); // 1=basic, 2=details, 3=images, 4=preview
+  const [uploadingImages, setUploadingImages] = useState(false);
+  const [loadingMapConfig, setLoadingMapConfig] = useState(true);
+  const [reverseLoading, setReverseLoading] = useState(false);
+  const [dragIndex, setDragIndex] = useState<number | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [mapConfig, setMapConfig] = useState({
+    tileUrl: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    attribution: '&copy; OpenStreetMap contributors',
+    maxZoom: 20,
+  });
 
   // Form state
   const [form, setForm] = useState({
@@ -53,14 +90,23 @@ export default function CreateListingPage() {
     commission_rate: '',
     booking_note: '',
   });
-  const [imageUrls, setImageUrls] = useState<string[]>([
-    'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&h=400&fit=crop',
-  ]);
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
 
   // Fetch amenities
   useEffect(() => {
     api.get<{ amenities: Amenity[] }>('/api/search/amenities').then(({ data }) => {
       if (data) setAmenities(data.amenities);
+    });
+
+    api.get<{ tileUrl: string; attribution: string; maxZoom: number }>('/api/map/config').then(({ data }) => {
+      if (data) {
+        setMapConfig({
+          tileUrl: data.tileUrl,
+          attribution: data.attribution,
+          maxZoom: data.maxZoom,
+        });
+      }
+      setLoadingMapConfig(false);
     });
   }, []);
 
@@ -79,8 +125,20 @@ export default function CreateListingPage() {
 
   const handleSubmit = async () => {
     setError('');
-    if (!form.title || !form.price || !form.contact_phone) {
-      setError('Vui lòng điền đầy đủ: tiêu đề, giá thuê và số điện thoại');
+    if (!form.title || !form.price || !form.contact_phone || !form.area) {
+      setError('Vui lòng điền đầy đủ: tiêu đề, giá thuê, diện tích và số điện thoại');
+      return;
+    }
+    if (imageUrls.length < 3 || imageUrls.length > 15) {
+      setError('Cần tải lên từ 3 đến 15 ảnh');
+      return;
+    }
+    if (form.title.trim().length > 100) {
+      setError('Tiêu đề tối đa 100 ký tự');
+      return;
+    }
+    if (Number(form.price) <= 0 || Number(form.area) <= 0) {
+      setError('Giá thuê và diện tích phải lớn hơn 0');
       return;
     }
 
@@ -88,7 +146,7 @@ export default function CreateListingPage() {
     const payload = {
       ...form,
       price: Number(form.price) * 1000000, // Convert from triệu to đồng
-      area: form.area ? Number(form.area) : null,
+      area: Number(form.area),
       bedrooms: Number(form.bedrooms),
       bathrooms: Number(form.bathrooms),
       images: imageUrls.map((url, i) => ({ url, order: i })),
@@ -105,16 +163,114 @@ export default function CreateListingPage() {
     }
   };
 
+  const reviewFlowByStatus: Record<ListingStatus, string> = {
+    draft: 'Tin đang ở bản nháp.',
+    pending: 'Tin sẽ chuyển sang trạng thái Chờ duyệt. Hệ thống thông báo Admin để Check Legit, sau đó duyệt hoặc từ chối kèm ghi chú.',
+    approved: 'Tài khoản đã xác minh: tin có thể được tự động duyệt và hiển thị ngay.',
+    rejected: 'Nếu bị từ chối, bạn có thể chỉnh sửa tin và gửi lại để duyệt.',
+  };
+
+  const handleImageFiles = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    const incoming = Array.from(files);
+    const nextCount = imageUrls.length + incoming.length;
+    if (nextCount > 15) {
+      setError('Tối đa 15 ảnh');
+      return;
+    }
+
+    for (const file of incoming) {
+      if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+        setError('Chỉ chấp nhận JPG, PNG, WebP');
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        setError('Mỗi ảnh tối đa 5MB');
+        return;
+      }
+    }
+
+    setError('');
+    setUploadingImages(true);
+    const formData = new FormData();
+    incoming.forEach((file) => formData.append('images', file));
+    const { data, error: uploadError } = await api.upload<{ images: { url: string; order: number }[] }>(
+      '/api/listings/upload-images',
+      formData
+    );
+    setUploadingImages(false);
+
+    if (uploadError || !data) {
+      setError(uploadError || 'Upload ảnh thất bại');
+      return;
+    }
+    if (!Array.isArray(data.images) || data.images.length === 0) {
+      setError('Upload ảnh không thành công, vui lòng thử lại.');
+      return;
+    }
+    const sorted = [...data.images].sort((a, b) => a.order - b.order).map((img) => img.url);
+    setImageUrls((prev) => [...prev, ...sorted]);
+  };
+
+  const moveImage = (from: number, to: number) => {
+    if (from === to) return;
+    setImageUrls((prev) => {
+      const next = [...prev];
+      const [item] = next.splice(from, 1);
+      next.splice(to, 0, item);
+      return next;
+    });
+  };
+
+  const handleMapPick = async (lat: number, lng: number) => {
+    updateForm('lat', lat);
+    updateForm('lng', lng);
+    setReverseLoading(true);
+    const { data } = await api.get<{
+      address: string;
+      ward: string;
+      district: string;
+      city: string;
+    }>(`/api/map/reverse-geocode?lat=${lat}&lng=${lng}`);
+    setReverseLoading(false);
+
+    if (!data) return;
+    if (data.address) updateForm('address', data.address);
+    if (data.ward) updateForm('ward', data.ward);
+    if (data.district) updateForm('district', data.district);
+    if (data.city) updateForm('city', data.city);
+  };
+
   if (!canPost) {
     return (
-      <div className="flex-1 flex items-center justify-center p-8">
-        <div className="text-center max-w-md">
-          <div className="text-6xl mb-4">🔒</div>
-          <h2 className="text-2xl font-bold text-slate-800 mb-2">Không có quyền đăng tin</h2>
-          <p className="text-slate-500">Bạn cần đăng ký tài khoản Chủ trọ hoặc Môi giới để đăng tin cho thuê.</p>
-          <button onClick={() => navigate('/register')} className="mt-4 px-6 py-2 bg-emerald-700 text-white rounded-xl font-semibold cursor-pointer">
-            Đăng ký ngay
-          </button>
+      <div className="flex-1 overflow-y-auto bg-slate-50">
+        <div className="max-w-4xl mx-auto p-6">
+          <div className="bg-white rounded-2xl border border-slate-200 p-6 md:p-8">
+            <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 mb-2">Đăng tin cho thuê</h1>
+            <p className="text-slate-500 mb-6">Bạn đang ở đúng module đăng tin. Để gửi tin thật, cần tài khoản Chủ trọ/Môi giới.</p>
+            <div className="grid md:grid-cols-3 gap-3 mb-6">
+              {[
+                'Điền thông tin cơ bản: tiêu đề, giá, diện tích',
+                'Chọn loại hình + tiện nghi + thông tin liên hệ',
+                'Upload 3-15 ảnh và gửi duyệt',
+              ].map((item) => (
+                <div key={item} className="p-3 rounded-xl bg-emerald-50 text-emerald-800 text-sm font-medium border border-emerald-100">
+                  {item}
+                </div>
+              ))}
+            </div>
+            <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-sm mb-6">
+              Quy trình duyệt: Pending → Admin Check Legit → Approved/Rejected (kèm ghi chú lý do).
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <button onClick={() => navigate('/register')} className="px-5 py-2.5 bg-emerald-700 text-white rounded-xl font-semibold cursor-pointer hover:bg-emerald-800 transition-colors">
+                Đăng ký để đăng tin
+              </button>
+              <Link to="/search" className="px-5 py-2.5 border border-slate-300 text-slate-700 rounded-xl font-semibold hover:bg-slate-50 transition-colors">
+                Xem danh sách phòng
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -161,6 +317,9 @@ export default function CreateListingPage() {
             </motion.div>
           )}
         </AnimatePresence>
+        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-xl text-xs text-blue-800">
+          <span className="font-semibold">Tip UX:</span> Bạn có thể vào module này từ nút <b>Đăng tin</b> trên thanh điều hướng.
+        </div>
 
         {/* Step 1: Basic info */}
         {step === 1 && (
@@ -181,7 +340,7 @@ export default function CreateListingPage() {
                     placeholder="3.5" className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-700/10" />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-slate-600 mb-1">Diện tích (m²)</label>
+                  <label className="block text-sm font-semibold text-slate-600 mb-1">Diện tích (m²) <span className="text-red-400">*</span></label>
                   <input type="number" value={form.area} onChange={e => updateForm('area', e.target.value)}
                     placeholder="25" className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-700/10" />
                 </div>
@@ -251,6 +410,33 @@ export default function CreateListingPage() {
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-5">
             <div className="bg-white rounded-2xl p-6 border border-slate-200 space-y-4">
               <h3 className="font-bold text-slate-800">Địa chỉ</h3>
+              <div>
+                <p className="text-xs text-slate-500 mb-2">Chọn vị trí trực tiếp trên bản đồ (click vào điểm muốn đăng)</p>
+                <div className="h-72 rounded-xl overflow-hidden border border-slate-200">
+                  {loadingMapConfig ? (
+                    <div className="h-full w-full flex items-center justify-center text-slate-500 text-sm">Đang tải bản đồ...</div>
+                  ) : (
+                    <MapContainer
+                      center={[form.lat || 16.047079, form.lng || 108.20623]}
+                      zoom={13}
+                      className="w-full h-full"
+                      scrollWheelZoom
+                    >
+                      <TileLayer
+                        url={mapConfig.tileUrl}
+                        attribution={mapConfig.attribution}
+                        maxZoom={mapConfig.maxZoom}
+                      />
+                      <LocationPicker value={{ lat: form.lat, lng: form.lng }} onPick={handleMapPick} />
+                    </MapContainer>
+                  )}
+                </div>
+                <p className="mt-2 text-xs text-slate-600">
+                  Tọa độ: <span className="font-semibold">{Number(form.lat).toFixed(6)}</span>,{' '}
+                  <span className="font-semibold">{Number(form.lng).toFixed(6)}</span>
+                </p>
+                {reverseLoading && <p className="text-xs text-emerald-700 mt-1">Đang lấy địa chỉ từ tọa độ...</p>}
+              </div>
               <input type="text" value={form.address} onChange={e => updateForm('address', e.target.value)}
                 placeholder="Số nhà, đường..." className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-700/10" />
               <div className="grid grid-cols-3 gap-3">
@@ -270,6 +456,15 @@ export default function CreateListingPage() {
                   placeholder="Tên liên hệ" className="px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-700/10" />
                 <input type="tel" value={form.contact_phone} onChange={e => updateForm('contact_phone', e.target.value)}
                   placeholder="Số điện thoại *" required className="px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-700/10" />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-slate-600 mb-1">Ngày sẵn sàng cho thuê</label>
+                <input
+                  type="date"
+                  value={form.available_date}
+                  onChange={e => updateForm('available_date', e.target.value)}
+                  className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-700/10"
+                />
               </div>
             </div>
 
@@ -338,23 +533,55 @@ export default function CreateListingPage() {
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-5">
             <div className="bg-white rounded-2xl p-6 border border-slate-200 space-y-4">
               <h3 className="font-bold text-slate-800">Hình ảnh (3-15 ảnh)</h3>
-              <p className="text-xs text-slate-400">Ảnh đầu tiên sẽ là ảnh đại diện. Kéo thả để sắp xếp.</p>
+              <p className="text-xs text-slate-400">Ảnh đầu tiên sẽ là ảnh đại diện. Kéo thả để sắp xếp. Chỉ JPG/PNG/WebP, tối đa 5MB/ảnh.</p>
+              <div className="p-4 rounded-xl border border-dashed border-slate-300 bg-slate-50">
+                <label className="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-700 text-white rounded-lg text-sm font-semibold cursor-pointer hover:bg-emerald-800 transition-colors">
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    multiple
+                    className="hidden"
+                    onChange={(e) => {
+                      handleImageFiles(e.target.files);
+                      e.currentTarget.value = '';
+                    }}
+                  />
+                  {uploadingImages ? 'Đang upload...' : 'Chọn ảnh từ máy'}
+                </label>
+                <p className="text-xs text-slate-500 mt-2">{imageUrls.length}/15 ảnh</p>
+              </div>
               <div className="grid grid-cols-3 gap-3">
                 {imageUrls.map((url, i) => (
-                  <div key={i} className="relative group aspect-[4/3] rounded-xl overflow-hidden border-2 border-slate-200">
+                  <div
+                    key={`${url}-${i}`}
+                    draggable
+                    onDragStart={() => setDragIndex(i)}
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      setDragOverIndex(i);
+                    }}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      if (dragIndex !== null) moveImage(dragIndex, i);
+                      setDragIndex(null);
+                      setDragOverIndex(null);
+                    }}
+                    onDragEnd={() => {
+                      setDragIndex(null);
+                      setDragOverIndex(null);
+                    }}
+                    className={`relative group aspect-[4/3] rounded-xl overflow-hidden border-2 ${dragOverIndex === i ? 'border-emerald-500' : 'border-slate-200'}`}
+                  >
                     <img src={url} alt={`Ảnh ${i + 1}`} className="w-full h-full object-cover" />
                     {i === 0 && <span className="absolute top-2 left-2 px-2 py-0.5 bg-emerald-600 text-white text-[10px] font-bold rounded-full">Ảnh chính</span>}
                     <button onClick={() => setImageUrls(prev => prev.filter((_, j) => j !== i))}
                       className="absolute top-2 right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer text-xs font-bold">×</button>
                   </div>
                 ))}
-                <button onClick={() => {
-                  const url = prompt('Nhập URL hình ảnh:');
-                  if (url) setImageUrls(prev => [...prev, url]);
-                }} className="aspect-[4/3] rounded-xl border-2 border-dashed border-slate-300 flex flex-col items-center justify-center gap-2 text-slate-400 hover:border-emerald-400 hover:text-emerald-500 transition-colors cursor-pointer">
+                <div className="aspect-[4/3] rounded-xl border-2 border-dashed border-slate-300 flex flex-col items-center justify-center gap-2 text-slate-400">
                   <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg>
-                  <span className="text-xs font-semibold">Thêm ảnh</span>
-                </button>
+                  <span className="text-xs font-semibold">Kéo thả để đổi thứ tự</span>
+                </div>
               </div>
             </div>
             <div className="flex gap-3">
@@ -392,6 +619,10 @@ export default function CreateListingPage() {
                 })}
               </div>
               {form.contact_phone && <p className="text-sm font-semibold text-slate-700">📞 {form.contact_phone}</p>}
+              <div className="p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-600">
+                <p className="font-semibold mb-1">Quy trình sau khi đăng:</p>
+                <p>{reviewFlowByStatus.pending}</p>
+              </div>
             </div>
             <div className="flex gap-3">
               <button onClick={() => setStep(3)} className="flex-1 py-3 border-2 border-slate-300 text-slate-700 rounded-xl font-bold cursor-pointer hover:bg-slate-50 transition-colors">
