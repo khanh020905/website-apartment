@@ -1,7 +1,8 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { AuthProvider } from './contexts/AuthContext';
+import { api } from './lib/api';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
 import MapView from './components/MapView';
@@ -17,11 +18,39 @@ import DashboardPage from './pages/DashboardPage';
 import AdminVerificationPage from './pages/AdminVerificationPage';
 import QRStatusPage from './pages/QRStatusPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
-import { mockListings } from './data/mockListings';
-import type { Listing } from './data/mockListings';
+import type { Listing } from '../../shared/types';
 
 function HomePage() {
-  const [filteredListings, setFilteredListings] = useState<Listing[]>(mockListings);
+  const [listings, setListings] = useState<Listing[]>([]);
+  const [filteredListings, setFilteredListings] = useState<Listing[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    const loadListings = async () => {
+      setLoading(true);
+      const { data, error } = await api.get<{ listings: Listing[] }>('/api/search?limit=200');
+      if (!mounted) return;
+
+      if (error || !data) {
+        setLoadError(error || 'Không thể tải danh sách tin đăng');
+        setListings([]);
+        setFilteredListings([]);
+      } else {
+        setLoadError(null);
+        setListings(data.listings);
+        setFilteredListings(data.listings);
+      }
+      setLoading(false);
+    };
+
+    loadListings();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const handleFilterChange = useCallback((filtered: Listing[]) => {
     setFilteredListings(filtered);
@@ -34,8 +63,18 @@ function HomePage() {
       transition={{ duration: 0.3, delay: 0.15 }}
       className="flex flex-1 overflow-hidden"
     >
-      <Sidebar listings={mockListings} onFilterChange={handleFilterChange} />
-      <MapView listings={filteredListings} />
+      <Sidebar listings={listings} onFilterChange={handleFilterChange} />
+      {loading ? (
+        <div className="flex-1 h-full flex items-center justify-center bg-slate-100 text-slate-500">
+          Đang tải dữ liệu...
+        </div>
+      ) : loadError ? (
+        <div className="flex-1 h-full flex items-center justify-center bg-slate-100 text-red-600 font-medium px-6 text-center">
+          {loadError}
+        </div>
+      ) : (
+        <MapView listings={filteredListings} />
+      )}
     </motion.div>
   );
 }

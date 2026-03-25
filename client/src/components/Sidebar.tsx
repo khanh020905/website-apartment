@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import PropertyCard from './PropertyCard';
-import type { Listing } from '../data/mockListings';
+import type { Listing, PropertyType } from '../../../shared/types';
 
 interface SidebarProps {
   listings: Listing[];
@@ -10,7 +10,7 @@ interface SidebarProps {
 
 const Sidebar = ({ listings, onFilterChange }: SidebarProps) => {
   const [search, setSearch] = useState('');
-  const [purpose, setPurpose] = useState<'all' | 'thue-tro' | 'kinh-doanh'>('all');
+  const [propertyType, setPropertyType] = useState<'all' | PropertyType>('all');
   const [budgetMin, setBudgetMin] = useState(0);
   const [budgetMax, setBudgetMax] = useState(30);
 
@@ -19,17 +19,19 @@ const Sidebar = ({ listings, onFilterChange }: SidebarProps) => {
 
   const filteredListings = useMemo(() => {
     const filtered = listings.filter((l) => {
+      const fullAddress = [l.address, l.ward, l.district, l.city].filter(Boolean).join(' ');
       const matchSearch =
         search === '' ||
         l.title.toLowerCase().includes(search.toLowerCase()) ||
-        l.address.toLowerCase().includes(search.toLowerCase());
-      const matchPurpose = purpose === 'all' || l.purpose === purpose;
-      const matchBudget = l.price >= budgetMin && l.price <= budgetMax;
-      return matchSearch && matchPurpose && matchBudget;
+        fullAddress.toLowerCase().includes(search.toLowerCase());
+      const matchPropertyType = propertyType === 'all' || l.property_type === propertyType;
+      const priceInMillion = Number(l.price) / 1_000_000;
+      const matchBudget = priceInMillion >= budgetMin && priceInMillion <= budgetMax;
+      return matchSearch && matchPropertyType && matchBudget;
     });
     onFilterChange(filtered);
     return filtered;
-  }, [search, purpose, budgetMin, budgetMax, listings, onFilterChange]);
+  }, [search, propertyType, budgetMin, budgetMax, listings, onFilterChange]);
 
   const handleMinChange = (val: number) => {
     setBudgetMin(Math.min(val, budgetMax - 0.5));
@@ -66,26 +68,28 @@ const Sidebar = ({ listings, onFilterChange }: SidebarProps) => {
           </div>
         </div>
 
-        {/* Mục đích */}
+        {/* Loại hình */}
         <div className="mb-5">
-          <label className="block text-sm font-bold text-slate-800 mb-2">Mục đích</label>
+          <label className="block text-sm font-bold text-slate-800 mb-2">Loại hình</label>
           <div className="flex flex-col gap-2.5">
             {[
               { value: 'all' as const, label: 'Tất cả' },
-              { value: 'thue-tro' as const, label: 'Thuê trọ' },
-              { value: 'kinh-doanh' as const, label: 'Thuê kinh doanh' },
+              { value: 'phong_tro' as const, label: 'Phòng trọ' },
+              { value: 'can_ho_mini' as const, label: 'Căn hộ mini' },
+              { value: 'chung_cu' as const, label: 'Chung cư' },
+              { value: 'nha_nguyen_can' as const, label: 'Nhà nguyên căn' },
             ].map((opt) => (
               <label
                 key={opt.value}
-                onClick={() => setPurpose(opt.value)}
+                onClick={() => setPropertyType(opt.value)}
                 className="flex items-center gap-3 cursor-pointer group"
               >
                 <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${
-                  purpose === opt.value
+                  propertyType === opt.value
                     ? 'border-emerald-700'
                     : 'border-slate-300 group-hover:border-slate-400'
                 }`}>
-                  {purpose === opt.value && (
+                  {propertyType === opt.value && (
                     <motion.div
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
@@ -95,7 +99,7 @@ const Sidebar = ({ listings, onFilterChange }: SidebarProps) => {
                   )}
                 </div>
                 <span className={`text-sm transition-colors ${
-                  purpose === opt.value ? 'text-emerald-800 font-semibold' : 'text-slate-600'
+                  propertyType === opt.value ? 'text-emerald-800 font-semibold' : 'text-slate-600'
                 }`}>
                   {opt.label}
                 </span>

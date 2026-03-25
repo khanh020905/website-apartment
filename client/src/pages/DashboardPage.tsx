@@ -21,7 +21,7 @@ interface BuildingWithRooms extends Building {
 }
 
 export default function DashboardPage() {
-  const { user, canManageBuildings } = useAuth();
+  const { canManageBuildings } = useAuth();
   const [buildings, setBuildings] = useState<BuildingWithRooms[]>([]);
   const [selectedBuilding, setSelectedBuilding] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);

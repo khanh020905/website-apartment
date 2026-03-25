@@ -1,11 +1,12 @@
 import L from 'leaflet';
-import type { Listing } from '../data/mockListings';
+import type { Listing } from '../../../shared/types';
 
 export const createPriceIcon = (listing: Listing) => {
+  const priceInMillion = Number(listing.price) / 1_000_000;
   const priceText =
-    listing.price % 1 === 0
-      ? `${listing.price} Trđ`
-      : `${listing.price.toFixed(1)} Trđ`;
+    priceInMillion % 1 === 0
+      ? `${priceInMillion} Trđ`
+      : `${priceInMillion.toFixed(1)} Trđ`;
 
   return L.divIcon({
     className: 'leaflet-div-icon',

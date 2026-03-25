@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
-import type { Listing, Amenity, PropertyType, FurnitureStatus } from '../../../shared/types';
+import type { Listing, Amenity, PropertyType } from '../../../shared/types';
 
 const PROPERTY_TYPES: { value: PropertyType | ''; label: string }[] = [
   { value: '', label: 'Tất cả' },
