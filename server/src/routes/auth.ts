@@ -9,6 +9,39 @@ const router = Router();
 // Valid roles for registration (admin is assigned manually)
 const VALID_ROLES: UserRole[] = ['user', 'landlord', 'broker'];
 
+
+/**
+ * Helper: Log security and audit events to DB
+ */
+async function logAudit(
+  eventType: string,
+  userId: string | null,
+  req: Request,
+  metadata: Record<string, unknown> = {}
+) {
+  try {
+    const supabase = getSupabase();
+    const ip = req.headers['x-forwarded-for']?.toString().split(',')[0]?.trim() || req.ip;
+    const userAgent = req.headers['user-agent'];
+
+    await supabase.from('security_audit_logs').insert({
+      event_type: eventType,
+      user_id: userId,
+      ip_address: ip,
+      user_agent: userAgent,
+      metadata: {
+        ...metadata,
+        path: req.path,
+        method: req.method,
+      },
+    });
+
+    console.log(`[AUDIT] ${eventType} - User: ${userId || 'GUEST'} - IP: ${ip}`);
+  } catch (err) {
+    console.error('[AUDIT ERROR]', err);
+  }
+}
+
 // POST /api/auth/register
 router.post('/register', async (req: Request, res: Response) => {
   const { email, password, fullName, phone, role } = req.body;
@@ -22,8 +55,9 @@ router.post('/register', async (req: Request, res: Response) => {
   const selectedRole: UserRole = VALID_ROLES.includes(role) ? role : 'user';
 
   const supabase = getSupabase();
+  const clientIP = req.headers['x-forwarded-for']?.toString().split(',')[0]?.trim() || req.ip;
 
-  // 1. Create auth user (without metadata that trigger depends on)
+  // 1. Create auth user
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
@@ -36,11 +70,12 @@ router.post('/register', async (req: Request, res: Response) => {
 
   if (error) {
     console.error('[REGISTER ERROR]', error.message);
+    await logAudit('REGISTER_FAILURE', null, req, { email, error: error.message });
     res.status(400).json({ error: error.message });
     return;
   }
 
-  // 2. Create profile row explicitly (doesn't rely on trigger)
+  // 2. Create/Update profile row explicitly
   if (data.user) {
     const { error: profileError } = await supabase
       .from('profiles')
@@ -50,11 +85,14 @@ router.post('/register', async (req: Request, res: Response) => {
         full_name: fullName || '',
         phone: phone || null,
         role: selectedRole,
+        registration_ip: clientIP,
       }, { onConflict: 'id' });
 
     if (profileError) {
       console.error('[PROFILE CREATE ERROR]', profileError.message);
     }
+    
+    await logAudit('REGISTER_SUCCESS', data.user.id, req, { email, role: selectedRole });
   }
 
   res.json({
@@ -77,29 +115,48 @@ router.post('/login', async (req: Request, res: Response) => {
     password,
   });
 
-  if (error) {
-    res.status(401).json({ error: error.message });
+  if (error || !data.user) {
+    await logAudit('LOGIN_FAILURE', null, req, { email, error: error?.message || 'Không tìm thấy người dùng' });
+    res.status(401).json({ error: error?.message || 'Email hoặc mật khẩu không chính xác' });
     return;
   }
 
-  // Fetch profile with role
+  // Fetch profile with audit data
   const { data: profile } = await getSupabase()
     .from('profiles')
-    .select('role, full_name, phone, avatar_url, subscription, is_verified')
+    .select('*')
     .eq('id', data.user.id)
     .single();
+
+  // Update login metadata (similar to EZ backend)
+  await getSupabase()
+    .from('profiles')
+    .update({
+      last_login: new Date().toISOString(),
+      login_count: (profile?.login_count || 0) + 1,
+    })
+    .eq('id', data.user.id);
+
+  await logAudit('LOGIN_SUCCESS', data.user.id, req, { email });
 
   res.json({
     user: {
       ...data.user,
-      profile,
+      profile: {
+        ...profile,
+        last_login: new Date().toISOString(),
+        login_count: (profile?.login_count || 0) + 1,
+      },
     },
     session: data.session,
   });
 });
 
 // POST /api/auth/logout
-router.post('/logout', async (_req: Request, res: Response) => {
+router.post('/logout', authenticate, async (req: AuthRequest, res: Response) => {
+  if (req.user) {
+    await logAudit('LOGOUT', req.user.id, req, {});
+  }
   res.json({ message: 'Đăng xuất thành công' });
 });
 

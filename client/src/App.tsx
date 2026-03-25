@@ -16,6 +16,7 @@ import MyListingsPage from './pages/MyListingsPage';
 import DashboardPage from './pages/DashboardPage';
 import AdminVerificationPage from './pages/AdminVerificationPage';
 import QRStatusPage from './pages/QRStatusPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import { mockListings } from './data/mockListings';
 import type { Listing } from './data/mockListings';
 
@@ -58,6 +59,7 @@ function App() {
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/contact" element={<ContactPage />} />
                   <Route path="/search" element={<SearchPage />} />
+                  <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                   <Route path="/listings/:id" element={<ListingDetailPage />} />
 
                   {/* Authenticated routes */}

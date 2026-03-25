@@ -2,13 +2,8 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import type { UserRole } from '../../../shared/types';
+import { supabase } from '../lib/supabase';
 
-const ROLE_OPTIONS: { value: UserRole; label: string; desc: string; icon: string }[] = [
-  { value: 'user', label: 'Khách', desc: 'Tìm kiếm phòng trọ', icon: '🔍' },
-  { value: 'landlord', label: 'Chủ trọ', desc: 'Quản lý nhà trọ', icon: '🏠' },
-  { value: 'broker', label: 'Môi giới', desc: 'Đăng tin cho thuê', icon: '🤝' },
-];
 
 const RegisterPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -19,10 +14,10 @@ const RegisterPage = () => {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [selectedRole, setSelectedRole] = useState<UserRole>('user');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const [cooldown, setCooldown] = useState(false);
 
   const { signUp } = useAuth();
   const navigate = useNavigate();
@@ -31,6 +26,11 @@ const RegisterPage = () => {
     e.preventDefault();
     setError('');
     setSuccess('');
+
+    if (cooldown) {
+      setError('Vui lòng đợi 30 giây trước khi thử lại.');
+      return;
+    }
 
     if (password !== confirmPassword) {
       setError('Mật khẩu xác nhận không khớp');
@@ -42,15 +42,46 @@ const RegisterPage = () => {
       return;
     }
 
+    // Special character check for Name field (from EZ)
+    const nameRegex = /^[a-zA-Z0-9\sÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵýỷỹ\s]+$/;
+    if (!nameRegex.test(fullName)) {
+      setError('Họ và tên không được chứa ký tự đặc biệt');
+      return;
+    }
+
+    if (!agreed) {
+      setError('Bạn cần đồng ý với điều khoản dịch vụ');
+      return;
+    }
+
     setLoading(true);
-    const { error } = await signUp(email, password, fullName, selectedRole, phone || undefined);
+    const { error } = await signUp(email, password, fullName, 'user', phone || undefined);
+    
+    // Activate cooldown
+    setCooldown(true);
+    setTimeout(() => setCooldown(false), 30000);
+
     setLoading(false);
 
     if (error) {
       setError(error);
     } else {
-      setSuccess('Đăng ký thành công! Kiểm tra email để xác nhận tài khoản.');
-      setTimeout(() => navigate('/login'), 3000);
+      setSuccess('Đăng ký thành công! Chào mừng bạn đến với HomeSpot.');
+      setTimeout(() => navigate('/'), 2000);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin,
+        },
+      });
+      if (error) throw error;
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Lỗi đăng nhập Google');
     }
   };
 
@@ -145,7 +176,11 @@ const RegisterPage = () => {
           )}
 
           {/* Google Login */}
-          <button className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all mb-6">
+          <button 
+            type="button"
+            onClick={handleGoogleLogin}
+            className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all mb-6 cursor-pointer"
+          >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
               <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
@@ -200,31 +235,6 @@ const RegisterPage = () => {
                 onChange={(e) => setPhone(e.target.value)}
                 className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-700/10 transition-all"
               />
-            </div>
-
-            {/* Role Selection */}
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">Bạn là</label>
-              <div className="grid grid-cols-3 gap-2">
-                {ROLE_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => setSelectedRole(opt.value)}
-                    className={`flex flex-col items-center gap-1 p-3 rounded-xl border-2 transition-all text-center cursor-pointer ${
-                      selectedRole === opt.value
-                        ? 'border-emerald-600 bg-emerald-50 shadow-sm'
-                        : 'border-slate-200 hover:border-slate-300'
-                    }`}
-                  >
-                    <span className="text-xl">{opt.icon}</span>
-                    <span className={`text-xs font-bold ${selectedRole === opt.value ? 'text-emerald-700' : 'text-slate-700'}`}>
-                      {opt.label}
-                    </span>
-                    <span className="text-[10px] text-slate-400 leading-tight">{opt.desc}</span>
-                  </button>
-                ))}
-              </div>
             </div>
 
             {/* Password */}
