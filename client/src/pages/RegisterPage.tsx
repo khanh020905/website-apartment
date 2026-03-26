@@ -120,7 +120,7 @@ const RegisterPage = () => {
               <div>
                 <h4 className="text-white font-bold text-sm">Nguyễn Minh Anh</h4>
                 <p className="text-white/60 text-xs">Nhà đầu tư bất động sản</p>
-                <p className="text-emerald-400 text-xs font-medium">Hồ Chí Minh, Việt Nam</p>
+                <p className="text-cyan-200 text-xs font-medium">Hồ Chí Minh, Việt Nam</p>
               </div>
             </div>
           </div>
@@ -169,7 +169,7 @@ const RegisterPage = () => {
 
           {/* Success message */}
           {success && (
-            <div className="mb-4 px-4 py-3 bg-emerald-50 border border-emerald-200 rounded-xl text-sm text-emerald-700 flex items-center gap-2">
+            <div className="mb-4 px-4 py-3 bg-cyan-50 border border-cyan-200 rounded-xl text-sm text-[#0b7272] flex items-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
               </svg>
@@ -254,7 +254,7 @@ const RegisterPage = () => {
                     onClick={() => setAccountRole(opt.value)}
                     className={`py-2.5 rounded-lg text-sm font-semibold cursor-pointer transition-all ${
                       accountRole === opt.value
-                        ? 'bg-emerald-700 text-white'
+                        ? 'bg-[#0f9b9b] text-white'
                         : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                     }`}
                   >
@@ -331,7 +331,7 @@ const RegisterPage = () => {
               <div
                 onClick={() => setAgreed(!agreed)}
                 className={`w-5 h-5 mt-0.5 rounded-md border-2 flex-shrink-0 flex items-center justify-center transition-all ${
-                  agreed ? 'bg-emerald-700 border-emerald-700' : 'border-slate-300 hover:border-slate-400'
+                  agreed ? 'bg-[#0f9b9b] border-[#0f9b9b]' : 'border-slate-300 hover:border-slate-400'
                 }`}
               >
                 {agreed && (
@@ -352,7 +352,7 @@ const RegisterPage = () => {
               whileTap={{ scale: 0.99 }}
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 bg-emerald-800 hover:bg-emerald-900 text-white rounded-xl font-bold text-sm transition-colors shadow-lg shadow-emerald-900/20 mt-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-full py-3.5 bg-[#0b7272] hover:bg-[#0f9b9b] text-white rounded-xl font-bold text-sm transition-colors shadow-lg shadow-cyan-950/20 mt-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {loading ? 'Đang tạo tài khoản...' : 'Tạo tài khoản'}
             </motion.button>
@@ -361,7 +361,7 @@ const RegisterPage = () => {
           {/* Footer link */}
           <p className="text-center text-sm text-slate-500 mt-6">
             Đã có tài khoản?{' '}
-            <Link to="/login" className="text-emerald-700 font-semibold hover:text-emerald-800 underline underline-offset-2 transition-colors">
+            <Link to="/login" className="text-[#0b7272] font-semibold hover:text-[#0f9b9b] underline underline-offset-2 transition-colors">
               Đăng nhập
             </Link>
           </p>

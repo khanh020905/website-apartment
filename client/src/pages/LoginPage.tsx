@@ -76,7 +76,7 @@ const LoginPage = () => {
 							<div>
 								<h4 className="text-white font-bold text-sm">Trần Đức Huy</h4>
 								<p className="text-white/60 text-xs">Sinh viên Đại học Bách Khoa</p>
-								<p className="text-emerald-400 text-xs font-medium">Quận Thủ Đức, TP.HCM</p>
+								<p className="text-cyan-200 text-xs font-medium">Quận Thủ Đức, TP.HCM</p>
 							</div>
 						</div>
 					</div>
@@ -244,7 +244,7 @@ const LoginPage = () => {
 								<div
 									className={`w-[18px] h-[18px] rounded border-2 flex-shrink-0 flex items-center justify-center transition-all ${
 										remember ?
-											"bg-emerald-700 border-emerald-700"
+											"bg-[#0f9b9b] border-[#0f9b9b]"
 										:	"border-slate-300 hover:border-slate-400"
 									}`}
 								>
@@ -269,7 +269,7 @@ const LoginPage = () => {
 							</label>
 							<a
 								href="#"
-								className="text-sm text-emerald-700 font-medium hover:text-emerald-800 transition-colors"
+								className="text-sm text-[#0b7272] font-medium hover:text-[#0f9b9b] transition-colors"
 							>
 								Quên mật khẩu?
 							</a>
@@ -281,7 +281,7 @@ const LoginPage = () => {
 							whileTap={{ scale: 0.99 }}
 							type="submit"
 							disabled={loading}
-							className="w-full py-3.5 bg-emerald-800 hover:bg-emerald-900 text-white rounded-xl font-bold text-sm transition-colors shadow-lg shadow-emerald-900/20 mt-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+							className="w-full py-3.5 bg-[#0b7272] hover:bg-[#0f9b9b] text-white rounded-xl font-bold text-sm transition-colors shadow-lg shadow-cyan-950/20 mt-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
 						>
 							{loading ? "Đang đăng nhập..." : "Đăng nhập"}
 						</motion.button>
@@ -292,7 +292,7 @@ const LoginPage = () => {
 						Chưa có tài khoản?{" "}
 						<Link
 							to="/register"
-							className="text-emerald-700 font-semibold hover:text-emerald-800 underline underline-offset-2 transition-colors"
+							className="text-[#0b7272] font-semibold hover:text-[#0f9b9b] underline underline-offset-2 transition-colors"
 						>
 							Đăng ký ngay
 						</Link>

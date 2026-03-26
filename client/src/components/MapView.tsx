@@ -1,6 +1,7 @@
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { Link } from 'react-router-dom';
 import { createPriceIcon } from './PriceMarker';
-import type { Listing } from '../../../shared/types';
+import { PROPERTY_TYPE_LABELS, type Listing } from '../../../shared/types';
 import 'leaflet/dist/leaflet.css';
 
 interface MapViewProps {
@@ -65,6 +66,26 @@ const MapView = ({ listings }: MapViewProps) => {
                     </span>
                     <span className="text-slate-600 text-sm font-semibold">Trđ<span className="text-slate-400 font-normal">/tháng</span></span>
                   </div>
+                </div>
+                <div className="mt-2 flex flex-wrap gap-1">
+                  <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">{PROPERTY_TYPE_LABELS[listing.property_type]}</span>
+                  {listing.area ? <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">{listing.area} m²</span> : null}
+                  <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">{listing.bedrooms} PN</span>
+                  <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">{listing.bathrooms} WC</span>
+                </div>
+                <div className="mt-3 grid grid-cols-2 gap-2">
+                  <a
+                    href={`tel:${listing.contact_phone}`}
+                    className="text-center px-3 py-2 rounded-lg text-sm font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors"
+                  >
+                    Thuê ngay
+                  </a>
+                  <Link
+                    to={`/listings/${listing.id}`}
+                    className="text-center px-3 py-2 rounded-lg text-sm font-semibold border border-slate-300 text-slate-700 hover:bg-slate-100 transition-colors"
+                  >
+                    Xem chi tiết
+                  </Link>
                 </div>
               </div>
             </Popup>

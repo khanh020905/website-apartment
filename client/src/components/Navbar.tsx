@@ -39,16 +39,12 @@ const Navbar = () => {
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
       className="h-[56px] flex items-center justify-between px-6 z-50 relative"
-      style={{ background: 'linear-gradient(135deg, #022c22 0%, #064e3b 50%, #065f46 100%)' }}
+      style={{ background: 'linear-gradient(135deg, #0b7272 0%, #0f9b9b 50%, #78c9d3 100%)' }}
     >
       {/* Left — Logo */}
       <Link to="/" className="flex items-center gap-2.5 cursor-pointer">
-        <div className="w-9 h-9 bg-emerald-700 rounded-lg flex items-center justify-center shadow-lg shadow-emerald-900/30">
-          <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="none">
-            <path d="M12 2L3 9v11a1 1 0 001 1h5v-6h6v6h5a1 1 0 001-1V9l-9-7z" fill="white" opacity="0.9"/>
-            <circle cx="15" cy="10" r="3" fill="#34d399" stroke="white" strokeWidth="1.5"/>
-            <circle cx="15" cy="10" r="1" fill="white"/>
-          </svg>
+        <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center shadow-lg shadow-cyan-950/20 overflow-hidden">
+          <img src="/logo.jpg" alt="HomeSpot" className="w-full h-full object-cover" />
         </div>
         <span className="text-xl font-extrabold text-white tracking-tight">HomeSpot</span>
       </Link>
@@ -87,8 +83,8 @@ const Navbar = () => {
             <motion.button
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
-              className="flex items-center gap-2 px-5 py-2 bg-white text-slate-900 rounded-full text-sm font-semibold hover:bg-white/90 transition-all cursor-pointer shadow-sm"
-            >
+                className="flex items-center gap-2 px-5 py-2 bg-white text-[#0b7272] rounded-full text-sm font-semibold hover:bg-white/90 transition-all cursor-pointer shadow-sm"
+              >
               <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <circle cx="12" cy="12" r="10" />
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v8m4-4H8" />
@@ -126,10 +122,10 @@ const Navbar = () => {
               onClick={() => setDropdownOpen(!dropdownOpen)}
               className="flex items-center gap-2 cursor-pointer"
             >
-              <div className="w-9 h-9 bg-emerald-600 rounded-full flex items-center justify-center text-white text-sm font-bold hover:ring-2 hover:ring-white/30 transition-all">
+              <div className="w-9 h-9 bg-[#0f9b9b] rounded-full flex items-center justify-center text-white text-sm font-bold hover:ring-2 hover:ring-white/30 transition-all">
                 {(user.user_metadata?.full_name?.[0] || user.email?.[0] || 'U').toUpperCase()}
               </div>
-              <span className="hidden md:block text-xs text-emerald-300 font-semibold">{ROLE_LABELS[role] || role}</span>
+              <span className="hidden md:block text-xs text-cyan-100 font-semibold">{ROLE_LABELS[role] || role}</span>
             </button>
 
             <AnimatePresence>
@@ -146,7 +142,7 @@ const Navbar = () => {
                       {user.user_metadata?.full_name || 'Người dùng'}
                     </p>
                     <p className="text-xs text-slate-400 truncate">{user.email}</p>
-                    <span className="inline-block mt-1 px-2 py-0.5 bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded-full">
+                    <span className="inline-block mt-1 px-2 py-0.5 bg-cyan-100 text-[#0b7272] text-[10px] font-bold rounded-full">
                       {ROLE_LABELS[role] || role}
                     </span>
                   </div>
@@ -223,7 +219,7 @@ const Navbar = () => {
                 whileTap={{ scale: 0.95 }}
                 className={`px-5 py-1.5 text-sm rounded-lg font-semibold transition-all cursor-pointer ${
                   location.pathname === '/register'
-                    ? 'bg-white text-emerald-900'
+                    ? 'bg-white text-[#0b7272]'
                     : 'border border-white/50 text-white hover:bg-white/10'
                 }`}
               >

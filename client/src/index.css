@@ -2,6 +2,11 @@
 
 @theme {
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --color-brand-dark: #0b7272;
+  --color-brand-primary: #0f9b9b;
+  --color-brand-light: #78c9d3;
+  --color-brand-ink: #0f3f4a;
+  --color-brand-bg: #f2fbfc;
 }
 
 /* Base resets & typography */
@@ -10,8 +15,12 @@ html, body, #root {
   width: 100%;
   overflow: hidden;
   font-family: 'Inter', sans-serif;
-  background-color: #f8fafc; /* Very light slate */
+  background-color: var(--color-brand-bg);
   -webkit-font-smoothing: antialiased;
+}
+
+body {
+  color: var(--color-brand-ink);
 }
 
 /* Custom Hide Scrollbar but keep functionality */
@@ -40,9 +49,9 @@ html, body, #root {
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: #047857;
+  background: var(--color-brand-primary);
   border: 3px solid white;
-  box-shadow: 0 2px 8px rgba(4, 120, 87, 0.4);
+  box-shadow: 0 2px 8px rgba(15, 155, 155, 0.4);
   cursor: pointer;
   pointer-events: all;
   transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s;
@@ -50,16 +59,16 @@ html, body, #root {
 
 .dual-slider::-webkit-slider-thumb:hover {
   transform: scale(1.2);
-  box-shadow: 0 3px 14px rgba(4, 120, 87, 0.5);
+  box-shadow: 0 3px 14px rgba(15, 155, 155, 0.5);
 }
 
 .dual-slider::-moz-range-thumb {
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: #047857;
+  background: var(--color-brand-primary);
   border: 3px solid white;
-  box-shadow: 0 2px 8px rgba(4, 120, 87, 0.4);
+  box-shadow: 0 2px 8px rgba(15, 155, 155, 0.4);
   cursor: pointer;
   pointer-events: all;
 }
@@ -91,7 +100,7 @@ html, body, #root {
 
 .leaflet-control-zoom a:hover {
   background-color: #f8fafc !important;
-  color: #047857 !important;
+  color: var(--color-brand-primary) !important;
 }
 
 .leaflet-popup-content-wrapper {

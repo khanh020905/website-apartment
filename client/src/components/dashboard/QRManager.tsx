@@ -112,7 +112,7 @@ export const QRManager = ({
                       level="H" 
                       includeMargin={false}
                       imageSettings={{
-                        src: "/favicon.ico", // or a home logo
+                        src: "/logo.jpg",
                         x: undefined, y: undefined, height: 40, width: 40, excavate: true,
                       }}
                     />
