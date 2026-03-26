@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Range, getTrackBackground } from 'react-range';
@@ -133,7 +133,7 @@ export default function SearchPage() {
   useEffect(() => { 
     const timer = setTimeout(() => {
       search();
-    }, 500);
+    }, 300);
     return () => clearTimeout(timer);
   }, [search]);
 
@@ -217,7 +217,7 @@ export default function SearchPage() {
               {/* Price Range */}
               <div key="price-range-group" className="space-y-6">
                 <div className="flex items-center justify-between">
-                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Giá thuê (triệu/tháng)</label>
+                  <label className="text-sm font-bold text-slate-700 ml-1">Giá thuê (triệu/tháng)</label>
                   <span className="text-sm font-black text-emerald-600">{formatPrice(priceValues[0])} — {formatPrice(priceValues[1])}</span>
                 </div>
                 <div className="px-2 h-10 flex items-center relative z-20">
@@ -264,7 +264,7 @@ export default function SearchPage() {
               {/* Area Range */}
               <div key="area-range-group" className="space-y-6">
                 <div className="flex items-center justify-between">
-                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Diện tích (m²)</label>
+                  <label className="text-sm font-bold text-slate-700 ml-1">Diện tích (m²)</label>
                   <span className="text-sm font-black text-slate-700">{areaValues[0]} — {areaValues[1] === AREA_RANGE.MAX ? '200+' : areaValues[1]} m²</span>
                 </div>
                 <div className="px-2 h-10 flex items-center relative z-20">
@@ -310,7 +310,7 @@ export default function SearchPage() {
 
               {/* Location Cascade */}
               <div className="space-y-4">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-2">Khu vực / Vị trí</label>
+                <label className="text-sm font-bold text-slate-700 ml-1">Khu vực / Vị trí</label>
                 <div className="space-y-3">
                   <div className="relative group">
                     <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 group-focus-within:text-emerald-600 transition-colors" />
@@ -358,33 +358,37 @@ export default function SearchPage() {
               {/* Bedrooms & Bathrooms */}
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-4">
-                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-2">Số phòng ngủ</label>
-                  <div className="flex gap-1.5 p-1.5 bg-slate-50 border-2 border-slate-100 rounded-2xl overflow-x-auto scrollbar-hide">
-                    {[null, '1', '2', '3', '4'].map(n => (
+                  <label className="text-sm font-bold text-slate-700 ml-1">Số phòng ngủ</label>
+                  <div className="flex gap-2">
+                    {['0', '1', '2', '3', '4+'].map(n => (
                       <button 
-                        key={String(n)} 
-                        onClick={() => setBedrooms(n)} 
-                        className={`flex-1 min-w-[36px] h-10 rounded-xl text-xs font-black transition-all cursor-pointer ${
-                          bedrooms === n ? 'bg-white text-slate-900 shadow-sm border border-slate-200' : 'text-slate-400 hover:text-slate-600'
+                        key={n} 
+                        onClick={() => setBedrooms(n === '0' ? null : n === '4+' ? '4' : n)} 
+                        className={`flex-1 min-w-[48px] h-12 rounded-xl text-sm font-bold transition-all cursor-pointer ${
+                          (n === '0' && bedrooms === null) || (n === '4+' && bedrooms === '4') || (bedrooms === n && n !== '0' && n !== '4+')
+                            ? 'bg-emerald-800 text-white shadow-lg shadow-emerald-900/20' 
+                            : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-transparent'
                         }`}
                       >
-                        {n === null ? 'All' : n === '4' ? '4+' : n}
+                        {n}
                       </button>
                     ))}
                   </div>
                 </div>
                 <div className="space-y-4">
-                  <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-2">Số WC</label>
-                  <div className="flex gap-1.5 p-1.5 bg-slate-50 border-2 border-slate-100 rounded-2xl">
-                    {[null, '1', '2', '3'].map(n => (
+                  <label className="text-sm font-bold text-slate-700 ml-1">Số phòng vệ sinh</label>
+                  <div className="flex gap-2">
+                    {['1', '2', '3+'].map(n => (
                       <button 
-                        key={String(n)} 
-                        onClick={() => setBathrooms(n)} 
-                        className={`flex-1 min-w-[36px] h-10 rounded-xl text-xs font-black transition-all cursor-pointer ${
-                          bathrooms === n ? 'bg-white text-slate-900 shadow-sm border border-slate-200' : 'text-slate-400 hover:text-slate-600'
+                        key={n} 
+                        onClick={() => setBathrooms(n === '3+' ? '3' : n)} 
+                        className={`flex-1 min-w-[48px] h-12 rounded-xl text-sm font-bold transition-all cursor-pointer ${
+                          (n === '3+' && bathrooms === '3') || (bathrooms === n && n !== '3+')
+                            ? 'bg-emerald-800 text-white shadow-lg shadow-emerald-900/20' 
+                            : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-transparent'
                         }`}
                       >
-                        {n === null ? 'All' : n === '3' ? '3+' : n}
+                        {n}
                       </button>
                     ))}
                   </div>
@@ -393,7 +397,7 @@ export default function SearchPage() {
 
               {/* Property Types (Multi Checkbox) */}
               <div className="space-y-4">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-2">Loại hình căn hộ</label>
+                <label className="text-sm font-bold text-slate-700 ml-1">Loại hình căn hộ</label>
                 <div className="grid grid-cols-1 gap-2">
                   {PROPERTY_TYPES.map(pt => (
                     <button
@@ -402,7 +406,7 @@ export default function SearchPage() {
                       className={`flex items-center gap-3 p-4 rounded-2xl border-2 transition-all cursor-pointer ${
                         selectedPropertyTypes.includes(pt.value) 
                           ? 'bg-emerald-50 border-emerald-600 text-emerald-800 shadow-lg shadow-emerald-900/5' 
-                          : 'bg-white border-slate-100 text-slate-500 hover:border-slate-200'
+                          : 'bg-slate-50 border-slate-100 text-slate-500 hover:border-slate-200'
                       }`}
                     >
                       <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${
@@ -418,14 +422,14 @@ export default function SearchPage() {
 
               {/* Furniture (Radio) */}
               <div className="space-y-4">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-2">Tình trạng nội thất</label>
+                <label className="text-sm font-bold text-slate-700 ml-1">Tình trạng nội thất</label>
                 <div className="flex flex-wrap gap-2">
                   {(['none', 'basic', 'full'] as FurnitureStatus[]).map(f => (
                     <button 
                       key={f} 
                       onClick={() => setFurniture(f === furniture ? '' : f)} 
                       className={`px-6 py-3 rounded-2xl flex items-center gap-2 border-2 text-xs font-black uppercase tracking-widest transition-all cursor-pointer ${
-                        furniture === f ? 'bg-indigo-600 border-indigo-600 text-white shadow-xl shadow-indigo-900/20' : 'bg-white border-slate-100 text-slate-400 hover:border-slate-200'
+                        furniture === f ? 'bg-indigo-600 border-indigo-600 text-white shadow-xl shadow-indigo-900/20' : 'bg-slate-50 border-slate-100 text-slate-400 hover:border-slate-200'
                       }`}
                     >
                       {f === 'none' && <X className="w-3.5 h-3.5" />}
@@ -439,7 +443,7 @@ export default function SearchPage() {
 
               {/* Amenities (Multi select) */}
               <div className="space-y-4">
-                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-2">Tiện nghi có sẵn</label>
+                <label className="text-sm font-bold text-slate-700 ml-1">Tiện nghi có sẵn</label>
                 <div className="flex flex-wrap gap-2">
                   {amenities.map(am => (
                     <button 
@@ -448,7 +452,7 @@ export default function SearchPage() {
                       className={`px-4 py-2.5 rounded-2xl border-2 text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer flex items-center gap-2 ${
                         selectedAmenities.includes(am.id) 
                           ? 'bg-rose-50 border-rose-300 text-rose-700 shadow-md' 
-                          : 'bg-white border-slate-100 text-slate-400 hover:border-slate-200'
+                          : 'bg-slate-50 border-slate-100 text-slate-400 hover:border-slate-200'
                       }`}
                     >
                       <span className="opacity-60">
@@ -472,7 +476,7 @@ export default function SearchPage() {
                   setProvince('');
                   setSelectedAmenities([]);
                 }}
-                className="w-full py-4 text-[10px] font-black uppercase tracking-[0.4em] text-slate-300 hover:text-rose-500 transition-colors cursor-pointer"
+                className="w-full py-4 text-xs font-bold text-slate-400 hover:text-rose-500 transition-colors cursor-pointer"
               >
                 Nhập lại bộ lọc (Reset)
               </button>
@@ -526,97 +530,10 @@ export default function SearchPage() {
               </p>
             </div>
           ) : (
-            <div className={`grid gap-4 sm:gap-6 ${
-              viewMode === 'grid' 
-                ? 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3' 
-                : 'grid-cols-1'
-            }`}>
-              {listings.map((listing, i) => (
-                <motion.div 
-                  key={listing.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: (i % 6) * 0.05 }}
-                  className="group"
-                >
-                  <Link 
-                    to={`/listings/${listing.id}`} 
-                    className={`block bg-white rounded-[32px] border border-slate-100 overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ${
-                      viewMode === 'list' ? 'flex flex-col sm:flex-row h-auto sm:h-64' : ''
-                    }`}
-                  >
-                    {/* Image Area */}
-                    <div className={`relative overflow-hidden ${
-                      viewMode === 'list' ? 'sm:w-[40%] flex-shrink-0' : 'aspect-[1.4/1]'
-                    }`}>
-                      <img 
-                        src={listing.images?.[0]?.url || listing.images?.[0] as unknown as string || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80'}
-                        alt={listing.title} 
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity" />
-                      
-                      {/* Price Badge */}
-                      <div className="absolute top-4 left-4">
-                        <div className="bg-white/10 backdrop-blur-xl border border-white/20 text-white px-4 py-2 rounded-2xl font-black text-sm shadow-xl">
-                          {(listing.price / 1000000).toFixed(1)} triệu/th
-                        </div>
-                      </div>
-
-                      {/* Top Right Badges */}
-                      <div className="absolute top-4 right-4 flex flex-col gap-2">
-                        {listing.property_type === 'can_ho_mini' && (
-                          <div className="bg-emerald-600 text-white p-2 rounded-xl shadow-lg">
-                            <Home className="w-4 h-4" />
-                          </div>
-                        )}
-                        <button className="bg-white text-rose-500 p-2 rounded-xl shadow-lg hover:bg-rose-50 transition-colors">
-                          <Users className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Content Area */}
-                    <div className="p-6 flex flex-col justify-between">
-                      <div>
-                        <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-2 flex items-center gap-1.5">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                          {PROPERTY_TYPE_LABELS[listing.property_type]}
-                        </p>
-                        <h3 className="text-lg font-black text-slate-800 leading-tight mb-3 line-clamp-2 transition-colors group-hover:text-emerald-700">
-                          {listing.title}
-                        </h3>
-                        <div className="flex items-start gap-1.5 text-slate-400 font-bold text-xs mb-6">
-                          <MapPin className="w-3.5 h-3.5 mt-0.5 shrink-0" />
-                          <span className="line-clamp-1">{listing.district}, {listing.city}</span>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-4 text-slate-500 border-t border-slate-50 pt-4 mt-auto">
-                        <div className="flex flex-col">
-                          <span className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-slate-300">
-                            <Bed className="w-3 h-3" /> PN
-                          </span>
-                          <span className="text-sm font-black text-slate-700">{listing.bedrooms}</span>
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-slate-300">
-                            <Bath className="w-3 h-3" /> WC
-                          </span>
-                          <span className="text-sm font-black text-slate-700">{listing.bathrooms}</span>
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-slate-300">
-                            <Square className="w-3 h-3" /> Diện tích
-                          </span>
-                          <span className="text-sm font-black text-slate-700">{listing.area}m²</span>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                </motion.div>
-              ))}
-            </div>
+            <ListingGrid 
+              listings={listings} 
+              viewMode={viewMode}
+            />
           )}
 
           {/* Pagination */}
@@ -663,3 +580,102 @@ function Sofa({ className }: { className?: string }) {
     </svg>
   );
 }
+
+// Optimized Grid Component
+const ListingGrid = memo(({ listings, viewMode }: { listings: Listing[], viewMode: 'grid' | 'list' }) => {
+  return (
+    <div className={`grid gap-4 sm:gap-6 ${
+      viewMode === 'grid' 
+        ? 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3' 
+        : 'grid-cols-1'
+    }`}>
+      {listings.map((listing, i) => (
+        <ListingCard key={listing.id} listing={listing} viewMode={viewMode} index={i} />
+      ))}
+    </div>
+  );
+});
+
+// Memoized Single Card
+const ListingCard = memo(({ listing, viewMode, index }: { listing: Listing, viewMode: 'grid' | 'list', index: number }) => {
+  return (
+    <motion.div 
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: (index % 6) * 0.05 }}
+      className="group"
+    >
+      <Link 
+        to={`/listings/${listing.id}`} 
+        className={`block bg-white rounded-[32px] border border-slate-100 overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ${
+          viewMode === 'list' ? 'flex flex-col sm:flex-row h-auto sm:h-64' : ''
+        }`}
+      >
+        <div className={`relative overflow-hidden ${
+          viewMode === 'list' ? 'sm:w-[40%] flex-shrink-0' : 'aspect-[1.4/1]'
+        }`}>
+          <img 
+            src={listing.images?.[0]?.url || listing.images?.[0] as unknown as string || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80'}
+            alt={listing.title} 
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity" />
+          
+          <div className="absolute top-4 left-4">
+            <div className="bg-white/10 backdrop-blur-xl border border-white/20 text-white px-4 py-2 rounded-2xl font-black text-sm shadow-xl">
+              {(listing.price / 1000000).toFixed(1)} triệu/th
+            </div>
+          </div>
+
+          <div className="absolute top-4 right-4 flex flex-col gap-2">
+            {listing.property_type === 'can_ho_mini' && (
+              <div className="bg-emerald-600 text-white p-2 rounded-xl shadow-lg">
+                <Home className="w-4 h-4" />
+              </div>
+            )}
+            <button className="bg-white text-rose-500 p-2 rounded-xl shadow-lg hover:bg-rose-50 transition-colors">
+              <Users className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        <div className="p-6 flex flex-col justify-between">
+          <div>
+            <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              {PROPERTY_TYPE_LABELS[listing.property_type]}
+            </p>
+            <h3 className="text-lg font-black text-slate-800 leading-tight mb-3 line-clamp-2 transition-colors group-hover:text-emerald-700">
+              {listing.title}
+            </h3>
+            <div className="flex items-start gap-1.5 text-slate-400 font-bold text-xs mb-6">
+              <MapPin className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+              <span className="line-clamp-1">{listing.district}, {listing.city}</span>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4 text-slate-500 border-t border-slate-50 pt-4 mt-auto">
+            <div className="flex flex-col">
+              <span className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-slate-300">
+                <Bed className="w-3 h-3" /> PN
+              </span>
+              <span className="text-sm font-black text-slate-700">{listing.bedrooms}</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-slate-300">
+                <Bath className="w-3 h-3" /> WC
+              </span>
+              <span className="text-sm font-black text-slate-700">{listing.bathrooms}</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-slate-300">
+                <Square className="w-3 h-3" /> Diện tích
+              </span>
+              <span className="text-sm font-black text-slate-700">{listing.area}m²</span>
+            </div>
+          </div>
+        </div>
+      </Link>
+    </motion.div>
+  );
+});
