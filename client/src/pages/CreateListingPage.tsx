@@ -254,7 +254,7 @@ export default function CreateListingPage() {
                 'Chọn loại hình + tiện nghi + thông tin liên hệ',
                 'Upload 3-15 ảnh và gửi duyệt',
               ].map((item) => (
-                <div key={item} className="p-3 rounded-xl bg-emerald-50 text-emerald-800 text-sm font-medium border border-emerald-100">
+                <div key={item} className="p-3 rounded-xl bg-teal-50 text-teal-800 text-sm font-medium border border-teal-100">
                   {item}
                 </div>
               ))}
@@ -263,7 +263,7 @@ export default function CreateListingPage() {
               Quy trình duyệt: Pending → Admin Check Legit → Approved/Rejected (kèm ghi chú lý do).
             </div>
             <div className="flex flex-wrap gap-3">
-              <button onClick={() => navigate('/register')} className="px-5 py-2.5 bg-emerald-700 text-white rounded-xl font-semibold cursor-pointer hover:bg-emerald-800 transition-colors">
+              <button onClick={() => navigate('/register')} className="px-5 py-2.5 bg-teal-700 text-white rounded-xl font-semibold cursor-pointer hover:bg-teal-800 transition-colors">
                 Đăng ký để đăng tin
               </button>
               <Link to="/search" className="px-5 py-2.5 border border-slate-300 text-slate-700 rounded-xl font-semibold hover:bg-slate-50 transition-colors">
@@ -293,9 +293,9 @@ export default function CreateListingPage() {
               onClick={() => setStep(i + 1)}
               className={`flex-1 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 step === i + 1
-                  ? 'bg-emerald-700 text-white shadow-lg shadow-emerald-900/20'
+                  ? 'bg-teal-700 text-white shadow-lg shadow-teal-900/20'
                   : step > i + 1
-                  ? 'bg-emerald-100 text-emerald-700'
+                  ? 'bg-teal-100 text-teal-700'
                   : 'bg-slate-200 text-slate-500'
               }`}
             >
@@ -312,7 +312,7 @@ export default function CreateListingPage() {
             </motion.div>
           )}
           {success && (
-            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="mb-4 p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-sm text-emerald-700">
+            <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="mb-4 p-4 bg-teal-50 border border-teal-200 rounded-xl text-sm text-teal-700">
               ✅ {success}
             </motion.div>
           )}
@@ -329,7 +329,7 @@ export default function CreateListingPage() {
               <div>
                 <label className="block text-sm font-semibold text-slate-600 mb-1">Tiêu đề tin <span className="text-red-400">*</span></label>
                 <input type="text" maxLength={100} value={form.title} onChange={e => updateForm('title', e.target.value)}
-                  placeholder="VD: Phòng trọ mới xây, gần ĐH Bách Khoa" className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-700/10" />
+                  placeholder="VD: Phòng trọ mới xây, gần ĐH Bách Khoa" className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-700/10" />
                 <p className="text-xs text-slate-400 mt-1">{form.title.length}/100 ký tự</p>
               </div>
 
@@ -337,12 +337,12 @@ export default function CreateListingPage() {
                 <div>
                   <label className="block text-sm font-semibold text-slate-600 mb-1">Giá thuê (triệu/tháng) <span className="text-red-400">*</span></label>
                   <input type="number" step="0.1" value={form.price} onChange={e => updateForm('price', e.target.value)}
-                    placeholder="3.5" className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-700/10" />
+                    placeholder="3.5" className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-700/10" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-slate-600 mb-1">Diện tích (m²) <span className="text-red-400">*</span></label>
                   <input type="number" value={form.area} onChange={e => updateForm('area', e.target.value)}
-                    placeholder="25" className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-700/10" />
+                    placeholder="25" className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-700/10" />
                 </div>
               </div>
 
@@ -353,7 +353,7 @@ export default function CreateListingPage() {
                     {['0', '1', '2', '3', '4'].map(n => (
                       <button key={n} type="button" onClick={() => updateForm('bedrooms', n)}
                         className={`flex-1 py-2.5 rounded-lg text-sm font-semibold cursor-pointer transition-all ${
-                          form.bedrooms === n ? 'bg-emerald-700 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
+                          form.bedrooms === n ? 'bg-teal-700 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
                         {n === '4' ? '4+' : n}
                       </button>
                     ))}
@@ -365,7 +365,7 @@ export default function CreateListingPage() {
                     {['1', '2', '3'].map(n => (
                       <button key={n} type="button" onClick={() => updateForm('bathrooms', n)}
                         className={`flex-1 py-2.5 rounded-lg text-sm font-semibold cursor-pointer transition-all ${
-                          form.bathrooms === n ? 'bg-emerald-700 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
+                          form.bathrooms === n ? 'bg-teal-700 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
                         {n === '3' ? '3+' : n}
                       </button>
                     ))}
@@ -379,7 +379,7 @@ export default function CreateListingPage() {
                   {PROPERTY_TYPES.map(pt => (
                     <button key={pt.value} type="button" onClick={() => updateForm('property_type', pt.value)}
                       className={`py-2.5 rounded-lg text-sm font-semibold cursor-pointer transition-all ${
-                        form.property_type === pt.value ? 'bg-emerald-700 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
+                        form.property_type === pt.value ? 'bg-teal-700 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
                       {pt.label}
                     </button>
                   ))}
@@ -392,14 +392,14 @@ export default function CreateListingPage() {
                   {FURNITURE_OPTIONS.map(f => (
                     <button key={f.value} type="button" onClick={() => updateForm('furniture', f.value)}
                       className={`flex-1 py-2.5 rounded-lg text-sm font-semibold cursor-pointer transition-all ${
-                        form.furniture === f.value ? 'bg-emerald-700 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
+                        form.furniture === f.value ? 'bg-teal-700 text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
                       {f.label}
                     </button>
                   ))}
                 </div>
               </div>
             </div>
-            <button onClick={() => setStep(2)} className="w-full py-3 bg-emerald-700 text-white rounded-xl font-bold cursor-pointer hover:bg-emerald-800 transition-colors">
+            <button onClick={() => setStep(2)} className="w-full py-3 bg-teal-700 text-white rounded-xl font-bold cursor-pointer hover:bg-teal-800 transition-colors">
               Tiếp theo →
             </button>
           </motion.div>
@@ -435,17 +435,17 @@ export default function CreateListingPage() {
                   Tọa độ: <span className="font-semibold">{Number(form.lat).toFixed(6)}</span>,{' '}
                   <span className="font-semibold">{Number(form.lng).toFixed(6)}</span>
                 </p>
-                {reverseLoading && <p className="text-xs text-emerald-700 mt-1">Đang lấy địa chỉ từ tọa độ...</p>}
+                {reverseLoading && <p className="text-xs text-teal-700 mt-1">Đang lấy địa chỉ từ tọa độ...</p>}
               </div>
               <input type="text" value={form.address} onChange={e => updateForm('address', e.target.value)}
-                placeholder="Số nhà, đường..." className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-700/10" />
+                placeholder="Số nhà, đường..." className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-700/10" />
               <div className="grid grid-cols-3 gap-3">
                 <input type="text" value={form.city} onChange={e => updateForm('city', e.target.value)}
-                  placeholder="Tỉnh/TP" className="px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-700/10" />
+                  placeholder="Tỉnh/TP" className="px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-700/10" />
                 <input type="text" value={form.district} onChange={e => updateForm('district', e.target.value)}
-                  placeholder="Quận/Huyện" className="px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-700/10" />
+                  placeholder="Quận/Huyện" className="px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-700/10" />
                 <input type="text" value={form.ward} onChange={e => updateForm('ward', e.target.value)}
-                  placeholder="Phường/Xã" className="px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-700/10" />
+                  placeholder="Phường/Xã" className="px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-700/10" />
               </div>
             </div>
 
@@ -453,9 +453,9 @@ export default function CreateListingPage() {
               <h3 className="font-bold text-slate-800">Liên hệ</h3>
               <div className="grid grid-cols-2 gap-3">
                 <input type="text" value={form.contact_name} onChange={e => updateForm('contact_name', e.target.value)}
-                  placeholder="Tên liên hệ" className="px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-700/10" />
+                  placeholder="Tên liên hệ" className="px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-700/10" />
                 <input type="tel" value={form.contact_phone} onChange={e => updateForm('contact_phone', e.target.value)}
-                  placeholder="Số điện thoại *" required className="px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-700/10" />
+                  placeholder="Số điện thoại *" required className="px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-700/10" />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-slate-600 mb-1">Ngày sẵn sàng cho thuê</label>
@@ -463,7 +463,7 @@ export default function CreateListingPage() {
                   type="date"
                   value={form.available_date}
                   onChange={e => updateForm('available_date', e.target.value)}
-                  className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-700/10"
+                  className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-700/10"
                 />
               </div>
             </div>
@@ -474,7 +474,7 @@ export default function CreateListingPage() {
                 {amenities.map(am => (
                   <button key={am.id} type="button" onClick={() => toggleAmenity(am.id)}
                     className={`flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm transition-all cursor-pointer ${
-                      form.amenity_ids.includes(am.id) ? 'bg-emerald-100 text-emerald-700 font-semibold border-2 border-emerald-300' : 'bg-slate-50 text-slate-600 border-2 border-transparent hover:border-slate-200'
+                      form.amenity_ids.includes(am.id) ? 'bg-teal-100 text-teal-700 font-semibold border-2 border-teal-300' : 'bg-slate-50 text-slate-600 border-2 border-transparent hover:border-slate-200'
                     }`}>
                     <span className="text-base">{form.amenity_ids.includes(am.id) ? '✅' : '⬜'}</span>
                     {am.name_vi}
@@ -486,7 +486,7 @@ export default function CreateListingPage() {
             <div className="bg-white rounded-2xl p-6 border border-slate-200">
               <label className="block text-sm font-semibold text-slate-600 mb-1">Mô tả chi tiết</label>
               <textarea rows={4} value={form.description} onChange={e => updateForm('description', e.target.value)}
-                placeholder="Mô tả chi tiết về phòng, khu vực, ưu điểm..." className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-700/10 resize-none" />
+                placeholder="Mô tả chi tiết về phòng, khu vực, ưu điểm..." className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-700/10 resize-none" />
             </div>
 
             {/* Broker CRM Fields — SRS §2.1 */}
@@ -521,7 +521,7 @@ export default function CreateListingPage() {
               <button onClick={() => setStep(1)} className="flex-1 py-3 border-2 border-slate-300 text-slate-700 rounded-xl font-bold cursor-pointer hover:bg-slate-50 transition-colors">
                 ← Quay lại
               </button>
-              <button onClick={() => setStep(3)} className="flex-1 py-3 bg-emerald-700 text-white rounded-xl font-bold cursor-pointer hover:bg-emerald-800 transition-colors">
+              <button onClick={() => setStep(3)} className="flex-1 py-3 bg-teal-700 text-white rounded-xl font-bold cursor-pointer hover:bg-teal-800 transition-colors">
                 Tiếp theo →
               </button>
             </div>
@@ -535,7 +535,7 @@ export default function CreateListingPage() {
               <h3 className="font-bold text-slate-800">Hình ảnh (3-15 ảnh)</h3>
               <p className="text-xs text-slate-400">Ảnh đầu tiên sẽ là ảnh đại diện. Kéo thả để sắp xếp. Chỉ JPG/PNG/WebP, tối đa 5MB/ảnh.</p>
               <div className="p-4 rounded-xl border border-dashed border-slate-300 bg-slate-50">
-                <label className="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-700 text-white rounded-lg text-sm font-semibold cursor-pointer hover:bg-emerald-800 transition-colors">
+                <label className="inline-flex items-center gap-2 px-4 py-2.5 bg-teal-700 text-white rounded-lg text-sm font-semibold cursor-pointer hover:bg-teal-800 transition-colors">
                   <input
                     type="file"
                     accept="image/jpeg,image/png,image/webp"
@@ -570,10 +570,10 @@ export default function CreateListingPage() {
                       setDragIndex(null);
                       setDragOverIndex(null);
                     }}
-                    className={`relative group aspect-[4/3] rounded-xl overflow-hidden border-2 ${dragOverIndex === i ? 'border-emerald-500' : 'border-slate-200'}`}
+                    className={`relative group aspect-[4/3] rounded-xl overflow-hidden border-2 ${dragOverIndex === i ? 'border-teal-500' : 'border-slate-200'}`}
                   >
                     <img src={url} alt={`Ảnh ${i + 1}`} className="w-full h-full object-cover" />
-                    {i === 0 && <span className="absolute top-2 left-2 px-2 py-0.5 bg-emerald-600 text-white text-[10px] font-bold rounded-full">Ảnh chính</span>}
+                    {i === 0 && <span className="absolute top-2 left-2 px-2 py-0.5 bg-teal-600 text-white text-[10px] font-bold rounded-full">Ảnh chính</span>}
                     <button onClick={() => setImageUrls(prev => prev.filter((_, j) => j !== i))}
                       className="absolute top-2 right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer text-xs font-bold">×</button>
                   </div>
@@ -588,7 +588,7 @@ export default function CreateListingPage() {
               <button onClick={() => setStep(2)} className="flex-1 py-3 border-2 border-slate-300 text-slate-700 rounded-xl font-bold cursor-pointer hover:bg-slate-50 transition-colors">
                 ← Quay lại
               </button>
-              <button onClick={() => setStep(4)} className="flex-1 py-3 bg-emerald-700 text-white rounded-xl font-bold cursor-pointer hover:bg-emerald-800 transition-colors">
+              <button onClick={() => setStep(4)} className="flex-1 py-3 bg-teal-700 text-white rounded-xl font-bold cursor-pointer hover:bg-teal-800 transition-colors">
                 Xem trước →
               </button>
             </div>
@@ -605,7 +605,7 @@ export default function CreateListingPage() {
               )}
               <h2 className="text-xl font-bold text-slate-900">{form.title || 'Chưa có tiêu đề'}</h2>
               <div className="flex items-center gap-4 text-sm text-slate-500">
-                <span className="text-emerald-700 font-bold text-lg">{form.price || '0'} triệu/tháng</span>
+                <span className="text-teal-700 font-bold text-lg">{form.price || '0'} triệu/tháng</span>
                 {form.area && <span>• {form.area} m²</span>}
                 <span>• {form.bedrooms} PN</span>
                 <span>• {form.bathrooms} WC</span>
@@ -615,7 +615,7 @@ export default function CreateListingPage() {
               <div className="flex flex-wrap gap-2">
                 {form.amenity_ids.map(id => {
                   const am = amenities.find(a => a.id === id);
-                  return am ? <span key={id} className="px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-semibold rounded-full">{am.name_vi}</span> : null;
+                  return am ? <span key={id} className="px-3 py-1 bg-teal-50 text-teal-700 text-xs font-semibold rounded-full">{am.name_vi}</span> : null;
                 })}
               </div>
               {form.contact_phone && <p className="text-sm font-semibold text-slate-700">📞 {form.contact_phone}</p>}
@@ -629,7 +629,7 @@ export default function CreateListingPage() {
                 ← Chỉnh sửa
               </button>
               <button onClick={handleSubmit} disabled={loading}
-                className="flex-1 py-3 bg-emerald-700 text-white rounded-xl font-bold cursor-pointer hover:bg-emerald-800 transition-colors disabled:opacity-60">
+                className="flex-1 py-3 bg-teal-700 text-white rounded-xl font-bold cursor-pointer hover:bg-teal-800 transition-colors disabled:opacity-60">
                 {loading ? 'Đang gửi...' : '📤 Đăng tin'}
               </button>
             </div>
@@ -639,3 +639,4 @@ export default function CreateListingPage() {
     </div>
   );
 }
+

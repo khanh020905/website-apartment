@@ -64,13 +64,13 @@ const ContactPage = () => {
           >
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
               <h2 className="text-lg font-bold text-slate-900 mb-5">Thông tin liên hệ</h2>
-              <p className="text-xs font-bold text-emerald-800 uppercase tracking-wider mb-4">
+              <p className="text-xs font-bold text-teal-800 uppercase tracking-wider mb-4">
                 CÔNG TY TNHH HOMESPOT
               </p>
               <div className="flex flex-col gap-5">
                 <div className="flex gap-3.5">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center flex-shrink-0">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-emerald-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <div className="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-teal-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
@@ -83,8 +83,8 @@ const ContactPage = () => {
                   </div>
                 </div>
                 <div className="flex gap-3.5">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center flex-shrink-0">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-emerald-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <div className="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-teal-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                     </svg>
                   </div>
@@ -94,8 +94,8 @@ const ContactPage = () => {
                   </div>
                 </div>
                 <div className="flex gap-3.5">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center flex-shrink-0">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-emerald-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                  <div className="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-teal-700" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
                   </div>
@@ -126,32 +126,32 @@ const ContactPage = () => {
                     <label className="block text-sm font-semibold text-slate-700 mb-1.5">
                       Họ và tên <span className="text-red-400">*</span>
                     </label>
-                    <input type="text" placeholder="Nhập họ và tên của bạn" className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-700/10 transition-all" />
+                    <input type="text" placeholder="Nhập họ và tên của bạn" className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-700/10 transition-all" />
                   </div>
                   <div className="flex-1">
                     <label className="block text-sm font-semibold text-slate-700 mb-1.5">
                       Số điện thoại <span className="text-red-400">*</span>
                     </label>
-                    <input type="tel" placeholder="0912 345 678" className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-700/10 transition-all" />
+                    <input type="tel" placeholder="0912 345 678" className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-700/10 transition-all" />
                   </div>
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-1.5">Email <span className="text-red-400">*</span></label>
-                  <input type="email" placeholder="email@example.com" className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-700/10 transition-all" />
+                  <input type="email" placeholder="email@example.com" className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-700/10 transition-all" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-1.5">Tiêu đề <span className="text-red-400">*</span></label>
-                  <input type="text" placeholder="Chủ đề bạn muốn trao đổi" className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-700/10 transition-all" />
+                  <input type="text" placeholder="Chủ đề bạn muốn trao đổi" className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-700/10 transition-all" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-slate-700 mb-1.5">Nội dung <span className="text-red-400">*</span></label>
-                  <textarea rows={5} placeholder="Mô tả chi tiết vấn đề bạn gặp phải hoặc câu hỏi cần hỗ trợ..." className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-700/10 transition-all resize-none" />
+                  <textarea rows={5} placeholder="Mô tả chi tiết vấn đề bạn gặp phải hoặc câu hỏi cần hỗ trợ..." className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-700/10 transition-all resize-none" />
                 </div>
                 <motion.button
                   whileHover={{ scale: 1.01, y: -1 }}
                   whileTap={{ scale: 0.99 }}
                   type="submit"
-                  className="w-full py-3.5 bg-emerald-800 hover:bg-emerald-900 text-white rounded-xl font-bold text-sm transition-colors shadow-lg shadow-emerald-900/20 flex items-center justify-center gap-2 cursor-pointer"
+                  className="w-full py-3.5 bg-teal-800 hover:bg-teal-900 text-white rounded-xl font-bold text-sm transition-colors shadow-lg shadow-teal-900/20 flex items-center justify-center gap-2 cursor-pointer"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
@@ -175,7 +175,7 @@ const ContactPage = () => {
           {/* Left — Title + "Still have questions?" */}
           <div className="lg:w-[380px] flex-shrink-0 flex flex-col justify-between">
             <div>
-              <span className="inline-block px-3 py-1 bg-emerald-100 text-emerald-800 text-xs font-bold rounded-full mb-4 uppercase tracking-wide">
+              <span className="inline-block px-3 py-1 bg-teal-100 text-teal-800 text-xs font-bold rounded-full mb-4 uppercase tracking-wide">
                 Hỗ trợ
               </span>
               <h2 className="text-4xl font-extrabold text-slate-900 leading-tight tracking-tight">
@@ -191,7 +191,7 @@ const ContactPage = () => {
               </p>
               <a
                 href="mailto:support@homespot.vn"
-                className="inline-flex items-center gap-2 px-4 py-2 bg-white text-emerald-800 text-xs font-bold rounded-lg hover:bg-white/90 transition-colors"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-white text-teal-800 text-xs font-bold rounded-lg hover:bg-white/90 transition-colors"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -210,7 +210,7 @@ const ContactPage = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.35 + i * 0.05 }}
                 className={`bg-white rounded-2xl border transition-all duration-300 ${
-                  openFaq === i ? 'border-emerald-200 shadow-md shadow-emerald-100/50' : 'border-slate-100 shadow-sm'
+                  openFaq === i ? 'border-teal-200 shadow-md shadow-teal-100/50' : 'border-slate-100 shadow-sm'
                 }`}
               >
                 <button
@@ -221,11 +221,11 @@ const ContactPage = () => {
                     {faq.q}
                   </span>
                   <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-300 ${
-                    openFaq === i ? 'bg-emerald-700 rotate-180' : 'bg-slate-100'
+                    openFaq === i ? 'bg-teal-700 rotate-180' : 'bg-slate-100'
                   }`}>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className={`w-4 h-4 transition-colors ${openFaq === i ? 'text-white' : 'text-emerald-700'}`}
+                      className={`w-4 h-4 transition-colors ${openFaq === i ? 'text-white' : 'text-teal-700'}`}
                       fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}
                     >
                       <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
@@ -260,3 +260,4 @@ const ContactPage = () => {
 };
 
 export default ContactPage;
+

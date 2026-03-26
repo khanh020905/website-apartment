@@ -23,6 +23,7 @@ import type { Listing } from '../../shared/types';
 function HomePage() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [filteredListings, setFilteredListings] = useState<Listing[]>([]);
+  const [selectedListingId, setSelectedListingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -56,6 +57,16 @@ function HomePage() {
     setFilteredListings(filtered);
   }, []);
 
+  useEffect(() => {
+    if (filteredListings.length === 0) {
+      setSelectedListingId(null);
+      return;
+    }
+    if (!selectedListingId || !filteredListings.some((listing) => listing.id === selectedListingId)) {
+      setSelectedListingId(filteredListings[0].id);
+    }
+  }, [filteredListings, selectedListingId]);
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -63,7 +74,12 @@ function HomePage() {
       transition={{ duration: 0.3, delay: 0.15 }}
       className="flex flex-1 overflow-hidden"
     >
-      <Sidebar listings={listings} onFilterChange={handleFilterChange} />
+      <Sidebar
+        listings={listings}
+        onFilterChange={handleFilterChange}
+        selectedListingId={selectedListingId}
+        onSelectListing={setSelectedListingId}
+      />
       {loading ? (
         <div className="flex-1 h-full flex items-center justify-center bg-slate-100 text-slate-500">
           Đang tải dữ liệu...
@@ -73,7 +89,11 @@ function HomePage() {
           {loadError}
         </div>
       ) : (
-        <MapView listings={filteredListings} />
+        <MapView
+          listings={filteredListings}
+          selectedListingId={selectedListingId}
+          onSelectListing={setSelectedListingId}
+        />
       )}
     </motion.div>
   );

@@ -1,22 +1,55 @@
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { useEffect, useMemo, useRef } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import { Link } from 'react-router-dom';
+import type { Marker as LeafletMarker } from 'leaflet';
 import { createPriceIcon } from './PriceMarker';
 import { PROPERTY_TYPE_LABELS, type Listing } from '../../../shared/types';
 import 'leaflet/dist/leaflet.css';
 
 interface MapViewProps {
   listings: Listing[];
+  selectedListingId?: string | null;
+  onSelectListing?: (listingId: string) => void;
+}
+
+interface FocusOnListingProps {
+  selectedListing: Listing | null;
+  markerRef?: LeafletMarker | null;
+}
+
+function FocusOnListing({ selectedListing, markerRef }: FocusOnListingProps) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!selectedListing || selectedListing.lat === null || selectedListing.lng === null) return;
+
+    map.flyTo([selectedListing.lat, selectedListing.lng], Math.max(map.getZoom(), 16), {
+      duration: 0.6,
+    });
+    markerRef?.openPopup();
+  }, [map, markerRef, selectedListing]);
+
+  return null;
 }
 
 // Google Satellite tiles (matching reference design)
 const SATELLITE_URL = 'https://mt1.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}';
 const SATELLITE_ATTR = 'Dữ liệu bản đồ &copy;2026 Google, Hình ảnh &copy;2026 Airbus, CNES / Airbus, Maxar Technologies';
 
-const MapView = ({ listings }: MapViewProps) => {
+const MapView = ({ listings, selectedListingId = null, onSelectListing }: MapViewProps) => {
   const mapListings = listings.filter((listing) => listing.lat !== null && listing.lng !== null);
+  const selectedListing = useMemo(
+    () => mapListings.find((listing) => listing.id === selectedListingId) || null,
+    [mapListings, selectedListingId]
+  );
+  const selectedMarkerRef = useRef<LeafletMarker | null>(null);
 
   return (
-    <div className="flex-1 h-full relative bg-[#1a1a2e]">
+    <div className="flex-1 h-full relative bg-[#e8f7f8]">
+      <div className="absolute top-4 left-4 z-[500] bg-white/95 backdrop-blur border border-cyan-100 rounded-2xl px-4 py-3 shadow-lg shadow-cyan-900/10">
+        <p className="text-xs font-bold uppercase tracking-wider text-[#0f9b9b]">Bản đồ căn hộ</p>
+        <p className="text-sm font-semibold text-slate-700">{mapListings.length} vị trí đang hiển thị</p>
+      </div>
       <MapContainer
         center={[10.79, 106.685]}
         zoom={14}
@@ -33,12 +66,22 @@ const MapView = ({ listings }: MapViewProps) => {
           subdomains={['mt0', 'mt1', 'mt2', 'mt3']}
         />
 
+        <FocusOnListing selectedListing={selectedListing} markerRef={selectedMarkerRef.current} />
+
         {/* Price markers */}
         {mapListings.map((listing) => (
           <Marker
             key={listing.id}
             position={[listing.lat as number, listing.lng as number]}
             icon={createPriceIcon(listing)}
+            ref={(el) => {
+              if (listing.id === selectedListingId) {
+                selectedMarkerRef.current = el;
+              }
+            }}
+            eventHandlers={{
+              click: () => onSelectListing?.(listing.id),
+            }}
           >
             <Popup closeButton={false} offset={[0, -10]}>
               <div className="text-left w-[240px] flex flex-col group">
@@ -48,7 +91,7 @@ const MapView = ({ listings }: MapViewProps) => {
                     alt={listing.title}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
-                  <div className="absolute top-2 right-2 bg-white/90 backdrop-blur px-2 py-0.5 rounded-full text-[10px] font-bold text-emerald-700 shadow-sm">
+                  <div className="absolute top-2 right-2 bg-white/90 backdrop-blur px-2 py-0.5 rounded-full text-[10px] font-bold text-teal-700 shadow-sm">
                     Mới
                   </div>
                 </div>
@@ -76,7 +119,7 @@ const MapView = ({ listings }: MapViewProps) => {
                 <div className="mt-3 grid grid-cols-2 gap-2">
                   <a
                     href={`tel:${listing.contact_phone}`}
-                    className="text-center px-3 py-2 rounded-lg text-sm font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition-colors"
+                    className="text-center px-3 py-2 rounded-lg text-sm font-semibold bg-teal-600 text-white hover:bg-teal-700 transition-colors"
                   >
                     Thuê ngay
                   </a>

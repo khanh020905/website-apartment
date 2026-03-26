@@ -27,7 +27,7 @@ export default function ListingDetailPage() {
     });
   }, [id]);
 
-  if (loading) return <div className="flex-1 flex items-center justify-center"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-emerald-600" /></div>;
+  if (loading) return <div className="flex-1 flex items-center justify-center"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-teal-600" /></div>;
   if (!listing) return <div className="flex-1 flex items-center justify-center"><p className="text-slate-500">Không tìm thấy tin đăng</p></div>;
 
   const images = listing.images?.length > 0
@@ -41,7 +41,7 @@ export default function ListingDetailPage() {
       <div className="max-w-5xl mx-auto p-6">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-slate-500 mb-4">
-          <Link to="/search" className="hover:text-emerald-700">Tìm kiếm</Link>
+          <Link to="/search" className="hover:text-teal-700">Tìm kiếm</Link>
           <span>/</span>
           <span className="text-slate-700 font-medium line-clamp-1">{listing.title}</span>
         </div>
@@ -62,7 +62,7 @@ export default function ListingDetailPage() {
                   {images.map((img: string, i: number) => (
                     <button key={i} onClick={() => setActiveImage(i)}
                       className={`w-16 h-12 rounded-lg overflow-hidden flex-shrink-0 cursor-pointer border-2 transition-all ${
-                        i === activeImage ? 'border-emerald-600' : 'border-transparent opacity-60 hover:opacity-100'}`}>
+                        i === activeImage ? 'border-teal-600' : 'border-transparent opacity-60 hover:opacity-100'}`}>
                       <img src={img} alt="" className="w-full h-full object-cover" />
                     </button>
                   ))}
@@ -76,7 +76,7 @@ export default function ListingDetailPage() {
               <p className="text-sm text-slate-500 mb-4">{listing.address}{listing.ward && `, ${listing.ward}`}{listing.district && `, ${listing.district}`}{listing.city && `, ${listing.city}`}</p>
 
               <div className="flex flex-wrap gap-3 mb-6">
-                <span className="px-4 py-2 bg-emerald-100 text-emerald-800 rounded-xl font-bold text-lg">{(listing.price / 1000000).toFixed(1)} triệu/tháng</span>
+                <span className="px-4 py-2 bg-teal-100 text-teal-800 rounded-xl font-bold text-lg">{(listing.price / 1000000).toFixed(1)} triệu/tháng</span>
                 {listing.area && <span className="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl font-semibold">{listing.area} m²</span>}
                 <span className="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl font-semibold">{listing.bedrooms} phòng ngủ</span>
                 <span className="px-4 py-2 bg-slate-100 text-slate-700 rounded-xl font-semibold">{listing.bathrooms} phòng vệ sinh</span>
@@ -94,7 +94,7 @@ export default function ListingDetailPage() {
                   <h3 className="font-bold text-slate-800 mb-2">Tiện nghi</h3>
                   <div className="flex flex-wrap gap-2">
                     {listingAmenities.map(am => (
-                      <span key={am.id} className="px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-lg text-xs font-semibold border border-emerald-200">
+                      <span key={am.id} className="px-3 py-1.5 bg-teal-50 text-teal-700 rounded-lg text-xs font-semibold border border-teal-200">
                         {am.icon} {am.name_vi}
                       </span>
                     ))}
@@ -111,7 +111,7 @@ export default function ListingDetailPage() {
               <h3 className="font-bold text-slate-800 mb-4">Thông tin liên hệ</h3>
               {listing.profiles && (
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-700 font-bold text-lg">
+                  <div className="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center text-teal-700 font-bold text-lg">
                     {listing.profiles.full_name?.[0] || '?'}
                   </div>
                   <div>
@@ -121,7 +121,7 @@ export default function ListingDetailPage() {
                 </div>
               )}
               <a href={`tel:${listing.contact_phone}`}
-                className="w-full flex items-center justify-center gap-2 py-3 bg-emerald-700 text-white rounded-xl font-bold text-sm hover:bg-emerald-800 transition-colors mb-3">
+                className="w-full flex items-center justify-center gap-2 py-3 bg-teal-700 text-white rounded-xl font-bold text-sm hover:bg-teal-800 transition-colors mb-3">
                 📞 {listing.contact_phone}
               </a>
               <a href={`https://zalo.me/${listing.contact_phone}`} target="_blank" rel="noopener noreferrer"
@@ -141,3 +141,4 @@ export default function ListingDetailPage() {
     </div>
   );
 }
+

@@ -158,7 +158,7 @@ export default function SearchPage() {
         <div className="max-w-7xl mx-auto px-6 py-6 lg:py-8">
           <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center justify-between">
             <div className="flex-1 relative group">
-              <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none transition-colors group-focus-within:text-emerald-600">
+              <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none transition-colors group-focus-within:text-teal-600">
                 <Search className="w-5 h-5" />
               </div>
               <input 
@@ -166,7 +166,7 @@ export default function SearchPage() {
                 placeholder="Tìm kiếm theo tiêu đề, địa chỉ, khu vực..." 
                 value={keyword} 
                 onChange={e => { setKeyword(e.target.value); setPage(1); }}
-                className="w-full h-16 pl-14 pr-6 bg-slate-50 border-2 border-slate-100 rounded-[28px] font-bold text-slate-800 placeholder-slate-400 focus:bg-white focus:border-emerald-600 focus:ring-4 focus:ring-emerald-700/5 transition-all outline-none" 
+                className="w-full h-16 pl-14 pr-6 bg-slate-50 border-2 border-slate-100 rounded-[28px] font-bold text-slate-800 placeholder-slate-400 focus:bg-white focus:border-teal-600 focus:ring-4 focus:ring-teal-700/5 transition-all outline-none" 
               />
             </div>
             
@@ -175,8 +175,8 @@ export default function SearchPage() {
                 onClick={() => setShowFilters(!showFilters)}
                 className={`h-16 px-8 rounded-[28px] font-black uppercase tracking-widest text-xs flex items-center gap-3 transition-all cursor-pointer ${
                   showFilters 
-                    ? 'bg-emerald-700 text-white shadow-xl shadow-emerald-900/30 rotate-0' 
-                    : 'bg-white border-2 border-slate-100 text-slate-700 hover:border-emerald-300'
+                    ? 'bg-teal-700 text-white shadow-xl shadow-teal-900/30 rotate-0' 
+                    : 'bg-white border-2 border-slate-100 text-slate-700 hover:border-teal-300'
                 }`}
               >
                 <Sliders className="w-4 h-4" />
@@ -218,7 +218,7 @@ export default function SearchPage() {
               <div key="price-range-group" className="space-y-6">
                 <div className="flex items-center justify-between">
                   <label className="text-sm font-bold text-slate-700 ml-1">Giá thuê (triệu/tháng)</label>
-                  <span className="text-sm font-black text-emerald-600">{formatPrice(priceValues[0])} — {formatPrice(priceValues[1])}</span>
+                  <span className="text-sm font-black text-teal-600">{formatPrice(priceValues[0])} — {formatPrice(priceValues[1])}</span>
                 </div>
                 <div className="px-2 h-10 flex items-center relative z-20">
                   <Range
@@ -254,7 +254,7 @@ export default function SearchPage() {
                       <div
                         {...props}
                         style={{ ...props.style }}
-                        className="w-6 h-6 bg-white border-4 border-emerald-600 rounded-full shadow-lg cursor-pointer outline-none active:scale-110 hover:scale-105"
+                        className="w-6 h-6 bg-white border-4 border-teal-600 rounded-full shadow-lg cursor-pointer outline-none active:scale-110 hover:scale-105"
                       />
                     )}
                   />
@@ -313,11 +313,11 @@ export default function SearchPage() {
                 <label className="text-sm font-bold text-slate-700 ml-1">Khu vực / Vị trí</label>
                 <div className="space-y-3">
                   <div className="relative group">
-                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 group-focus-within:text-emerald-600 transition-colors" />
+                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 group-focus-within:text-teal-600 transition-colors" />
                     <select 
                       value={province} 
                       onChange={e => { setProvince(e.target.value); setDistrict(''); setWard(''); }}
-                      className="w-full h-14 pl-12 pr-6 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-sm appearance-none outline-none focus:bg-white focus:border-emerald-600 transition-all"
+                      className="w-full h-14 pl-12 pr-6 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-sm appearance-none outline-none focus:bg-white focus:border-teal-600 transition-all"
                     >
                       <option value="">Chọn Tỉnh / Thành phố</option>
                       {provinces.map(p => <option key={p.code} value={p.name}>{p.name}</option>)}
@@ -331,7 +331,7 @@ export default function SearchPage() {
                       disabled={!province}
                       value={district} 
                       onChange={e => { setDistrict(e.target.value); setWard(''); }}
-                      className="w-full h-14 pl-12 pr-6 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-sm appearance-none outline-none focus:bg-white focus:border-emerald-600 transition-all disabled:opacity-50"
+                      className="w-full h-14 pl-12 pr-6 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-sm appearance-none outline-none focus:bg-white focus:border-teal-600 transition-all disabled:opacity-50"
                     >
                       <option value="">Chọn Quận / Huyện</option>
                       {districts.map(d => <option key={d.code} value={d.name}>{d.name}</option>)}
@@ -345,7 +345,7 @@ export default function SearchPage() {
                       disabled={!district}
                       value={ward} 
                       onChange={e => setWard(e.target.value)}
-                      className="w-full h-14 pl-12 pr-6 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-sm appearance-none outline-none focus:bg-white focus:border-emerald-600 transition-all disabled:opacity-50"
+                      className="w-full h-14 pl-12 pr-6 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-sm appearance-none outline-none focus:bg-white focus:border-teal-600 transition-all disabled:opacity-50"
                     >
                       <option value="">Chọn Phường / Xã</option>
                       {wards.map(w => <option key={w.code} value={w.name}>{w.name}</option>)}
@@ -366,7 +366,7 @@ export default function SearchPage() {
                         onClick={() => setBedrooms(n === '0' ? null : n === '4+' ? '4' : n)} 
                         className={`flex-1 min-w-[48px] h-12 rounded-xl text-sm font-bold transition-all cursor-pointer ${
                           (n === '0' && bedrooms === null) || (n === '4+' && bedrooms === '4') || (bedrooms === n && n !== '0' && n !== '4+')
-                            ? 'bg-emerald-800 text-white shadow-lg shadow-emerald-900/20' 
+                            ? 'bg-teal-800 text-white shadow-lg shadow-teal-900/20' 
                             : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-transparent'
                         }`}
                       >
@@ -384,7 +384,7 @@ export default function SearchPage() {
                         onClick={() => setBathrooms(n === '3+' ? '3' : n)} 
                         className={`flex-1 min-w-[48px] h-12 rounded-xl text-sm font-bold transition-all cursor-pointer ${
                           (n === '3+' && bathrooms === '3') || (bathrooms === n && n !== '3+')
-                            ? 'bg-emerald-800 text-white shadow-lg shadow-emerald-900/20' 
+                            ? 'bg-teal-800 text-white shadow-lg shadow-teal-900/20' 
                             : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-transparent'
                         }`}
                       >
@@ -405,12 +405,12 @@ export default function SearchPage() {
                       onClick={() => togglePropertyType(pt.value)}
                       className={`flex items-center gap-3 p-4 rounded-2xl border-2 transition-all cursor-pointer ${
                         selectedPropertyTypes.includes(pt.value) 
-                          ? 'bg-emerald-50 border-emerald-600 text-emerald-800 shadow-lg shadow-emerald-900/5' 
+                          ? 'bg-teal-50 border-teal-600 text-teal-800 shadow-lg shadow-teal-900/5' 
                           : 'bg-slate-50 border-slate-100 text-slate-500 hover:border-slate-200'
                       }`}
                     >
                       <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${
-                        selectedPropertyTypes.includes(pt.value) ? 'bg-emerald-600 border-emerald-600' : 'border-slate-200 bg-white'
+                        selectedPropertyTypes.includes(pt.value) ? 'bg-teal-600 border-teal-600' : 'border-slate-200 bg-white'
                       }`}>
                         {selectedPropertyTypes.includes(pt.value) && <Check className="w-4 h-4 text-white" />}
                       </div>
@@ -493,7 +493,7 @@ export default function SearchPage() {
                 {total} kết quả tìm được
               </h2>
               <div className="flex items-center gap-2 mt-1">
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <div className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse" />
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Cập nhật theo thời gian thực</p>
               </div>
             </div>
@@ -516,7 +516,7 @@ export default function SearchPage() {
           {/* Listings Display */}
           {loading ? (
             <div className="py-20 flex flex-col items-center justify-center space-y-4">
-              <div className="w-12 h-12 border-4 border-slate-100 border-t-emerald-600 rounded-full animate-spin" />
+              <div className="w-12 h-12 border-4 border-slate-100 border-t-teal-600 rounded-full animate-spin" />
               <p className="text-xs font-black text-slate-300 uppercase tracking-widest">Đang tìm kiếm căn hộ...</p>
             </div>
           ) : listings.length === 0 ? (
@@ -542,9 +542,9 @@ export default function SearchPage() {
               <button 
                 disabled={page <= 1} 
                 onClick={() => { setPage(p => p - 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                className="w-14 h-14 bg-white border-2 border-slate-100 rounded-2xl flex items-center justify-center shadow-sm disabled:opacity-40 hover:border-emerald-600 transition-all cursor-pointer group"
+                className="w-14 h-14 bg-white border-2 border-slate-100 rounded-2xl flex items-center justify-center shadow-sm disabled:opacity-40 hover:border-teal-600 transition-all cursor-pointer group"
               >
-                <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-emerald-600 rotate-180" />
+                <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-teal-600 rotate-180" />
               </button>
               
               <div className="flex items-center gap-2 px-6 py-3 bg-white border-2 border-slate-100 rounded-2xl shadow-sm">
@@ -557,9 +557,9 @@ export default function SearchPage() {
               <button 
                 disabled={page >= totalPages} 
                 onClick={() => { setPage(p => p + 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                className="w-14 h-14 bg-white border-2 border-slate-100 rounded-2xl flex items-center justify-center shadow-sm disabled:opacity-40 hover:border-emerald-600 transition-all cursor-pointer group"
+                className="w-14 h-14 bg-white border-2 border-slate-100 rounded-2xl flex items-center justify-center shadow-sm disabled:opacity-40 hover:border-teal-600 transition-all cursor-pointer group"
               >
-                <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-emerald-600" />
+                <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-teal-600" />
               </button>
             </div>
           )}
@@ -629,7 +629,7 @@ const ListingCard = memo(({ listing, viewMode, index }: { listing: Listing, view
 
           <div className="absolute top-4 right-4 flex flex-col gap-2">
             {listing.property_type === 'can_ho_mini' && (
-              <div className="bg-emerald-600 text-white p-2 rounded-xl shadow-lg">
+              <div className="bg-teal-600 text-white p-2 rounded-xl shadow-lg">
                 <Home className="w-4 h-4" />
               </div>
             )}
@@ -641,11 +641,11 @@ const ListingCard = memo(({ listing, viewMode, index }: { listing: Listing, view
 
         <div className="p-6 flex flex-col justify-between">
           <div>
-            <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-2 flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            <p className="text-[10px] font-black text-teal-600 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-teal-500" />
               {PROPERTY_TYPE_LABELS[listing.property_type]}
             </p>
-            <h3 className="text-lg font-black text-slate-800 leading-tight mb-3 line-clamp-2 transition-colors group-hover:text-emerald-700">
+            <h3 className="text-lg font-black text-slate-800 leading-tight mb-3 line-clamp-2 transition-colors group-hover:text-teal-700">
               {listing.title}
             </h3>
             <div className="flex items-start gap-1.5 text-slate-400 font-bold text-xs mb-6">
@@ -679,3 +679,4 @@ const ListingCard = memo(({ listing, viewMode, index }: { listing: Listing, view
     </motion.div>
   );
 });
+
