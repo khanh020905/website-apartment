@@ -147,7 +147,16 @@ export interface Listing {
   created_at: string;
   updated_at: string;
   approved_at: string | null;
+  assigned_inspector_id: string | null;
+  assigned_at: string | null;
   view_count: number;
+}
+
+export interface ListingReviewChecklist {
+  addressMatched?: boolean;
+  roomConditionMatched?: boolean;
+  amenitiesMatched?: boolean;
+  imagesMatched?: boolean;
 }
 
 export interface ListingReview {
@@ -156,6 +165,7 @@ export interface ListingReview {
   reviewer_id: string;
   action: ReviewAction;
   notes: string | null;
+  checklist: ListingReviewChecklist | null;
   reviewed_at: string;
 }
 
