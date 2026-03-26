@@ -18,35 +18,45 @@ import DashboardPage from './pages/DashboardPage';
 import AdminVerificationPage from './pages/AdminVerificationPage';
 import BuildingStatusPage from './pages/BuildingStatusPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
-import type { Listing } from '../../shared/types';
+import PricingPage from './pages/PricingPage';
+import ProfilePage from './pages/ProfilePage';
+import type { Listing, Amenity } from '../../shared/types';
 
 function HomePage() {
   const [listings, setListings] = useState<Listing[]>([]);
   const [filteredListings, setFilteredListings] = useState<Listing[]>([]);
+  const [amenities, setAmenities] = useState<Amenity[]>([]);
   const [selectedListingId, setSelectedListingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     let mounted = true;
-    const loadListings = async () => {
+    const loadData = async () => {
       setLoading(true);
-      const { data, error } = await api.get<{ listings: Listing[] }>('/api/search?limit=200');
+      const [listingsRes, amenitiesRes] = await Promise.all([
+        api.get<{ listings: Listing[] }>('/api/search?limit=200'),
+        api.get<{ amenities: Amenity[] }>('/api/search/amenities')
+      ]);
+
       if (!mounted) return;
 
-      if (error || !data) {
-        setLoadError(error || 'Không thể tải danh sách tin đăng');
-        setListings([]);
-        setFilteredListings([]);
+      if (listingsRes.error || !listingsRes.data) {
+        setLoadError(listingsRes.error || 'Không thể tải danh sách tin đăng');
       } else {
         setLoadError(null);
-        setListings(data.listings);
-        setFilteredListings(data.listings);
+        setListings(listingsRes.data.listings);
+        setFilteredListings(listingsRes.data.listings);
       }
+
+      if (amenitiesRes.data) {
+        setAmenities(amenitiesRes.data.amenities);
+      }
+
       setLoading(false);
     };
 
-    loadListings();
+    loadData();
 
     return () => {
       mounted = false;
@@ -76,13 +86,17 @@ function HomePage() {
     >
       <Sidebar
         listings={listings}
+        amenities={amenities}
         onFilterChange={handleFilterChange}
         selectedListingId={selectedListingId}
         onSelectListing={setSelectedListingId}
       />
       {loading ? (
         <div className="flex-1 h-full flex items-center justify-center bg-slate-100 text-slate-500">
-          Đang tải dữ liệu...
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-10 h-10 border-4 border-teal-600/20 border-t-teal-600 rounded-full animate-spin" />
+            <p className="text-sm font-medium">Đang tải dữ liệu bản đồ...</p>
+          </div>
         </div>
       ) : loadError ? (
         <div className="flex-1 h-full flex items-center justify-center bg-slate-100 text-red-600 font-medium px-6 text-center">
@@ -119,10 +133,20 @@ function App() {
                   <Route path="/contact" element={<ContactPage />} />
                   <Route path="/search" element={<SearchPage />} />
                   <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+                  <Route path="/pricing" element={<PricingPage />} />
                   <Route path="/listings/:id" element={<ListingDetailPage />} />
 
                   {/* Authenticated routes */}
-                  <Route path="/create-listing" element={<CreateListingPage />} />
+                  <Route path="/create-listing" element={
+                    <ProtectedRoute>
+                      <CreateListingPage />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="/profile" element={
+                    <ProtectedRoute>
+                      <ProfilePage />
+                    </ProtectedRoute>
+                  } />
                   <Route path="/my-listings" element={
                     <ProtectedRoute>
                       <MyListingsPage />

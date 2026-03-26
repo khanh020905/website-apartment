@@ -20,6 +20,8 @@ export type ContractStatus = 'active' | 'expired' | 'terminated' | 'pending';
 
 export type ReviewAction = 'approved' | 'rejected';
 
+export type HomeDirection = 'East' | 'West' | 'South' | 'North' | 'NorthEast' | 'NorthWest' | 'SouthEast' | 'SouthWest';
+
 
 // --- Display Labels (Vietnamese) ---
 
@@ -68,6 +70,7 @@ export interface Profile {
   role: UserRole;
   subscription: SubscriptionTier;
   is_verified: boolean;
+  dob: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -144,6 +147,8 @@ export interface Listing {
   amenity_ids: number[];
   status: ListingStatus;
   available_date: string | null;
+  direction: HomeDirection | null;
+  is_verified: boolean;
   created_at: string;
   updated_at: string;
   approved_at: string | null;
@@ -274,6 +279,8 @@ export interface SearchFilters {
   bathrooms?: number | null;
   propertyTypes?: PropertyType[];
   furniture?: FurnitureStatus;
+  direction?: HomeDirection;
+  isVerified?: boolean;
   amenityIds?: number[];
   city?: string;
   district?: string;

@@ -10,6 +10,7 @@ import searchRoutes from './routes/search';
 import adminRoutes from './routes/admin';
 import qrRoutes from './routes/qr';
 import dashboardRoutes from './routes/dashboard';
+import contractRoutes from './routes/contracts';
 
 dotenv.config();
 
@@ -34,6 +35,7 @@ app.use('/api/search', searchRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/qr', qrRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/contracts', contractRoutes);
 
 // Health check route
 app.get('/api/health', (_req: Request, res: Response) => {

@@ -1,14 +1,14 @@
-import { useState, useEffect, useCallback, memo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Range, getTrackBackground } from 'react-range';
 import { 
   Search, MapPin, Home, Users, LayoutGrid, List,
   ChevronDown, ChevronRight, Check, X, Sliders, Bed, Bath, Square,
-  Wind, Wifi, Shield, Car
+  Wind, Wifi, Shield, Car, Lock
 } from 'lucide-react';
 import { api } from '../lib/api';
-import type { Listing, Amenity, PropertyType, FurnitureStatus } from '../../../shared/types';
+import type { Listing, Amenity, PropertyType, FurnitureStatus, HomeDirection } from '../../../shared/types';
 import { PROPERTY_TYPE_LABELS, FURNITURE_LABELS } from '../../../shared/types';
 
 const PROPERTY_TYPES: { value: PropertyType; label: string }[] = [
@@ -52,19 +52,18 @@ export default function SearchPage() {
   const [ward, setWard] = useState('');
   const [sortBy, setSortBy] = useState('newest');
   const [selectedAmenities, setSelectedAmenities] = useState<number[]>([]);
+  const [direction, setDirection] = useState<string | null>(null);
+  const [isVerified, setIsVerified] = useState(false);
 
-  // Location Data (Vietnamese Administrative Divisions)
+  // Location Data
   const [provinces, setProvinces] = useState<any[]>([]);
   const [districts, setDistricts] = useState<any[]>([]);
   const [wards, setWards] = useState<any[]>([]);
 
   useEffect(() => {
-    // Lead amenities
     api.get<{ amenities: Amenity[] }>('/api/search/amenities').then(({ data }) => {
       if (data) setAmenities(data.amenities);
     });
-
-    // Load Provinces
     fetch('https://provinces.open-api.vn/api/p/').then(r => r.json()).then(setProvinces);
   }, []);
 
@@ -100,14 +99,10 @@ export default function SearchPage() {
     setLoading(true);
     const params = new URLSearchParams();
     if (keyword) params.set('keyword', keyword);
-    
-    // Price in VND
     params.set('priceMin', String(priceValues[0] * 1000000));
     params.set('priceMax', String(priceValues[1] * 1000000));
-    
     params.set('areaMin', String(areaValues[0]));
     params.set('areaMax', String(areaValues[1]));
-    
     if (selectedPropertyTypes.length > 0) params.set('propertyTypes', selectedPropertyTypes.join(','));
     if (furniture) params.set('furniture', furniture);
     if (bedrooms) params.set('bedrooms', bedrooms);
@@ -116,10 +111,12 @@ export default function SearchPage() {
     if (district) params.set('district', district);
     if (ward) params.set('ward', ward);
     if (selectedAmenities.length > 0) params.set('amenityIds', selectedAmenities.join(','));
+    if (direction) params.set('direction', direction);
+    if (isVerified) params.set('isVerified', 'true');
     
     params.set('sortBy', sortBy);
     params.set('page', String(page));
-    params.set('limit', '21'); // divisible by 3
+    params.set('limit', '21');
 
     const { data } = await api.get<{ listings: Listing[]; total: number; totalPages: number }>(`/api/search?${params}`);
     if (data) {
@@ -128,12 +125,12 @@ export default function SearchPage() {
       setTotalPages(data.totalPages);
     }
     setLoading(false);
-  }, [keyword, priceValues, areaValues, selectedPropertyTypes, furniture, bedrooms, bathrooms, province, district, ward, sortBy, page, selectedAmenities]);
+  }, [keyword, priceValues, areaValues, selectedPropertyTypes, furniture, bedrooms, bathrooms, province, district, ward, sortBy, page, selectedAmenities, direction, isVerified]);
 
   useEffect(() => { 
     const timer = setTimeout(() => {
       search();
-    }, 300);
+    }, 500);
     return () => clearTimeout(timer);
   }, [search]);
 
@@ -158,7 +155,7 @@ export default function SearchPage() {
         <div className="max-w-7xl mx-auto px-6 py-6 lg:py-8">
           <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center justify-between">
             <div className="flex-1 relative group">
-              <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none transition-colors group-focus-within:text-teal-600">
+              <div className="absolute inset-y-0 left-5 flex items-center pointer-events-none transition-colors group-focus-within:text-emerald-600">
                 <Search className="w-5 h-5" />
               </div>
               <input 
@@ -166,7 +163,7 @@ export default function SearchPage() {
                 placeholder="Tìm kiếm theo tiêu đề, địa chỉ, khu vực..." 
                 value={keyword} 
                 onChange={e => { setKeyword(e.target.value); setPage(1); }}
-                className="w-full h-16 pl-14 pr-6 bg-slate-50 border-2 border-slate-100 rounded-[28px] font-bold text-slate-800 placeholder-slate-400 focus:bg-white focus:border-teal-600 focus:ring-4 focus:ring-teal-700/5 transition-all outline-none" 
+                className="w-full h-16 pl-14 pr-6 bg-slate-50 border-2 border-slate-100 rounded-[28px] font-bold text-slate-800 placeholder-slate-400 focus:bg-white focus:border-emerald-600 focus:ring-4 focus:ring-emerald-700/5 transition-all outline-none" 
               />
             </div>
             
@@ -175,8 +172,8 @@ export default function SearchPage() {
                 onClick={() => setShowFilters(!showFilters)}
                 className={`h-16 px-8 rounded-[28px] font-black uppercase tracking-widest text-xs flex items-center gap-3 transition-all cursor-pointer ${
                   showFilters 
-                    ? 'bg-teal-700 text-white shadow-xl shadow-teal-900/30 rotate-0' 
-                    : 'bg-white border-2 border-slate-100 text-slate-700 hover:border-teal-300'
+                    ? 'bg-emerald-700 text-white shadow-xl shadow-emerald-900/30 rotate-0' 
+                    : 'bg-white border-2 border-slate-100 text-slate-700 hover:border-emerald-300'
                 }`}
               >
                 <Sliders className="w-4 h-4" />
@@ -218,7 +215,7 @@ export default function SearchPage() {
               <div key="price-range-group" className="space-y-6">
                 <div className="flex items-center justify-between">
                   <label className="text-sm font-bold text-slate-700 ml-1">Giá thuê (triệu/tháng)</label>
-                  <span className="text-sm font-black text-teal-600">{formatPrice(priceValues[0])} — {formatPrice(priceValues[1])}</span>
+                  <span className="text-sm font-black text-emerald-600">{formatPrice(priceValues[0])} — {formatPrice(priceValues[1])}</span>
                 </div>
                 <div className="px-2 h-10 flex items-center relative z-20">
                   <Range
@@ -254,7 +251,7 @@ export default function SearchPage() {
                       <div
                         {...props}
                         style={{ ...props.style }}
-                        className="w-6 h-6 bg-white border-4 border-teal-600 rounded-full shadow-lg cursor-pointer outline-none active:scale-110 hover:scale-105"
+                        className="w-6 h-6 bg-white border-4 border-emerald-600 rounded-full shadow-lg cursor-pointer outline-none active:scale-110 hover:scale-105 transition-transform"
                       />
                     )}
                   />
@@ -301,7 +298,7 @@ export default function SearchPage() {
                       <div
                         {...props}
                         style={{ ...props.style }}
-                        className="w-6 h-6 bg-white border-4 border-indigo-600 rounded-full shadow-lg cursor-pointer outline-none active:scale-110 hover:scale-105"
+                        className="w-6 h-6 bg-white border-4 border-indigo-600 rounded-full shadow-lg cursor-pointer outline-none active:scale-110 hover:scale-105 transition-transform"
                       />
                     )}
                   />
@@ -313,11 +310,11 @@ export default function SearchPage() {
                 <label className="text-sm font-bold text-slate-700 ml-1">Khu vực / Vị trí</label>
                 <div className="space-y-3">
                   <div className="relative group">
-                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 group-focus-within:text-teal-600 transition-colors" />
+                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 group-focus-within:text-emerald-600 transition-colors" />
                     <select 
                       value={province} 
                       onChange={e => { setProvince(e.target.value); setDistrict(''); setWard(''); }}
-                      className="w-full h-14 pl-12 pr-6 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-sm appearance-none outline-none focus:bg-white focus:border-teal-600 transition-all"
+                      className="w-full h-14 pl-12 pr-6 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-sm appearance-none outline-none focus:bg-white focus:border-emerald-600 transition-all"
                     >
                       <option value="">Chọn Tỉnh / Thành phố</option>
                       {provinces.map(p => <option key={p.code} value={p.name}>{p.name}</option>)}
@@ -331,7 +328,7 @@ export default function SearchPage() {
                       disabled={!province}
                       value={district} 
                       onChange={e => { setDistrict(e.target.value); setWard(''); }}
-                      className="w-full h-14 pl-12 pr-6 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-sm appearance-none outline-none focus:bg-white focus:border-teal-600 transition-all disabled:opacity-50"
+                      className="w-full h-14 pl-12 pr-6 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-sm appearance-none outline-none focus:bg-white focus:border-emerald-600 transition-all disabled:opacity-50"
                     >
                       <option value="">Chọn Quận / Huyện</option>
                       {districts.map(d => <option key={d.code} value={d.name}>{d.name}</option>)}
@@ -345,7 +342,7 @@ export default function SearchPage() {
                       disabled={!district}
                       value={ward} 
                       onChange={e => setWard(e.target.value)}
-                      className="w-full h-14 pl-12 pr-6 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-sm appearance-none outline-none focus:bg-white focus:border-teal-600 transition-all disabled:opacity-50"
+                      className="w-full h-14 pl-12 pr-6 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-sm appearance-none outline-none focus:bg-white focus:border-emerald-600 transition-all disabled:opacity-50"
                     >
                       <option value="">Chọn Phường / Xã</option>
                       {wards.map(w => <option key={w.code} value={w.name}>{w.name}</option>)}
@@ -366,7 +363,7 @@ export default function SearchPage() {
                         onClick={() => setBedrooms(n === '0' ? null : n === '4+' ? '4' : n)} 
                         className={`flex-1 min-w-[48px] h-12 rounded-xl text-sm font-bold transition-all cursor-pointer ${
                           (n === '0' && bedrooms === null) || (n === '4+' && bedrooms === '4') || (bedrooms === n && n !== '0' && n !== '4+')
-                            ? 'bg-teal-800 text-white shadow-lg shadow-teal-900/20' 
+                            ? 'bg-emerald-800 text-white shadow-lg shadow-emerald-900/20' 
                             : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-transparent'
                         }`}
                       >
@@ -376,7 +373,7 @@ export default function SearchPage() {
                   </div>
                 </div>
                 <div className="space-y-4">
-                  <label className="text-sm font-bold text-slate-700 ml-1">Số phòng vệ sinh</label>
+                  <label className="text-sm font-bold text-slate-700 ml-1">Số WC</label>
                   <div className="flex gap-2">
                     {['1', '2', '3+'].map(n => (
                       <button 
@@ -384,7 +381,7 @@ export default function SearchPage() {
                         onClick={() => setBathrooms(n === '3+' ? '3' : n)} 
                         className={`flex-1 min-w-[48px] h-12 rounded-xl text-sm font-bold transition-all cursor-pointer ${
                           (n === '3+' && bathrooms === '3') || (bathrooms === n && n !== '3+')
-                            ? 'bg-teal-800 text-white shadow-lg shadow-teal-900/20' 
+                            ? 'bg-emerald-800 text-white shadow-lg shadow-emerald-900/20' 
                             : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border border-transparent'
                         }`}
                       >
@@ -395,7 +392,7 @@ export default function SearchPage() {
                 </div>
               </div>
 
-              {/* Property Types (Multi Checkbox) */}
+              {/* Property Types */}
               <div className="space-y-4">
                 <label className="text-sm font-bold text-slate-700 ml-1">Loại hình căn hộ</label>
                 <div className="grid grid-cols-1 gap-2">
@@ -405,12 +402,12 @@ export default function SearchPage() {
                       onClick={() => togglePropertyType(pt.value)}
                       className={`flex items-center gap-3 p-4 rounded-2xl border-2 transition-all cursor-pointer ${
                         selectedPropertyTypes.includes(pt.value) 
-                          ? 'bg-teal-50 border-teal-600 text-teal-800 shadow-lg shadow-teal-900/5' 
+                          ? 'bg-emerald-50 border-emerald-600 text-emerald-800 shadow-lg shadow-emerald-900/5' 
                           : 'bg-slate-50 border-slate-100 text-slate-500 hover:border-slate-200'
                       }`}
                     >
                       <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${
-                        selectedPropertyTypes.includes(pt.value) ? 'bg-teal-600 border-teal-600' : 'border-slate-200 bg-white'
+                        selectedPropertyTypes.includes(pt.value) ? 'bg-emerald-600 border-emerald-600' : 'border-slate-200 bg-white'
                       }`}>
                         {selectedPropertyTypes.includes(pt.value) && <Check className="w-4 h-4 text-white" />}
                       </div>
@@ -420,7 +417,7 @@ export default function SearchPage() {
                 </div>
               </div>
 
-              {/* Furniture (Radio) */}
+              {/* Furniture */}
               <div className="space-y-4">
                 <label className="text-sm font-bold text-slate-700 ml-1">Tình trạng nội thất</label>
                 <div className="flex flex-wrap gap-2">
@@ -441,7 +438,34 @@ export default function SearchPage() {
                 </div>
               </div>
 
-              {/* Amenities (Multi select) */}
+              {/* Home Direction */}
+              <div className="space-y-4">
+                <label className="text-sm font-bold text-slate-700 ml-1">Hướng nhà</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { val: 'East', label: 'Đông' },
+                    { val: 'West', label: 'Tây' },
+                    { val: 'South', label: 'Nam' },
+                    { val: 'North', label: 'Bắc' },
+                    { val: 'NorthEast', label: 'Đông Bắc' },
+                    { val: 'NorthWest', label: 'Tây Bắc' },
+                    { val: 'SouthEast', label: 'Đông Nam' },
+                    { val: 'SouthWest', label: 'Tây Nam' }
+                  ].map(d => (
+                    <button 
+                      key={d.val} 
+                      onClick={() => setDirection(d.val === direction ? null : d.val)} 
+                      className={`px-4 py-3 rounded-2xl border-2 text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer ${
+                        direction === d.val ? 'bg-slate-900 border-slate-900 text-white shadow-lg' : 'bg-slate-50 border-slate-100 text-slate-400 hover:border-slate-200'
+                      }`}
+                    >
+                      {d.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Amenities */}
               <div className="space-y-4">
                 <label className="text-sm font-bold text-slate-700 ml-1">Tiện nghi có sẵn</label>
                 <div className="flex flex-wrap gap-2">
@@ -464,6 +488,29 @@ export default function SearchPage() {
                 </div>
               </div>
 
+              {/* Verification Status */}
+              <div className="pt-4 border-t border-slate-100">
+                <button 
+                  onClick={() => setIsVerified(!isVerified)}
+                  className={`w-full p-6 h-auto rounded-[32px] border-2 flex items-center justify-between transition-all cursor-pointer ${
+                    isVerified ? 'bg-emerald-50 border-emerald-600 shadow-lg shadow-emerald-900/5' : 'bg-white border-slate-100 hover:border-slate-200'
+                  }`}
+                >
+                  <div className="flex items-center gap-4">
+                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${isVerified ? 'bg-emerald-600 text-white' : 'bg-slate-50 text-slate-400'}`}>
+                      <Shield className={isVerified ? 'fill-white/20' : ''} />
+                    </div>
+                    <div className="text-left">
+                      <p className="text-sm font-black text-slate-900 leading-none mb-1">Tin đăng xác thực</p>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Đã kiểm duyệt (Check Legit)</p>
+                    </div>
+                  </div>
+                  <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${isVerified ? 'bg-emerald-600 border-emerald-600' : 'border-slate-200'}`}>
+                    {isVerified && <Check className="w-3.5 h-3.5 text-white" />}
+                  </div>
+                </button>
+              </div>
+
               {/* Reset Filters */}
               <button 
                 onClick={() => {
@@ -474,7 +521,11 @@ export default function SearchPage() {
                   setBedrooms(null);
                   setBathrooms(null);
                   setProvince('');
+                  setDistrict('');
+                  setWard('');
                   setSelectedAmenities([]);
+                  setDirection(null);
+                  setIsVerified(false);
                 }}
                 className="w-full py-4 text-xs font-bold text-slate-400 hover:text-rose-500 transition-colors cursor-pointer"
               >
@@ -485,15 +536,36 @@ export default function SearchPage() {
         </AnimatePresence>
 
         {/* Results Main Content */}
-        <main className="flex-1 overflow-y-auto p-8 lg:p-12 space-y-8 scroll-smooth">
-          {/* Header & Sort */}
+         <main className="flex-1 overflow-y-auto p-8 lg:p-12 space-y-10 scroll-smooth">
+           {/* Quick Selection Toolbar */}
+           <div className="flex flex-wrap items-center gap-3">
+             <div className="flex items-center gap-2 px-6 py-2 bg-slate-100 rounded-full text-xs font-black text-slate-500 uppercase tracking-widest">
+                <MapPin className="w-3 h-3" /> TP. Hồ Chí Minh
+             </div>
+             {['Quận 1', 'Quận 7', 'Quận 10', 'Bình Thạnh', 'Tân Bình', 'Thủ Đức', 'Gò Vấp'].map(d => (
+               <button 
+                key={d} 
+                onClick={() => {
+                  setProvince('Thành phố Hồ Chí Minh');
+                  setDistrict(d);
+                }}
+                className={`px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer ${
+                  district === d ? 'bg-emerald-600 text-white shadow-lg' : 'bg-white border-2 border-slate-100 text-slate-400 hover:border-emerald-200'
+                }`}
+               >
+                 {d}
+               </button>
+             ))}
+           </div>
+
+           {/* Header & Sort */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
               <h2 className="text-3xl font-black text-slate-900 tracking-tighter">
-                {total} kết quả tìm được
+                {total} kết quả tìm thấy
               </h2>
               <div className="flex items-center gap-2 mt-1">
-                <div className="w-1.5 h-1.5 rounded-full bg-teal-500 animate-pulse" />
+                <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                 <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Cập nhật theo thời gian thực</p>
               </div>
             </div>
@@ -516,7 +588,7 @@ export default function SearchPage() {
           {/* Listings Display */}
           {loading ? (
             <div className="py-20 flex flex-col items-center justify-center space-y-4">
-              <div className="w-12 h-12 border-4 border-slate-100 border-t-teal-600 rounded-full animate-spin" />
+              <div className="w-12 h-12 border-4 border-slate-100 border-t-emerald-600 rounded-full animate-spin" />
               <p className="text-xs font-black text-slate-300 uppercase tracking-widest">Đang tìm kiếm căn hộ...</p>
             </div>
           ) : listings.length === 0 ? (
@@ -524,16 +596,115 @@ export default function SearchPage() {
               <div className="w-24 h-24 bg-white rounded-[40px] shadow-xl shadow-black/5 flex items-center justify-center mx-auto mb-8">
                 <Search className="w-10 h-10 text-slate-200" />
               </div>
-              <h3 className="text-2xl font-black text-slate-900 mb-2 tracking-tight">Không tìm thấy yêu cầu</h3>
-              <p className="max-w-xs mx-auto text-slate-400 font-medium leading-relaxed">
+              <h3 className="text-2xl font-black text-slate-900 mb-2 tracking-tight">Rất tiếc, chưa tìm thấy kết quả phù hợp</h3>
+              <p className="max-w-xs mx-auto text-slate-400 font-medium leading-relaxed mb-8">
                 Thử thay đổi bộ lọc, khoảng giá hoặc từ khóa tìm kiếm để tìm thấy kết quả phù hợp hơn.
               </p>
+              <button 
+                onClick={() => {
+                   setPriceValues([PRICE_RANGE.MIN, PRICE_RANGE.MAX]);
+                   setAreaValues([AREA_RANGE.MIN, AREA_RANGE.MAX]);
+                   setSelectedPropertyTypes([]);
+                   setKeyword('');
+                   search();
+                }}
+                className="px-10 py-4 bg-emerald-600 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-emerald-900/20 hover:bg-emerald-700 transition-all active:scale-95 cursor-pointer"
+              >
+                XÓA TẤT CẢ BỘ LỌC
+              </button>
             </div>
           ) : (
-            <ListingGrid 
-              listings={listings} 
-              viewMode={viewMode}
-            />
+            <div className={`grid gap-4 sm:gap-6 ${
+              viewMode === 'grid' 
+                ? 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3' 
+                : 'grid-cols-1'
+            }`}>
+              {listings.map((listing, i) => (
+                <motion.div 
+                  key={listing.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: (i % 6) * 0.05 }}
+                  className="group"
+                >
+                  <Link 
+                    to={`/listings/${listing.id}`} 
+                    className={`block bg-white rounded-[32px] border border-slate-100 overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ${
+                      viewMode === 'list' ? 'flex flex-col sm:flex-row h-auto sm:h-64' : ''
+                    }`}
+                  >
+                    {/* Image Area */}
+                    <div className={`relative overflow-hidden ${
+                      viewMode === 'list' ? 'sm:w-[40%] flex-shrink-0' : 'aspect-[1.4/1]'
+                    }`}>
+                      <img 
+                        src={listing.images?.[0]?.url || listing.images?.[0] as unknown as string || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80'}
+                        alt={listing.title} 
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity" />
+                      
+                      {/* Price Badge */}
+                      <div className="absolute top-4 left-4">
+                        <div className="bg-white/10 backdrop-blur-xl border border-white/20 text-white px-4 py-2 rounded-2xl font-black text-sm shadow-xl">
+                          {(listing.price / 1000000).toFixed(1)} triệu/th
+                        </div>
+                      </div>
+
+                      {/* Top Right Badges */}
+                      <div className="absolute top-4 right-4 flex flex-col gap-2">
+                        {listing.is_verified && (
+                          <div className="bg-emerald-600 text-white p-2 rounded-xl shadow-lg" title="Đã xác thực">
+                            <Shield className="w-4 h-4 fill-white/20" />
+                          </div>
+                        )}
+                        <button className="bg-white text-rose-500 p-2 rounded-xl shadow-lg hover:bg-rose-50 transition-colors">
+                          <Users className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Content Area */}
+                    <div className="p-6 flex flex-col justify-between">
+                      <div>
+                        <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                          {PROPERTY_TYPE_LABELS[listing.property_type]}
+                        </p>
+                        <h3 className="text-lg font-black text-slate-800 leading-tight mb-3 line-clamp-2 transition-colors group-hover:text-emerald-700">
+                          {listing.title}
+                        </h3>
+                        <div className="flex items-start gap-1.5 text-slate-400 font-bold text-xs mb-6">
+                          <MapPin className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                          <span className="line-clamp-1">{listing.district}, {listing.city}</span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-4 text-slate-500 border-t border-slate-50 pt-4 mt-auto">
+                        <div className="flex flex-col">
+                          <span className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-slate-300">
+                            <Bed className="w-3 h-3" /> PN
+                          </span>
+                          <span className="text-sm font-black text-slate-700">{listing.bedrooms}</span>
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-slate-300">
+                            <Bath className="w-3 h-3" /> WC
+                          </span>
+                          <span className="text-sm font-black text-slate-700">{listing.bathrooms}</span>
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-slate-300">
+                            <Square className="w-3 h-3" /> Diện tích
+                          </span>
+                          <span className="text-sm font-black text-slate-700">{listing.area}m²</span>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                </motion.div>
+              ))}
+            </div>
           )}
 
           {/* Pagination */}
@@ -542,9 +713,9 @@ export default function SearchPage() {
               <button 
                 disabled={page <= 1} 
                 onClick={() => { setPage(p => p - 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                className="w-14 h-14 bg-white border-2 border-slate-100 rounded-2xl flex items-center justify-center shadow-sm disabled:opacity-40 hover:border-teal-600 transition-all cursor-pointer group"
+                className="w-14 h-14 bg-white border-2 border-slate-100 rounded-2xl flex items-center justify-center shadow-sm disabled:opacity-40 hover:border-emerald-600 transition-all cursor-pointer group"
               >
-                <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-teal-600 rotate-180" />
+                <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-emerald-600 rotate-180" />
               </button>
               
               <div className="flex items-center gap-2 px-6 py-3 bg-white border-2 border-slate-100 rounded-2xl shadow-sm">
@@ -557,9 +728,9 @@ export default function SearchPage() {
               <button 
                 disabled={page >= totalPages} 
                 onClick={() => { setPage(p => p + 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                className="w-14 h-14 bg-white border-2 border-slate-100 rounded-2xl flex items-center justify-center shadow-sm disabled:opacity-40 hover:border-teal-600 transition-all cursor-pointer group"
+                className="w-14 h-14 bg-white border-2 border-slate-100 rounded-2xl flex items-center justify-center shadow-sm disabled:opacity-40 hover:border-emerald-600 transition-all cursor-pointer group"
               >
-                <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-teal-600" />
+                <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-emerald-600" />
               </button>
             </div>
           )}
@@ -569,7 +740,7 @@ export default function SearchPage() {
   );
 }
 
-// Simple Sofa icon if not in lucide
+// Simple Sofa icon
 function Sofa({ className }: { className?: string }) {
   return (
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
@@ -580,103 +751,3 @@ function Sofa({ className }: { className?: string }) {
     </svg>
   );
 }
-
-// Optimized Grid Component
-const ListingGrid = memo(({ listings, viewMode }: { listings: Listing[], viewMode: 'grid' | 'list' }) => {
-  return (
-    <div className={`grid gap-4 sm:gap-6 ${
-      viewMode === 'grid' 
-        ? 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3' 
-        : 'grid-cols-1'
-    }`}>
-      {listings.map((listing, i) => (
-        <ListingCard key={listing.id} listing={listing} viewMode={viewMode} index={i} />
-      ))}
-    </div>
-  );
-});
-
-// Memoized Single Card
-const ListingCard = memo(({ listing, viewMode, index }: { listing: Listing, viewMode: 'grid' | 'list', index: number }) => {
-  return (
-    <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: (index % 6) * 0.05 }}
-      className="group"
-    >
-      <Link 
-        to={`/listings/${listing.id}`} 
-        className={`block bg-white rounded-[32px] border border-slate-100 overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ${
-          viewMode === 'list' ? 'flex flex-col sm:flex-row h-auto sm:h-64' : ''
-        }`}
-      >
-        <div className={`relative overflow-hidden ${
-          viewMode === 'list' ? 'sm:w-[40%] flex-shrink-0' : 'aspect-[1.4/1]'
-        }`}>
-          <img 
-            src={listing.images?.[0]?.url || listing.images?.[0] as unknown as string || 'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80'}
-            alt={listing.title} 
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity" />
-          
-          <div className="absolute top-4 left-4">
-            <div className="bg-white/10 backdrop-blur-xl border border-white/20 text-white px-4 py-2 rounded-2xl font-black text-sm shadow-xl">
-              {(listing.price / 1000000).toFixed(1)} triệu/th
-            </div>
-          </div>
-
-          <div className="absolute top-4 right-4 flex flex-col gap-2">
-            {listing.property_type === 'can_ho_mini' && (
-              <div className="bg-teal-600 text-white p-2 rounded-xl shadow-lg">
-                <Home className="w-4 h-4" />
-              </div>
-            )}
-            <button className="bg-white text-rose-500 p-2 rounded-xl shadow-lg hover:bg-rose-50 transition-colors">
-              <Users className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-
-        <div className="p-6 flex flex-col justify-between">
-          <div>
-            <p className="text-[10px] font-black text-teal-600 uppercase tracking-widest mb-2 flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-teal-500" />
-              {PROPERTY_TYPE_LABELS[listing.property_type]}
-            </p>
-            <h3 className="text-lg font-black text-slate-800 leading-tight mb-3 line-clamp-2 transition-colors group-hover:text-teal-700">
-              {listing.title}
-            </h3>
-            <div className="flex items-start gap-1.5 text-slate-400 font-bold text-xs mb-6">
-              <MapPin className="w-3.5 h-3.5 mt-0.5 shrink-0" />
-              <span className="line-clamp-1">{listing.district}, {listing.city}</span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-4 text-slate-500 border-t border-slate-50 pt-4 mt-auto">
-            <div className="flex flex-col">
-              <span className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-slate-300">
-                <Bed className="w-3 h-3" /> PN
-              </span>
-              <span className="text-sm font-black text-slate-700">{listing.bedrooms}</span>
-            </div>
-            <div className="flex flex-col">
-              <span className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-slate-300">
-                <Bath className="w-3 h-3" /> WC
-              </span>
-              <span className="text-sm font-black text-slate-700">{listing.bathrooms}</span>
-            </div>
-            <div className="flex flex-col">
-              <span className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-slate-300">
-                <Square className="w-3 h-3" /> Diện tích
-              </span>
-              <span className="text-sm font-black text-slate-700">{listing.area}m²</span>
-            </div>
-          </div>
-        </div>
-      </Link>
-    </motion.div>
-  );
-});
-

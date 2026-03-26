@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../lib/api';
 import type { Amenity, PropertyType, FurnitureStatus, ListingStatus } from '../../../shared/types';
@@ -47,7 +47,9 @@ function LocationPicker({ value, onPick }: LocationPickerProps) {
 
 export default function CreateListingPage() {
   const navigate = useNavigate();
-  const { canPost, role } = useAuth();
+  const [searchParams] = useSearchParams();
+  const roomIdParam = searchParams.get('room_id');
+  const { canPost, role, user } = useAuth();
   const isBroker = role === 'broker';
   const [amenities, setAmenities] = useState<Amenity[]>([]);
   const [loading, setLoading] = useState(false);
@@ -85,6 +87,7 @@ export default function CreateListingPage() {
     lng: 0,
     amenity_ids: [] as number[],
     available_date: '',
+    room_id: '',
     // Broker CRM fields (SRS §2.1)
     target_audience: '',
     commission_rate: '',
@@ -108,7 +111,35 @@ export default function CreateListingPage() {
       }
       setLoadingMapConfig(false);
     });
-  }, []);
+
+    // Fetch room/building data if room_id is provided
+    if (roomIdParam) {
+      api.get<{ room: any }>(`/api/rooms/${roomIdParam}`).then(({ data }) => {
+        if (data && data.room) {
+          const r = data.room;
+          const b = r.buildings;
+          setForm(prev => ({
+            ...prev,
+            room_id: r.id,
+            property_type: r.furniture === 'full' ? 'can_ho_mini' : 'phong_tro', // Heuristic
+            price: r.price ? (r.price / 1_000_000).toString() : '',
+            area: r.area ? r.area.toString() : '',
+            furniture: r.furniture,
+            amenity_ids: r.amenity_ids || [],
+            description: r.description || '',
+            address: b?.address || '',
+            city: b?.city || '',
+            district: b?.district || '',
+            ward: b?.ward || '',
+            lat: b?.lat || 0,
+            lng: b?.lng || 0,
+            contact_name: prev.contact_name || user?.user_metadata?.full_name || '',
+            contact_phone: prev.contact_phone || user?.profile?.phone || '',
+          }));
+        }
+      });
+    }
+  }, [roomIdParam, user]);
 
   const updateForm = useCallback((field: string, value: unknown) => {
     setForm(prev => ({ ...prev, [field]: value }));

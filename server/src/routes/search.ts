@@ -9,6 +9,7 @@ router.get('/', async (req: Request, res: Response) => {
     priceMin, priceMax, areaMin, areaMax,
     bedrooms, bathrooms, propertyTypes, furniture,
     amenityIds, city, district, ward, keyword,
+    direction, isVerified, // Added filters
     sortBy = 'newest', page = '1', limit = '20',
     lat, lng, radius, // for map-based search
   } = req.query;
@@ -76,6 +77,16 @@ router.get('/', async (req: Request, res: Response) => {
     query = query.or(`title.ilike.%${kw}%,address.ilike.%${kw}%,description.ilike.%${kw}%`);
   }
 
+  // Direction
+  if (direction) {
+    query = query.eq('direction', direction as string);
+  }
+
+  // Verification status
+  if (isVerified === 'true') {
+    query = query.eq('is_verified', true);
+  }
+
   // Sorting
   switch (sortBy) {
     case 'price_asc':
@@ -117,6 +128,7 @@ router.get('/map', async (req: Request, res: Response) => {
   const {
     priceMin, priceMax, areaMin, areaMax,
     propertyTypes, city, district,
+    direction, isVerified,
   } = req.query;
 
   let query = getSupabase()
@@ -133,6 +145,8 @@ router.get('/map', async (req: Request, res: Response) => {
   if (propertyTypes) query = query.in('property_type', (propertyTypes as string).split(','));
   if (city) query = query.eq('city', city as string);
   if (district) query = query.eq('district', district as string);
+  if (direction) query = query.eq('direction', direction as string);
+  if (isVerified === 'true') query = query.eq('is_verified', true);
 
   const { data, error } = await query;
 

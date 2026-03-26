@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
-import type { UserRole } from '../../../shared/types';
+import type { UserRole, SubscriptionTier } from '../../../shared/types';
 
 
 const RegisterPage = () => {
@@ -16,13 +16,32 @@ const RegisterPage = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [accountRole, setAccountRole] = useState<UserRole>('user');
+  const [subscriptionTier, setSubscriptionTier] = useState<SubscriptionTier>('free');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const [cooldown, setCooldown] = useState(false);
 
+  const SUBSCRIPTION_PLANS: Record<Exclude<UserRole, 'user' | 'admin'>, { value: SubscriptionTier; label: string; price: string; features: string[] }[]> = {
+    landlord: [
+      { value: 'landlord_basic', label: 'Cơ bản (Miễn phí)', price: '0đ', features: ['Quản lý 1 tòa', 'Tối đa 10 phòng', '3 tin đăng/tháng'] },
+      { value: 'landlord_pro', label: 'Chuyên nghiệp', price: '499.000đ', features: ['Không giới hạn tòa', 'Không giới hạn phòng', 'Đẩy tin ưu tiên'] }
+    ],
+    broker: [
+      { value: 'broker_basic', label: 'Cơ bản', price: '199.000đ', features: ['Quản lý 50 tin', 'CRM cơ bản', 'Hỗ trợ 24/7'] },
+      { value: 'broker_pro', label: 'Cao cấp', price: '899.000đ', features: ['Không giới hạn tin', 'CRM nâng cao', 'Phân tích thị trường'] }
+    ]
+  };
+
   const { signUp } = useAuth();
   const navigate = useNavigate();
+
+  const handleRoleChange = (role: UserRole) => {
+    setAccountRole(role);
+    if (role === 'landlord') setSubscriptionTier('landlord_basic');
+    else if (role === 'broker') setSubscriptionTier('broker_basic');
+    else setSubscriptionTier('free');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,7 +76,7 @@ const RegisterPage = () => {
     }
 
     setLoading(true);
-    const { error } = await signUp(email, password, fullName, accountRole, phone || undefined);
+    const { error: signUpError } = await signUp(email, password, fullName, accountRole, phone || undefined, subscriptionTier);
     
     // Activate cooldown
     setCooldown(true);
@@ -65,8 +84,8 @@ const RegisterPage = () => {
 
     setLoading(false);
 
-    if (error) {
-      setError(error);
+    if (signUpError) {
+      setError(signUpError);
     } else {
       setSuccess('Đăng ký thành công! Chào mừng bạn đến với HomeSpot.');
       setTimeout(() => navigate('/'), 2000);
@@ -75,13 +94,13 @@ const RegisterPage = () => {
 
   const handleGoogleLogin = async () => {
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
+      const { error: googleError } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: window.location.origin,
         },
       });
-      if (error) throw error;
+      if (googleError) throw googleError;
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Lỗi đăng nhập Google');
     }
@@ -210,7 +229,7 @@ const RegisterPage = () => {
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 required
-                className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-700/10 transition-all"
+                className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-700/10 transition-all font-medium"
               />
             </div>
 
@@ -223,7 +242,7 @@ const RegisterPage = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-700/10 transition-all"
+                className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-700/10 transition-all font-medium"
               />
             </div>
 
@@ -235,7 +254,7 @@ const RegisterPage = () => {
                 placeholder="0901234567"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-700/10 transition-all"
+                className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-700/10 transition-all font-medium"
               />
             </div>
 
@@ -251,7 +270,7 @@ const RegisterPage = () => {
                   <button
                     key={opt.value}
                     type="button"
-                    onClick={() => setAccountRole(opt.value)}
+                    onClick={() => handleRoleChange(opt.value)}
                     className={`py-2.5 rounded-lg text-sm font-semibold cursor-pointer transition-all ${
                       accountRole === opt.value
                         ? 'bg-[#0f9b9b] text-white'
@@ -264,6 +283,44 @@ const RegisterPage = () => {
               </div>
             </div>
 
+            {/* Subscription Tiers */}
+            {(accountRole === 'landlord' || accountRole === 'broker') && (
+              <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="space-y-3">
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Chọn gói phù hợp</label>
+                <div className="grid grid-cols-1 gap-2.5">
+                  {SUBSCRIPTION_PLANS[accountRole].map((plan) => (
+                    <button
+                      key={plan.value}
+                      type="button"
+                      onClick={() => setSubscriptionTier(plan.value)}
+                      className={`relative p-4 rounded-xl border-2 text-left transition-all ${
+                        subscriptionTier === plan.value 
+                          ? 'border-indigo-600 bg-indigo-50/50' 
+                          : 'border-slate-100 bg-white hover:border-slate-200'
+                      }`}
+                    >
+                      <div className="flex justify-between items-start mb-1">
+                        <p className={`text-sm font-black ${subscriptionTier === plan.value ? 'text-indigo-700' : 'text-slate-900'}`}>{plan.label}</p>
+                        <p className="text-xs font-black text-indigo-600">{plan.price}</p>
+                      </div>
+                      <div className="flex flex-wrap gap-x-3 gap-y-1">
+                        {plan.features.map((f, i) => (
+                          <span key={i} className="text-[10px] font-bold text-slate-400 tracking-tight flex items-center gap-1">
+                            <span className="text-indigo-500">✓</span> {f}
+                          </span>
+                        ))}
+                      </div>
+                      {subscriptionTier === plan.value && (
+                        <div className="absolute -top-2 -right-2 bg-indigo-600 text-white p-1 rounded-full shadow-lg">
+                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                        </div>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
             {/* Password */}
             <div>
               <label className="block text-sm font-semibold text-slate-700 mb-1.5">Mật khẩu</label>
@@ -274,7 +331,7 @@ const RegisterPage = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-700/10 transition-all pr-12"
+                  className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-700/10 transition-all pr-12 font-medium"
                 />
                 <button
                   type="button"
@@ -305,7 +362,7 @@ const RegisterPage = () => {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
-                  className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-700/10 transition-all pr-12"
+                  className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-700/10 transition-all pr-12 font-medium"
                 />
                 <button
                   type="button"
@@ -340,7 +397,7 @@ const RegisterPage = () => {
                   </svg>
                 )}
               </div>
-              <span className="text-xs text-slate-500 leading-relaxed">
+              <span className="text-xs text-slate-500 leading-relaxed font-medium">
                 Tôi đồng ý nhận thông tin mới nhất về tin tức, 
                 chương trình khuyến mãi và cập nhật từ HomeSpot qua email.
               </span>
@@ -359,9 +416,9 @@ const RegisterPage = () => {
           </form>
 
           {/* Footer link */}
-          <p className="text-center text-sm text-slate-500 mt-6">
+          <p className="text-center text-sm text-slate-500 mt-6 font-medium">
             Đã có tài khoản?{' '}
-            <Link to="/login" className="text-[#0b7272] font-semibold hover:text-[#0f9b9b] underline underline-offset-2 transition-colors">
+            <Link to="/login" className="text-[#0b7272] font-bold hover:text-[#0f9b9b] underline underline-offset-2 transition-colors">
               Đăng nhập
             </Link>
           </p>
@@ -372,4 +429,3 @@ const RegisterPage = () => {
 };
 
 export default RegisterPage;
-

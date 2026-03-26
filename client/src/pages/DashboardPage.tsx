@@ -1,13 +1,13 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Building2, LayoutGrid, PieChart, RefreshCw, AlertCircle
+  Building2, LayoutGrid, PieChart, RefreshCw, AlertCircle, FileText
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../lib/api';
 import type { 
   BuildingWithRooms, Room, RoomStatus, DashboardStats, 
-  Amenity, CreateBuildingInput, CreateRoomInput 
+  Amenity, CreateBuildingInput, CreateRoomInput, ContractWithRoom 
 } from '../../../shared/types';
 
 // Components
@@ -16,8 +16,10 @@ import { FloorPlan } from '../components/dashboard/FloorPlan';
 import { BuildingList } from '../components/dashboard/BuildingList';
 import { RoomModal } from '../components/dashboard/RoomModal';
 import { BuildingModal } from '../components/dashboard/BuildingModal';
+import { ContractList } from '../components/dashboard/ContractList';
+import { ContractModal } from '../components/dashboard/ContractModal';
 
-type DashboardTab = 'overview' | 'floors' | 'buildings';
+type DashboardTab = 'overview' | 'floors' | 'buildings' | 'contracts';
 
 export default function DashboardPage() {
   const { canManageBuildings } = useAuth();
@@ -28,14 +30,18 @@ export default function DashboardPage() {
   // Data
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [buildings, setBuildings] = useState<BuildingWithRooms[]>([]);
+  const [contracts, setContracts] = useState<ContractWithRoom[]>([]);
   const [amenities, setAmenities] = useState<Amenity[]>([]);
   const [selectedBuildingId, setSelectedBuildingId] = useState<string | null>(null);
 
   // Modals state
   const [isRoomModalOpen, setIsRoomModalOpen] = useState(false);
   const [isBuildingModalOpen, setIsBuildingModalOpen] = useState(false);
+  const [isContractModalOpen, setIsContractModalOpen] = useState(false);
   const [editingRoom, setEditingRoom] = useState<Room | undefined>(undefined);
   const [editingBuilding, setEditingBuilding] = useState<BuildingWithRooms | undefined>(undefined);
+  const [editingContract, setEditingContract] = useState<ContractWithRoom | undefined>(undefined);
+  const [selectedRoomForContract, setSelectedRoomForContract] = useState<Room | undefined>(undefined);
 
   useEffect(() => {
     if (canManageBuildings) {
@@ -47,10 +53,11 @@ export default function DashboardPage() {
     setLoading(true);
     setError(null);
     try {
-      const [statsRes, buildingsRes, amenitiesRes] = await Promise.all([
+      const [statsRes, buildingsRes, contractsRes, amenitiesRes] = await Promise.all([
         api.get<DashboardStats>('/api/dashboard/stats'),
         api.get<{ buildings: BuildingWithRooms[] }>('/api/buildings'),
-        api.get<{ amenities: Amenity[] }>('/api/search/amenities') // check if this exists or move to rooms
+        api.get<{ contracts: ContractWithRoom[] }>('/api/contracts'),
+        api.get<{ amenities: Amenity[] }>('/api/search/amenities') 
       ]);
 
       if (statsRes.data) setStats(statsRes.data);
@@ -59,6 +66,9 @@ export default function DashboardPage() {
         if (buildingsRes.data.buildings.length > 0 && !selectedBuildingId) {
           setSelectedBuildingId(buildingsRes.data.buildings[0].id);
         }
+      }
+      if (contractsRes.data) {
+        setContracts(contractsRes.data.contracts);
       }
       
       // Load amenities (needed for room modal)
@@ -136,6 +146,29 @@ export default function DashboardPage() {
     else loadInitialData();
   };
 
+  // Actions: Contract
+  const handleSaveContract = async (data: any) => {
+    try {
+      if (editingContract) {
+        await api.put(`/api/contracts/${editingContract.id}`, data);
+      } else {
+        await api.post('/api/contracts', data);
+      }
+      setIsContractModalOpen(false);
+      setEditingContract(undefined);
+      setSelectedRoomForContract(undefined);
+      loadInitialData();
+    } catch (err) {
+      alert('Lỗi khi lưu hợp đồng');
+    }
+  };
+
+  const handleDeleteContract = async (id: string) => {
+    if (!confirm('Xác nhận kết thúc hợp đồng này? Phòng sẽ được chuyển sang trạng thái trống.')) return;
+    await api.delete(`/api/contracts/${id}`);
+    loadInitialData();
+  };
+
   if (!canManageBuildings) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
@@ -171,7 +204,7 @@ export default function DashboardPage() {
           </div>
 
           <div className="flex items-center gap-2 bg-white p-2 rounded-3xl shadow-sm border border-slate-100">
-            {(['overview', 'floors', 'buildings'] as const).map(tab => (
+            {(['overview', 'floors', 'buildings', 'contracts'] as const).map(tab => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -182,7 +215,8 @@ export default function DashboardPage() {
                 {tab === 'overview' && <PieChart className="w-4 h-4" />}
                 {tab === 'floors' && <LayoutGrid className="w-4 h-4" />}
                 {tab === 'buildings' && <Building2 className="w-4 h-4" />}
-                {tab === 'overview' ? 'Tổng quan' : tab === 'floors' ? 'Sơ đồ phòng' : 'Tòa nhà'}
+                {tab === 'contracts' && <FileText className="w-4 h-4" />}
+                {tab === 'overview' ? 'Tổng quan' : tab === 'floors' ? 'Sơ đồ phòng' : tab === 'buildings' ? 'Tòa nhà' : 'Hợp đồng'}
               </button>
             ))}
           </div>
@@ -237,6 +271,7 @@ export default function DashboardPage() {
                         onAddRoom={() => { setEditingRoom(undefined); setIsRoomModalOpen(true); }}
                         onEditRoom={(room) => { setEditingRoom(room); setIsRoomModalOpen(true); }}
                         onDeleteRoom={handleDeleteRoom}
+                        onAddContract={(room) => { setSelectedRoomForContract(room); setIsContractModalOpen(true); }}
                       />
                     ) : (
                       <div className="py-20 text-center font-bold text-slate-400">Vui lòng chọn hoặc thêm tòa nhà</div>
@@ -259,6 +294,14 @@ export default function DashboardPage() {
                 onAdd={() => { setEditingBuilding(undefined); setIsBuildingModalOpen(true); }}
                 onEdit={(b) => { setEditingBuilding(b); setIsBuildingModalOpen(true); }}
                 onDelete={handleDeleteBuilding}
+              />
+            )}
+
+            {activeTab === 'contracts' && (
+              <ContractList 
+                contracts={contracts}
+                onEdit={(c) => { setEditingContract(c); setIsContractModalOpen(true); }}
+                onDelete={handleDeleteContract}
               />
             )}
           </motion.div>
@@ -287,6 +330,14 @@ export default function DashboardPage() {
         onClose={() => setIsBuildingModalOpen(false)}
         onSave={handleSaveBuilding}
         initialData={editingBuilding}
+      />
+
+      <ContractModal 
+        isOpen={isContractModalOpen}
+        onClose={() => setIsContractModalOpen(false)}
+        onSave={handleSaveContract}
+        initialData={editingContract}
+        room={selectedRoomForContract || (editingContract?.room as any)}
       />
 
     </div>

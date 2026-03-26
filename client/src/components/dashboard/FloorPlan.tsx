@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { 
-  Users, LayoutGrid, Trash2, Edit3, Wrench, CheckCircle 
+  Users, LayoutGrid, Trash2, Edit3, Wrench, CheckCircle, ExternalLink, FilePlus
 } from 'lucide-react';
 import type { Room, RoomStatus, BuildingWithRooms } from '../../../../shared/types';
 import { ROOM_STATUS_LABELS } from '../../../../shared/types';
@@ -33,11 +34,13 @@ interface FloorPlanProps {
   onDeleteRoom: (roomId: string) => void;
   onEditRoom: (room: Room) => void;
   onAddRoom: () => void;
+  onAddContract: (room: Room) => void;
 }
 
 export const FloorPlan = ({ 
-  building, onStatusChange, onDeleteRoom, onEditRoom, onAddRoom 
+  building, onStatusChange, onDeleteRoom, onEditRoom, onAddRoom, onAddContract 
 }: FloorPlanProps) => {
+  const navigate = useNavigate();
   const [filter, setFilter] = useState<RoomStatus | 'all'>('all');
 
   const rooms = building.rooms || [];
@@ -135,6 +138,30 @@ export const FloorPlan = ({
                           
                           {/* Corner actions for desktop hover */}
                           <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col gap-1 translate-x-2 group-hover:translate-x-0 transition-transform">
+                            {room.status === 'available' && (
+                              <>
+                                <button 
+                                  onClick={(e) => { 
+                                    e.stopPropagation(); 
+                                    navigate(`/create-listing?room_id=${room.id}&building_id=${building.id}`); 
+                                  }} 
+                                  title="Đăng tin cho thuê"
+                                  className="p-1 text-emerald-600 hover:text-emerald-700 bg-white rounded-lg shadow-sm"
+                                >
+                                  <ExternalLink className="w-3 h-3" />
+                                </button>
+                                <button 
+                                  onClick={(e) => { 
+                                    e.stopPropagation(); 
+                                    onAddContract(room);
+                                  }} 
+                                  title="Lập hợp đồng"
+                                  className="p-1 text-indigo-600 hover:text-indigo-700 bg-white rounded-lg shadow-sm"
+                                >
+                                  <FilePlus className="w-3 h-3" />
+                                </button>
+                              </>
+                            )}
                             <button onClick={(e) => { e.stopPropagation(); onEditRoom(room); }} className="p-1 text-slate-400 hover:text-indigo-600 bg-white rounded-lg shadow-sm">
                               <Edit3 className="w-3 h-3" />
                             </button>

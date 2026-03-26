@@ -30,9 +30,10 @@ interface AuthContextType {
   canPost: boolean;
   canManageBuildings: boolean;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
-  signUp: (email: string, password: string, fullName: string, role?: UserRole, phone?: string) => Promise<{ error: string | null }>;
+  signUp: (email: string, password: string, fullName: string, role?: UserRole, phone?: string, subscription?: SubscriptionTier) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
   updateProfile: (data: Partial<Profile>) => Promise<{ error: string | null }>;
+  upgradeAccount: (role: UserRole, tier: SubscriptionTier) => Promise<{ success?: boolean; error?: string }>;
   refreshProfile: () => Promise<void>;
 }
 
@@ -127,11 +128,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     password: string,
     fullName: string,
     role: UserRole = 'user',
-    phone?: string
+    phone?: string,
+    subscription: SubscriptionTier = 'free'
   ) => {
     const { data, error } = await api.post<{ user: User; session: Session }>(
       '/api/auth/register',
-      { email, password, fullName, role, phone }
+      { email, password, fullName, role, phone, subscription }
     );
 
     if (error || !data) {
@@ -169,6 +171,20 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return { error: null };
   };
 
+  const upgradeAccount = async (newRole: UserRole, newTier: SubscriptionTier): Promise<{ success?: boolean; error?: string }> => {
+    const { error } = await api.put<{ profile: Profile }>(
+      '/api/auth/upgrade',
+      { role: newRole, subscription: newTier }
+    );
+
+    if (error) {
+      return { error };
+    }
+
+    await refreshProfile();
+    return { success: true };
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -186,6 +202,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         signUp,
         signOut,
         updateProfile,
+        upgradeAccount,
         refreshProfile,
       }}
     >

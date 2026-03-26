@@ -297,6 +297,7 @@ router.put('/profile', authenticate, async (req: AuthRequest, res: Response) => 
   if (full_name !== undefined) updates.full_name = full_name;
   if (phone !== undefined) updates.phone = phone;
   if (avatar_url !== undefined) updates.avatar_url = avatar_url;
+  if (req.body.dob !== undefined) updates.dob = req.body.dob;
 
   const { data, error } = await getSupabase()
     .from('profiles')
@@ -310,7 +311,49 @@ router.put('/profile', authenticate, async (req: AuthRequest, res: Response) => 
     return;
   }
 
+  await logAudit('PROFILE_UPDATE', req.user.id, req, { updates });
+
   res.json({ profile: data });
+});
+
+// POST /api/auth/change-password
+router.post('/change-password', authenticate, async (req: AuthRequest, res: Response) => {
+  const { currentPassword, password } = req.body;
+  
+  if (!req.user) { 
+    res.status(401).json({ error: 'Chưa xác thực' }); 
+    return; 
+  }
+
+  // Verify current password first
+  if (!currentPassword) {
+    res.status(400).json({ error: 'Vui lòng nhập mật khẩu hiện tại' });
+    return;
+  }
+
+  const { error: verifyError } = await getSupabase().auth.signInWithPassword({
+    email: req.user.email!,
+    password: currentPassword,
+  });
+
+  if (verifyError) {
+    res.status(401).json({ error: 'Mật khẩu hiện tại không chính xác' });
+    return;
+  }
+
+  if (!password || (password && password.length < 6)) {
+    res.status(400).json({ error: 'Mật khẩu mới phải từ 6 ký tự' });
+    return;
+  }
+
+  const { error } = await getSupabase().auth.updateUser({ password });
+  if (error) { 
+    res.status(400).json({ error: error.message }); 
+    return; 
+  }
+
+  await logAudit('PASSWORD_CHANGE', req.user.id, req, {});
+  res.json({ message: 'Đổi mật khẩu thành công' });
 });
 
 // GET /api/auth/users — Admin: list all users
@@ -369,6 +412,42 @@ router.put('/users/:id/verify', authenticate, requireAdmin, async (req: AuthRequ
     res.status(400).json({ error: error.message });
     return;
   }
+
+  res.json({ profile: data });
+});
+
+// PUT /api/auth/upgrade — User: upgrade own role/subscription
+router.put('/upgrade', authenticate, async (req: AuthRequest, res: Response) => {
+  const { role, subscription } = req.body;
+
+  if (!req.user) {
+    res.status(401).json({ error: 'Chưa xác thực' });
+    return;
+  }
+
+  // Basic validation
+  if (role && !['user', 'landlord', 'broker'].includes(role)) {
+    res.status(400).json({ error: 'Role không hợp lệ' });
+    return;
+  }
+
+  const updates: Record<string, unknown> = {};
+  if (role) updates.role = role;
+  if (subscription) updates.subscription = subscription;
+
+  const { data, error } = await getSupabase()
+    .from('profiles')
+    .update(updates)
+    .eq('id', req.user.id)
+    .select()
+    .single();
+
+  if (error) {
+    res.status(400).json({ error: error.message });
+    return;
+  }
+
+  await logAudit('UPGRADE_ACCOUNT', req.user.id, req, { role, subscription });
 
   res.json({ profile: data });
 });

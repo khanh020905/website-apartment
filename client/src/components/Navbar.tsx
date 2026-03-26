@@ -1,14 +1,28 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Bell } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { api } from '../lib/api';
 
 const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, loading, signOut, role, canPost, isAdmin } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [notificationCount, setNotificationCount] = useState(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (user) {
+      api.get<{ listings: any[] }>('/api/listings/my').then(({ data }) => {
+        if (data && data.listings) {
+          const attention = data.listings.filter(l => l.status === 'pending' || l.status === 'rejected').length;
+          setNotificationCount(attention);
+        }
+      });
+    }
+  }, [user]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -64,6 +78,9 @@ const Navbar = () => {
             </Link>
           </>
         )}
+        <Link to="/pricing" className={`text-sm font-medium transition-colors ${location.pathname === '/pricing' ? 'text-white' : 'text-white/70 hover:text-white'}`}>
+          Gói dịch vụ
+        </Link>
         {isAdmin && (
           <Link to="/admin" className={`text-sm font-medium transition-colors ${location.pathname === '/admin' ? 'text-white' : 'text-white/70 hover:text-white'}`}>
             Quản trị
@@ -116,6 +133,17 @@ const Navbar = () => {
           Liên hệ
         </Link>
 
+        {user && (
+          <Link to="/my-listings" className="relative p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-all">
+            <Bell className="w-5 h-5" />
+            {notificationCount > 0 && (
+              <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-orange-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-[#0f9b9b]">
+                {notificationCount}
+              </span>
+            )}
+          </Link>
+        )}
+
         {loading ? null : user ? (
           <div className="relative" ref={dropdownRef}>
             <button
@@ -148,6 +176,13 @@ const Navbar = () => {
                   </div>
 
                   <div className="py-1">
+                    <Link to="/profile" onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
+                      <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                      </svg>
+                      Hồ sơ cá nhân
+                    </Link>
                     {canPost && (
                       <>
                         <Link to="/dashboard" onClick={() => setDropdownOpen(false)}
@@ -188,6 +223,13 @@ const Navbar = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                       </svg>
                       Đăng tin cho thuê
+                    </Link>
+                    <Link to="/pricing" onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-teal-600 font-bold hover:bg-teal-50 transition-colors">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      Nâng cấp tài khoản
                     </Link>
                   </div>
 
@@ -234,4 +276,3 @@ const Navbar = () => {
 };
 
 export default Navbar;
-
