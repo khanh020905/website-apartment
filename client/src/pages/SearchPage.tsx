@@ -191,52 +191,65 @@ export default function SearchPage() {
 	};
 
 	return (
-		<div className="flex-1 flex flex-col bg-slate-100/30 overflow-hidden">
-			{/* Top Search Banner */}
-			<div className="shrink-0hite border-b border-slate-200">
-				<div className="max-w-7xl mx-auto px-6 py-6 lg:py-8">
+		<div className="flex-1 flex flex-col bg-brand-bg overflow-hidden">
+			{/* Top Hero Banner */}
+			<div className="shrink-0 bg-linear-to-r from-brand-ink to-brand-primary relative pt-10 -mt-5 pb-8 px-6 overflow-hidden">
+				{/* Decorative shapes */}
+				<div className="absolute top-0 right-0 w-125 h-125 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
+				<div className="absolute bottom-0 left-0 w-64 h-64 bg-brand-light/20 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2" />
+
+				<div className="max-w-7xl mx-auto relative z-10 pt-4">
+					<div className="mb-8 text-center lg:text-left">
+						<h1 className="text-3xl md:text-4xl font-black text-white tracking-wide mb-2 drop-shadow-sm">
+							Tìm kiếm không gian hoàn hảo
+						</h1>
+						<p className="text-brand-light font-bold text-sm md:text-base tracking-wide">
+							Hàng ngàn phòng trọ, căn hộ và nhà nguyên căn chính chủ
+						</p>
+					</div>
+
 					<div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center justify-between">
 						<div className="flex-1 relative group">
-							<div className="absolute inset-y-0 left-5 flex items-center pointer-events-none transition-colors group-focus-within:text-emerald-600">
-								<Search className="w-5 h-5" />
+							<div className="absolute inset-y-0 left-6 flex items-center pointer-events-none transition-colors group-focus-within:text-brand-primary text-slate-400">
+								<Search className="w-6 h-6" />
 							</div>
 							<input
 								type="text"
-								placeholder="Tìm kiếm theo tiêu đề, địa chỉ, khu vực..."
+								placeholder="Nhập tiêu đề, địa chỉ, hoặc khu vực..."
 								value={keyword}
 								onChange={(e) => {
 									setKeyword(e.target.value);
 									setPage(1);
 								}}
-								className="w-full h-16 pl-14 pr-6 bg-slate-50 border-2 border-slate-100 rounded-[28px] font-bold text-slate-800 placeholder-slate-400 focus:bg-white focus:border-emerald-600 focus:ring-4 focus:ring-emerald-700/5 transition-all outline-none"
+								className="w-full h-16 pl-16 pr-6 bg-white rounded-4xl font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-brand-light/30 shadow-2xl transition-all text-base lg:text-lg"
 							/>
 						</div>
 
 						<div className="flex items-center gap-3">
 							<button
 								onClick={() => setShowFilters(!showFilters)}
-								className={`h-16 px-8 rounded-[28px] font-black uppercase tracking-widest text-xs flex items-center gap-3 transition-all cursor-pointer ${
+								className={`h-16 px-8 rounded-4xl font-black uppercase tracking-widest text-[11px] lg:text-xs flex items-center gap-3 transition-all cursor-pointer ${
 									showFilters ?
-										"bg-emerald-700 text-white shadow-xl shadow-emerald-900/30 rotate-0"
-									:	"bg-white border-2 border-slate-100 text-slate-700 hover:border-emerald-300"
+										"bg-white text-brand-ink shadow-xl"
+									:	"bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20"
 								}`}
 							>
-								<Sliders className="w-4 h-4" />
-								Bộ lọc nâng cao
+								<Sliders className="w-5 h-5" />
+								<span className="hidden sm:inline">Bộ lọc</span> nâng cao
 							</button>
 
-							<div className="p-1.5 bg-slate-100/50 border border-slate-200 rounded-3xl hidden md:flex items-center gap-1">
+							<div className="p-1.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-4xl hidden md:flex items-center gap-1 h-16">
 								<button
 									onClick={() => setViewMode("grid")}
-									className={`p-3 rounded-[18px] transition-all cursor-pointer ${viewMode === "grid" ? "bg-white text-slate-900 shadow-sm" : "text-slate-400 hover:text-slate-600"}`}
+									className={`p-3 rounded-3xl transition-all cursor-pointer ${viewMode === "grid" ? "bg-white text-brand-primary shadow-md" : "text-white/70 hover:text-white hover:bg-white/10"}`}
 								>
-									<LayoutGrid className="w-5 h-5" />
+									<LayoutGrid className="w-6 h-6" />
 								</button>
 								<button
 									onClick={() => setViewMode("list")}
-									className={`p-3 rounded-[18px] transition-all cursor-pointer ${viewMode === "list" ? "bg-white text-slate-900 shadow-sm" : "text-slate-400 hover:text-slate-600"}`}
+									className={`p-3 rounded-3xl transition-all cursor-pointer ${viewMode === "list" ? "bg-white text-brand-primary shadow-md" : "text-white/70 hover:text-white hover:bg-white/10"}`}
 								>
-									<List className="w-5 h-5" />
+									<List className="w-6 h-6" />
 								</button>
 							</div>
 						</div>
@@ -276,7 +289,7 @@ export default function SearchPage() {
 									<label className="text-sm font-bold text-slate-700 ml-1">
 										Giá thuê (triệu/tháng)
 									</label>
-									<span className="text-sm font-black text-emerald-600">
+									<span className="text-sm font-black text-brand-primary">
 										{formatPrice(priceValues[0])} — {formatPrice(priceValues[1])}
 									</span>
 								</div>
@@ -300,7 +313,7 @@ export default function SearchPage() {
 													style={{
 														background: getTrackBackground({
 															values: priceValues,
-															colors: ["#f1f5f9", "#10b981", "#f1f5f9"],
+															colors: ["#f1f5f9", "var(--color-brand-primary)", "#f1f5f9"],
 															min: PRICE_RANGE.MIN,
 															max: PRICE_RANGE.MAX,
 														}),
@@ -314,7 +327,7 @@ export default function SearchPage() {
 											<div
 												{...props}
 												style={{ ...props.style }}
-												className="w-6 h-6 bg-white border-4 border-emerald-600 rounded-full shadow-lg cursor-pointer outline-none active:scale-110 hover:scale-105 transition-transform"
+												className="w-6 h-6 bg-white border-4 border-brand-primary rounded-full shadow-lg cursor-pointer outline-none active:scale-110 hover:scale-105 transition-transform"
 											/>
 										)}
 									/>
@@ -328,7 +341,7 @@ export default function SearchPage() {
 							>
 								<div className="flex items-center justify-between">
 									<label className="text-sm font-bold text-slate-700 ml-1">Diện tích (m²)</label>
-									<span className="text-sm font-black text-slate-700">
+									<span className="text-sm font-black text-brand-primary">
 										{areaValues[0]} — {areaValues[1] === AREA_RANGE.MAX ? "200+" : areaValues[1]} m²
 									</span>
 								</div>
@@ -352,7 +365,7 @@ export default function SearchPage() {
 													style={{
 														background: getTrackBackground({
 															values: areaValues,
-															colors: ["#f1f5f9", "#4f46e5", "#f1f5f9"],
+															colors: ["#f1f5f9", "var(--color-brand-primary)", "#f1f5f9"],
 															min: AREA_RANGE.MIN,
 															max: AREA_RANGE.MAX,
 														}),
@@ -366,7 +379,7 @@ export default function SearchPage() {
 											<div
 												{...props}
 												style={{ ...props.style }}
-												className="w-6 h-6 bg-white border-4 border-indigo-600 rounded-full shadow-lg cursor-pointer outline-none active:scale-110 hover:scale-105 transition-transform"
+												className="w-6 h-6 bg-white border-4 border-brand-primary rounded-full shadow-lg cursor-pointer outline-none active:scale-110 hover:scale-105 transition-transform"
 											/>
 										)}
 									/>
@@ -378,7 +391,7 @@ export default function SearchPage() {
 								<label className="text-sm font-bold text-slate-700 ml-1">Khu vực / Vị trí</label>
 								<div className="space-y-3">
 									<div className="relative group">
-										<MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 group-focus-within:text-emerald-600 transition-colors" />
+										<MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 group-focus-within:text-brand-primary transition-colors" />
 										<select
 											value={province}
 											onChange={(e) => {
@@ -386,7 +399,7 @@ export default function SearchPage() {
 												setDistrict("");
 												setWard("");
 											}}
-											className="w-full h-14 pl-12 pr-6 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-sm appearance-none outline-none focus:bg-white focus:border-emerald-600 transition-all"
+											className="w-full h-14 pl-12 pr-6 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-sm appearance-none outline-none focus:bg-white focus:border-brand-primary transition-all"
 										>
 											<option value="">Chọn Tỉnh / Thành phố</option>
 											{provinces.map((p) => (
@@ -402,7 +415,7 @@ export default function SearchPage() {
 									</div>
 
 									<div className="relative group">
-										<MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
+										<MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 group-focus-within:text-brand-primary transition-colors" />
 										<select
 											disabled={!province}
 											value={district}
@@ -410,7 +423,7 @@ export default function SearchPage() {
 												setDistrict(e.target.value);
 												setWard("");
 											}}
-											className="w-full h-14 pl-12 pr-6 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-sm appearance-none outline-none focus:bg-white focus:border-emerald-600 transition-all disabled:opacity-50"
+											className="w-full h-14 pl-12 pr-6 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-sm appearance-none outline-none focus:bg-white focus:border-brand-primary transition-all disabled:opacity-50"
 										>
 											<option value="">Chọn Quận / Huyện</option>
 											{districts.map((d) => (
@@ -426,12 +439,12 @@ export default function SearchPage() {
 									</div>
 
 									<div className="relative group">
-										<MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
+										<MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300 group-focus-within:text-brand-primary transition-colors" />
 										<select
 											disabled={!district}
 											value={ward}
 											onChange={(e) => setWard(e.target.value)}
-											className="w-full h-14 pl-12 pr-6 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-sm appearance-none outline-none focus:bg-white focus:border-emerald-600 transition-all disabled:opacity-50"
+											className="w-full h-14 pl-12 pr-6 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-sm appearance-none outline-none focus:bg-white focus:border-brand-primary transition-all disabled:opacity-50"
 										>
 											<option value="">Chọn Phường / Xã</option>
 											{wards.map((w) => (
@@ -469,7 +482,7 @@ export default function SearchPage() {
 														(n === "4+" && bedrooms === "4") ||
 														(bedrooms === n && n !== "0" && n !== "4+")
 													) ?
-														"bg-emerald-800 text-white shadow-lg shadow-emerald-900/20"
+														"bg-brand-ink text-white shadow-lg shadow-brand-ink/20"
 													:	"bg-slate-50 text-slate-600 hover:bg-slate-100 border border-transparent"
 												}`}
 											>
@@ -487,7 +500,7 @@ export default function SearchPage() {
 												onClick={() => setBathrooms(n === "3+" ? "3" : n)}
 												className={`flex-1 min-w-12 h-12 rounded-xl text-sm font-bold transition-all cursor-pointer ${
 													(n === "3+" && bathrooms === "3") || (bathrooms === n && n !== "3+") ?
-														"bg-emerald-800 text-white shadow-lg shadow-emerald-900/20"
+														"bg-brand-ink text-white shadow-lg shadow-brand-ink/20"
 													:	"bg-slate-50 text-slate-600 hover:bg-slate-100 border border-transparent"
 												}`}
 											>
@@ -508,14 +521,14 @@ export default function SearchPage() {
 											onClick={() => togglePropertyType(pt.value)}
 											className={`flex items-center gap-3 p-4 rounded-2xl border-2 transition-all cursor-pointer ${
 												selectedPropertyTypes.includes(pt.value) ?
-													"bg-emerald-50 border-emerald-600 text-emerald-800 shadow-lg shadow-emerald-900/5"
+													"bg-brand-primary/10 border-brand-primary text-brand-ink shadow-lg shadow-brand-primary/5"
 												:	"bg-slate-50 border-slate-100 text-slate-500 hover:border-slate-200"
 											}`}
 										>
 											<div
 												className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${
 													selectedPropertyTypes.includes(pt.value) ?
-														"bg-emerald-600 border-emerald-600"
+														"bg-brand-primary border-brand-primary"
 													:	"border-slate-200 bg-white"
 												}`}
 											>
@@ -539,7 +552,7 @@ export default function SearchPage() {
 											onClick={() => setFurniture(f === furniture ? "" : f)}
 											className={`px-6 py-3 rounded-2xl flex items-center gap-2 border-2 text-xs font-black uppercase tracking-widest transition-all cursor-pointer ${
 												furniture === f ?
-													"bg-indigo-600 border-indigo-600 text-white shadow-xl shadow-indigo-900/20"
+													"bg-brand-primary border-brand-primary text-white shadow-xl shadow-brand-primary/20"
 												:	"bg-slate-50 border-slate-100 text-slate-400 hover:border-slate-200"
 											}`}
 										>
@@ -591,8 +604,8 @@ export default function SearchPage() {
 											onClick={() => toggleAmenity(am.id)}
 											className={`px-4 py-2.5 rounded-2xl border-2 text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer flex items-center gap-2 ${
 												selectedAmenities.includes(am.id) ?
-													"bg-rose-50 border-rose-300 text-rose-700 shadow-md"
-												:	"bg-slate-50 border-slate-100 text-slate-400 hover:border-slate-200"
+													"bg-brand-primary/10 border-brand-primary/50 text-brand-primary shadow-md"
+												:	"bg-slate-50 border-slate-100 text-slate-400 hover:border-slate-200 hover:text-brand-primary"
 											}`}
 										>
 											<span className="opacity-60">
@@ -618,13 +631,13 @@ export default function SearchPage() {
 									onClick={() => setIsVerified(!isVerified)}
 									className={`w-full p-6 h-auto rounded-4xl border-2 flex items-center justify-between transition-all cursor-pointer ${
 										isVerified ?
-											"bg-emerald-50 border-emerald-600 shadow-lg shadow-emerald-900/5"
+											"bg-brand-primary/10 border-brand-primary shadow-lg shadow-brand-primary/5"
 										:	"bg-white border-slate-100 hover:border-slate-200"
 									}`}
 								>
 									<div className="flex items-center gap-4">
 										<div
-											className={`w-12 h-12 rounded-2xl flex items-center justify-center ${isVerified ? "bg-emerald-600 text-white" : "bg-slate-50 text-slate-400"}`}
+											className={`w-12 h-12 rounded-2xl flex items-center justify-center ${isVerified ? "bg-brand-primary text-white" : "bg-slate-50 text-slate-400"}`}
 										>
 											<Shield className={isVerified ? "fill-white/20" : ""} />
 										</div>
@@ -638,7 +651,7 @@ export default function SearchPage() {
 										</div>
 									</div>
 									<div
-										className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${isVerified ? "bg-emerald-600 border-emerald-600" : "border-slate-200"}`}
+										className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${isVerified ? "bg-brand-primary border-brand-primary" : "border-slate-200"}`}
 									>
 										{isVerified && <Check className="w-3.5 h-3.5 text-white" />}
 									</div>
@@ -684,10 +697,10 @@ export default function SearchPage() {
 										setProvince("Thành phố Hồ Chí Minh");
 										setDistrict(d);
 									}}
-									className={`px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer ${
+									className={`px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer border-2 ${
 										district === d ?
-											"bg-emerald-600 text-white shadow-lg"
-										:	"bg-white border-2 border-slate-100 text-slate-400 hover:border-emerald-200"
+											"bg-brand-primary border-brand-primary text-white shadow-lg shadow-brand-primary/20"
+										:	"bg-white border-slate-100 text-slate-400 hover:border-brand-primary/30 hover:text-brand-primary"
 									}`}
 								>
 									{d}
@@ -699,11 +712,11 @@ export default function SearchPage() {
 					{/* Header & Sort */}
 					<div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
 						<div>
-							<h2 className="text-3xl font-black text-slate-900 tracking-tighter">
+							<h2 className="text-3xl font-black text-brand-ink tracking-tighter">
 								{total} kết quả tìm thấy
 							</h2>
 							<div className="flex items-center gap-2 mt-1">
-								<div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+								<div className="w-1.5 h-1.5 rounded-full bg-brand-primary animate-pulse" />
 								<p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
 									Cập nhật theo thời gian thực
 								</p>
@@ -717,7 +730,7 @@ export default function SearchPage() {
 									onClick={() => setSortBy(s.value)}
 									className={`px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap cursor-pointer border-2 ${
 										sortBy === s.value ?
-											"bg-slate-900 border-slate-900 text-white shadow-xl"
+											"bg-brand-ink border-brand-ink text-white shadow-xl shadow-brand-ink/10"
 										:	"bg-white border-slate-100 text-slate-400 hover:border-slate-200"
 									}`}
 								>
@@ -730,7 +743,7 @@ export default function SearchPage() {
 					{/* Listings Display */}
 					{loading ?
 						<div className="py-20 flex flex-col items-center justify-center space-y-4">
-							<div className="w-12 h-12 border-4 border-slate-100 border-t-emerald-600 rounded-full animate-spin" />
+							<div className="w-12 h-12 border-4 border-slate-100 border-t-brand-primary rounded-full animate-spin" />
 							<p className="text-xs font-black text-slate-300 uppercase tracking-widest">
 								Đang tìm kiếm căn hộ...
 							</p>
@@ -740,7 +753,7 @@ export default function SearchPage() {
 							<div className="w-24 h-24 bg-white rounded-[40px] shadow-xl shadow-black/5 flex items-center justify-center mx-auto mb-8">
 								<Search className="w-10 h-10 text-slate-200" />
 							</div>
-							<h3 className="text-2xl font-black text-slate-900 mb-2 tracking-tight">
+							<h3 className="text-2xl font-black text-brand-ink mb-2 tracking-tight">
 								Rất tiếc, chưa tìm thấy kết quả phù hợp
 							</h3>
 							<p className="max-w-xs mx-auto text-slate-400 font-medium leading-relaxed mb-8">
@@ -755,7 +768,7 @@ export default function SearchPage() {
 									setKeyword("");
 									search();
 								}}
-								className="px-10 py-4 bg-emerald-600 text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-emerald-900/20 hover:bg-emerald-700 transition-all active:scale-95 cursor-pointer"
+								className="px-10 py-4 bg-brand-primary text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-brand-primary/20 hover:bg-brand-dark transition-all active:scale-95 cursor-pointer"
 							>
 								XÓA TẤT CẢ BỘ LỌC
 							</button>
@@ -775,7 +788,7 @@ export default function SearchPage() {
 								>
 									<Link
 										to={`/listings/${listing.id}`}
-										className={`block bg-white rounded-4xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 ${
+										className={`block bg-white rounded-4xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-2xl hover:shadow-brand-ink/10 hover:-translate-y-2 transition-all duration-500 ${
 											viewMode === "list" ? "flex flex-col sm:flex-row h-auto sm:h-64" : ""
 										}`}
 									>
@@ -794,7 +807,7 @@ export default function SearchPage() {
 												alt={listing.title}
 												className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
 											/>
-											<div className="absolute inset-0 bg-linear-to-t from-black/50 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity" />
+											<div className="absolute inset-0 bg-linear-to-t from-brand-ink/60 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity" />
 
 											{/* Price Badge */}
 											<div className="absolute top-4 left-4">
@@ -807,13 +820,13 @@ export default function SearchPage() {
 											<div className="absolute top-4 right-4 flex flex-col gap-2">
 												{listing.is_verified && (
 													<div
-														className="bg-emerald-600 text-white p-2 rounded-xl shadow-lg"
+														className="bg-brand-primary text-white p-2 rounded-xl shadow-lg border border-white/20"
 														title="Đã xác thực"
 													>
 														<Shield className="w-4 h-4 fill-white/20" />
 													</div>
 												)}
-												<button className="bg-white text-rose-500 p-2 rounded-xl shadow-lg hover:bg-rose-50 transition-colors">
+												<button className="bg-white/90 backdrop-blur text-brand-primary p-2 rounded-xl shadow-lg hover:bg-white transition-colors">
 													<Users className="w-4 h-4" />
 												</button>
 											</div>
@@ -822,11 +835,11 @@ export default function SearchPage() {
 										{/* Content Area */}
 										<div className="p-6 flex flex-col justify-between">
 											<div>
-												<p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-2 flex items-center gap-1.5">
-													<span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+												<p className="text-[10px] font-black text-brand-primary uppercase tracking-widest mb-2 flex items-center gap-1.5">
+													<span className="w-1.5 h-1.5 rounded-full bg-brand-light" />
 													{PROPERTY_TYPE_LABELS[listing.property_type]}
 												</p>
-												<h3 className="text-lg font-black text-slate-800 leading-tight mb-3 line-clamp-2 transition-colors group-hover:text-emerald-700">
+												<h3 className="text-lg font-black text-brand-ink leading-tight mb-3 line-clamp-2 transition-colors group-hover:text-brand-primary">
 													{listing.title}
 												</h3>
 												<div className="flex items-start gap-1.5 text-slate-400 font-bold text-xs mb-6">
@@ -879,16 +892,16 @@ export default function SearchPage() {
 									setPage((p) => p - 1);
 									window.scrollTo({ top: 0, behavior: "smooth" });
 								}}
-								className="w-14 h-14 bg-white border-2 border-slate-100 rounded-2xl flex items-center justify-center shadow-sm disabled:opacity-40 hover:border-emerald-600 transition-all cursor-pointer group"
+								className="w-14 h-14 bg-white border-2 border-slate-100 rounded-2xl flex items-center justify-center shadow-sm disabled:opacity-40 hover:border-brand-primary transition-all cursor-pointer group"
 							>
-								<ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-emerald-600 rotate-180" />
+								<ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-brand-primary rotate-180" />
 							</button>
 
 							<div className="flex items-center gap-2 px-6 py-3 bg-white border-2 border-slate-100 rounded-2xl shadow-sm">
 								<span className="text-xs font-black text-slate-300 uppercase tracking-widest">
 									Trang
 								</span>
-								<span className="text-base font-black text-slate-900">{page}</span>
+								<span className="text-base font-black text-brand-ink">{page}</span>
 								<span className="text-xs font-black text-slate-300 uppercase tracking-widest">
 									/
 								</span>
@@ -903,9 +916,9 @@ export default function SearchPage() {
 									setPage((p) => p + 1);
 									window.scrollTo({ top: 0, behavior: "smooth" });
 								}}
-								className="w-14 h-14 bg-white border-2 border-slate-100 rounded-2xl flex items-center justify-center shadow-sm disabled:opacity-40 hover:border-emerald-600 transition-all cursor-pointer group"
+								className="w-14 h-14 bg-white border-2 border-slate-100 rounded-2xl flex items-center justify-center shadow-sm disabled:opacity-40 hover:border-brand-primary transition-all cursor-pointer group"
 							>
-								<ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-emerald-600" />
+								<ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-brand-primary" />
 							</button>
 						</div>
 					)}
