@@ -2,13 +2,9 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import type { UserRole } from '../../../shared/types';
+import { supabase } from '../lib/supabase';
+import type { UserRole, SubscriptionTier } from '../../../shared/types';
 
-const ROLE_OPTIONS: { value: UserRole; label: string; desc: string; icon: string }[] = [
-  { value: 'user', label: 'Khách', desc: 'Tìm kiếm phòng trọ', icon: '🔍' },
-  { value: 'landlord', label: 'Chủ trọ', desc: 'Quản lý nhà trọ', icon: '🏠' },
-  { value: 'broker', label: 'Môi giới', desc: 'Đăng tin cho thuê', icon: '🤝' },
-];
 
 const RegisterPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -19,18 +15,43 @@ const RegisterPage = () => {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [selectedRole, setSelectedRole] = useState<UserRole>('user');
+  const [accountRole, setAccountRole] = useState<UserRole>('user');
+  const [subscriptionTier, setSubscriptionTier] = useState<SubscriptionTier>('free');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const [cooldown, setCooldown] = useState(false);
+
+  const SUBSCRIPTION_PLANS: Record<Exclude<UserRole, 'user' | 'admin'>, { value: SubscriptionTier; label: string; price: string; features: string[] }[]> = {
+    landlord: [
+      { value: 'landlord_basic', label: 'Cơ bản (Miễn phí)', price: '0đ', features: ['Quản lý 1 tòa', 'Tối đa 10 phòng', '3 tin đăng/tháng'] },
+      { value: 'landlord_pro', label: 'Chuyên nghiệp', price: '499.000đ', features: ['Không giới hạn tòa', 'Không giới hạn phòng', 'Đẩy tin ưu tiên'] }
+    ],
+    broker: [
+      { value: 'broker_basic', label: 'Cơ bản', price: '199.000đ', features: ['Quản lý 50 tin', 'CRM cơ bản', 'Hỗ trợ 24/7'] },
+      { value: 'broker_pro', label: 'Cao cấp', price: '899.000đ', features: ['Không giới hạn tin', 'CRM nâng cao', 'Phân tích thị trường'] }
+    ]
+  };
 
   const { signUp } = useAuth();
   const navigate = useNavigate();
+
+  const handleRoleChange = (role: UserRole) => {
+    setAccountRole(role);
+    if (role === 'landlord') setSubscriptionTier('landlord_basic');
+    else if (role === 'broker') setSubscriptionTier('broker_basic');
+    else setSubscriptionTier('free');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSuccess('');
+
+    if (cooldown) {
+      setError('Vui lòng đợi 30 giây trước khi thử lại.');
+      return;
+    }
 
     if (password !== confirmPassword) {
       setError('Mật khẩu xác nhận không khớp');
@@ -42,15 +63,46 @@ const RegisterPage = () => {
       return;
     }
 
+    // Special character check for Name field (from EZ)
+    const nameRegex = /^[a-zA-Z0-9\sÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵýỷỹ\s]+$/;
+    if (!nameRegex.test(fullName)) {
+      setError('Họ và tên không được chứa ký tự đặc biệt');
+      return;
+    }
+
+    if (!agreed) {
+      setError('Bạn cần đồng ý với điều khoản dịch vụ');
+      return;
+    }
+
     setLoading(true);
-    const { error } = await signUp(email, password, fullName, selectedRole, phone || undefined);
+    const { error: signUpError } = await signUp(email, password, fullName, accountRole, phone || undefined, subscriptionTier);
+    
+    // Activate cooldown
+    setCooldown(true);
+    setTimeout(() => setCooldown(false), 30000);
+
     setLoading(false);
 
-    if (error) {
-      setError(error);
+    if (signUpError) {
+      setError(signUpError);
     } else {
-      setSuccess('Đăng ký thành công! Kiểm tra email để xác nhận tài khoản.');
-      setTimeout(() => navigate('/login'), 3000);
+      setSuccess('Đăng ký thành công! Chào mừng bạn đến với HomeSpot.');
+      setTimeout(() => navigate('/'), 2000);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      const { error: googleError } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin,
+        },
+      });
+      if (googleError) throw googleError;
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Lỗi đăng nhập Google');
     }
   };
 
@@ -87,7 +139,7 @@ const RegisterPage = () => {
               <div>
                 <h4 className="text-white font-bold text-sm">Nguyễn Minh Anh</h4>
                 <p className="text-white/60 text-xs">Nhà đầu tư bất động sản</p>
-                <p className="text-emerald-400 text-xs font-medium">Hồ Chí Minh, Việt Nam</p>
+                <p className="text-cyan-200 text-xs font-medium">Hồ Chí Minh, Việt Nam</p>
               </div>
             </div>
           </div>
@@ -136,7 +188,7 @@ const RegisterPage = () => {
 
           {/* Success message */}
           {success && (
-            <div className="mb-4 px-4 py-3 bg-emerald-50 border border-emerald-200 rounded-xl text-sm text-emerald-700 flex items-center gap-2">
+            <div className="mb-4 px-4 py-3 bg-cyan-50 border border-cyan-200 rounded-xl text-sm text-[#0b7272] flex items-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
               </svg>
@@ -145,7 +197,11 @@ const RegisterPage = () => {
           )}
 
           {/* Google Login */}
-          <button className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all mb-6">
+          <button 
+            type="button"
+            onClick={handleGoogleLogin}
+            className="w-full flex items-center justify-center gap-3 px-4 py-3 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-all mb-6 cursor-pointer"
+          >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" />
               <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
@@ -173,7 +229,7 @@ const RegisterPage = () => {
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 required
-                className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-700/10 transition-all"
+                className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-700/10 transition-all font-medium"
               />
             </div>
 
@@ -186,7 +242,7 @@ const RegisterPage = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-700/10 transition-all"
+                className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-700/10 transition-all font-medium"
               />
             </div>
 
@@ -198,34 +254,72 @@ const RegisterPage = () => {
                 placeholder="0901234567"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-700/10 transition-all"
+                className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-700/10 transition-all font-medium"
               />
             </div>
 
-            {/* Role Selection */}
+            {/* Account role */}
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">Bạn là</label>
+              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Loại tài khoản</label>
               <div className="grid grid-cols-3 gap-2">
-                {ROLE_OPTIONS.map((opt) => (
+                {[
+                  { value: 'user' as const, label: 'Khách' },
+                  { value: 'landlord' as const, label: 'Chủ trọ' },
+                  { value: 'broker' as const, label: 'Môi giới' },
+                ].map((opt) => (
                   <button
                     key={opt.value}
                     type="button"
-                    onClick={() => setSelectedRole(opt.value)}
-                    className={`flex flex-col items-center gap-1 p-3 rounded-xl border-2 transition-all text-center cursor-pointer ${
-                      selectedRole === opt.value
-                        ? 'border-emerald-600 bg-emerald-50 shadow-sm'
-                        : 'border-slate-200 hover:border-slate-300'
+                    onClick={() => handleRoleChange(opt.value)}
+                    className={`py-2.5 rounded-lg text-sm font-semibold cursor-pointer transition-all ${
+                      accountRole === opt.value
+                        ? 'bg-[#0f9b9b] text-white'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                     }`}
                   >
-                    <span className="text-xl">{opt.icon}</span>
-                    <span className={`text-xs font-bold ${selectedRole === opt.value ? 'text-emerald-700' : 'text-slate-700'}`}>
-                      {opt.label}
-                    </span>
-                    <span className="text-[10px] text-slate-400 leading-tight">{opt.desc}</span>
+                    {opt.label}
                   </button>
                 ))}
               </div>
             </div>
+
+            {/* Subscription Tiers */}
+            {(accountRole === 'landlord' || accountRole === 'broker') && (
+              <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="space-y-3">
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Chọn gói phù hợp</label>
+                <div className="grid grid-cols-1 gap-2.5">
+                  {SUBSCRIPTION_PLANS[accountRole].map((plan) => (
+                    <button
+                      key={plan.value}
+                      type="button"
+                      onClick={() => setSubscriptionTier(plan.value)}
+                      className={`relative p-4 rounded-xl border-2 text-left transition-all ${
+                        subscriptionTier === plan.value 
+                          ? 'border-indigo-600 bg-indigo-50/50' 
+                          : 'border-slate-100 bg-white hover:border-slate-200'
+                      }`}
+                    >
+                      <div className="flex justify-between items-start mb-1">
+                        <p className={`text-sm font-black ${subscriptionTier === plan.value ? 'text-indigo-700' : 'text-slate-900'}`}>{plan.label}</p>
+                        <p className="text-xs font-black text-indigo-600">{plan.price}</p>
+                      </div>
+                      <div className="flex flex-wrap gap-x-3 gap-y-1">
+                        {plan.features.map((f, i) => (
+                          <span key={i} className="text-[10px] font-bold text-slate-400 tracking-tight flex items-center gap-1">
+                            <span className="text-indigo-500">✓</span> {f}
+                          </span>
+                        ))}
+                      </div>
+                      {subscriptionTier === plan.value && (
+                        <div className="absolute -top-2 -right-2 bg-indigo-600 text-white p-1 rounded-full shadow-lg">
+                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
+                        </div>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            )}
 
             {/* Password */}
             <div>
@@ -237,7 +331,7 @@ const RegisterPage = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-700/10 transition-all pr-12"
+                  className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-700/10 transition-all pr-12 font-medium"
                 />
                 <button
                   type="button"
@@ -268,7 +362,7 @@ const RegisterPage = () => {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   required
-                  className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-700/10 transition-all pr-12"
+                  className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm text-slate-700 placeholder-slate-400 focus:outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-700/10 transition-all pr-12 font-medium"
                 />
                 <button
                   type="button"
@@ -294,7 +388,7 @@ const RegisterPage = () => {
               <div
                 onClick={() => setAgreed(!agreed)}
                 className={`w-5 h-5 mt-0.5 rounded-md border-2 flex-shrink-0 flex items-center justify-center transition-all ${
-                  agreed ? 'bg-emerald-700 border-emerald-700' : 'border-slate-300 hover:border-slate-400'
+                  agreed ? 'bg-[#0f9b9b] border-[#0f9b9b]' : 'border-slate-300 hover:border-slate-400'
                 }`}
               >
                 {agreed && (
@@ -303,7 +397,7 @@ const RegisterPage = () => {
                   </svg>
                 )}
               </div>
-              <span className="text-xs text-slate-500 leading-relaxed">
+              <span className="text-xs text-slate-500 leading-relaxed font-medium">
                 Tôi đồng ý nhận thông tin mới nhất về tin tức, 
                 chương trình khuyến mãi và cập nhật từ HomeSpot qua email.
               </span>
@@ -315,16 +409,16 @@ const RegisterPage = () => {
               whileTap={{ scale: 0.99 }}
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 bg-emerald-800 hover:bg-emerald-900 text-white rounded-xl font-bold text-sm transition-colors shadow-lg shadow-emerald-900/20 mt-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+              className="w-full py-3.5 bg-[#0b7272] hover:bg-[#0f9b9b] text-white rounded-xl font-bold text-sm transition-colors shadow-lg shadow-cyan-950/20 mt-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {loading ? 'Đang tạo tài khoản...' : 'Tạo tài khoản'}
             </motion.button>
           </form>
 
           {/* Footer link */}
-          <p className="text-center text-sm text-slate-500 mt-6">
+          <p className="text-center text-sm text-slate-500 mt-6 font-medium">
             Đã có tài khoản?{' '}
-            <Link to="/login" className="text-emerald-700 font-semibold hover:text-emerald-800 underline underline-offset-2 transition-colors">
+            <Link to="/login" className="text-[#0b7272] font-bold hover:text-[#0f9b9b] underline underline-offset-2 transition-colors">
               Đăng nhập
             </Link>
           </p>

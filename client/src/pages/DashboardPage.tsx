@@ -1,300 +1,399 @@
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { api } from '../lib/api';
-import type { Building, Room, RoomStatus } from '../../../shared/types';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import { Building2, LayoutGrid, PieChart, RefreshCw, AlertCircle, FileText } from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
+import { api } from "../lib/api";
+import type {
+	BuildingWithRooms,
+	Room,
+	RoomStatus,
+	DashboardStats,
+	Amenity,
+	CreateBuildingInput,
+	CreateRoomInput,
+	ContractWithRoom,
+} from "../../../shared/types";
 
-const STATUS_COLORS: Record<RoomStatus, string> = {
-  available: 'bg-emerald-400',
-  occupied: 'bg-orange-400',
-  maintenance: 'bg-slate-400',
-};
-const STATUS_LABELS: Record<RoomStatus, string> = {
-  available: 'Trống',
-  occupied: 'Đang thuê',
-  maintenance: 'Bảo trì',
-};
+// Components
+import { Overview } from "../components/dashboard/Overview";
+import { FloorPlan } from "../components/dashboard/FloorPlan";
+import { BuildingList } from "../components/dashboard/BuildingList";
+import { RoomModal } from "../components/dashboard/RoomModal";
+import { BuildingModal } from "../components/dashboard/BuildingModal";
+import { ContractList } from "../components/dashboard/ContractList";
+import { ContractModal } from "../components/dashboard/ContractModal";
 
-interface BuildingWithRooms extends Building {
-  rooms: Room[];
-}
+type DashboardTab = "overview" | "floors" | "buildings" | "contracts";
 
 export default function DashboardPage() {
-  const { user, canManageBuildings } = useAuth();
-  const [buildings, setBuildings] = useState<BuildingWithRooms[]>([]);
-  const [selectedBuilding, setSelectedBuilding] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [showBuildingForm, setShowBuildingForm] = useState(false);
-  const [showRoomForm, setShowRoomForm] = useState(false);
-  const [newBuilding, setNewBuilding] = useState({ name: '', address: '', city: '', district: '', floors: '5' });
-  const [newRoom, setNewRoom] = useState({ room_number: '', floor: '1', area: '', price: '' });
+	const navigate = useNavigate();
+	const { canManageBuildings } = useAuth();
+	const [activeTab, setActiveTab] = useState<DashboardTab>("overview");
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadBuildings();
-  }, []);
+	// Data
+	const [stats, setStats] = useState<DashboardStats | null>(null);
+	const [buildings, setBuildings] = useState<BuildingWithRooms[]>([]);
+	const [contracts, setContracts] = useState<ContractWithRoom[]>([]);
+	const [amenities, setAmenities] = useState<Amenity[]>([]);
+	const [selectedBuildingId, setSelectedBuildingId] = useState<string | null>(null);
 
-  const loadBuildings = async () => {
-    setLoading(true);
-    const { data } = await api.get<{ buildings: BuildingWithRooms[] }>('/api/buildings');
-    if (data) {
-      // Load rooms for each building
-      const buildingsWithRooms = await Promise.all(
-        data.buildings.map(async (b) => {
-          const { data: roomData } = await api.get<{ rooms: Room[] }>(`/api/rooms?building_id=${b.id}`);
-          return { ...b, rooms: roomData?.rooms || [] };
-        })
-      );
-      setBuildings(buildingsWithRooms);
-      if (buildingsWithRooms.length > 0 && !selectedBuilding) {
-        setSelectedBuilding(buildingsWithRooms[0].id);
-      }
-    }
-    setLoading(false);
-  };
+	// Modals state
+	const [isRoomModalOpen, setIsRoomModalOpen] = useState(false);
+	const [isBuildingModalOpen, setIsBuildingModalOpen] = useState(false);
+	const [isContractModalOpen, setIsContractModalOpen] = useState(false);
+	const [editingRoom, setEditingRoom] = useState<Room | undefined>(undefined);
+	const [editingBuilding, setEditingBuilding] = useState<BuildingWithRooms | undefined>(undefined);
+	const [editingContract, setEditingContract] = useState<ContractWithRoom | undefined>(undefined);
+	const [selectedRoomForContract, setSelectedRoomForContract] = useState<Room | undefined>(
+		undefined,
+	);
 
-  const handleCreateBuilding = async () => {
-    const { error } = await api.post('/api/buildings', {
-      ...newBuilding,
-      floors: Number(newBuilding.floors),
-    });
-    if (!error) {
-      setShowBuildingForm(false);
-      setNewBuilding({ name: '', address: '', city: '', district: '', floors: '5' });
-      loadBuildings();
-    }
-  };
+	useEffect(() => {
+		if (canManageBuildings) {
+			loadInitialData();
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [canManageBuildings]);
 
-  const handleCreateRoom = async () => {
-    if (!selectedBuilding) return;
-    const { error } = await api.post('/api/rooms', {
-      building_id: selectedBuilding,
-      room_number: newRoom.room_number,
-      floor: Number(newRoom.floor),
-      area: newRoom.area ? Number(newRoom.area) : null,
-      price: newRoom.price ? Number(newRoom.price) * 1000000 : null,
-    });
-    if (!error) {
-      setShowRoomForm(false);
-      setNewRoom({ room_number: '', floor: '1', area: '', price: '' });
-      loadBuildings();
-    }
-  };
+	const loadInitialData = async () => {
+		setLoading(true);
+		setError(null);
+		try {
+			const [statsRes, buildingsRes, contractsRes, amenitiesRes] = await Promise.all([
+				api.get<DashboardStats>("/api/dashboard/stats"),
+				api.get<{ buildings: BuildingWithRooms[] }>("/api/buildings"),
+				api.get<{ contracts: ContractWithRoom[] }>("/api/contracts"),
+				api.get<{ amenities: Amenity[] }>("/api/search/amenities"),
+			]);
 
-  const handleRoomStatusChange = async (roomId: string, status: RoomStatus) => {
-    await api.put(`/api/rooms/${roomId}/status`, { status });
-    loadBuildings();
-  };
+			if (statsRes.data) setStats(statsRes.data);
+			if (buildingsRes.data) {
+				setBuildings(buildingsRes.data.buildings);
+				if (buildingsRes.data.buildings.length > 0 && !selectedBuildingId) {
+					setSelectedBuildingId(buildingsRes.data.buildings[0].id);
+				}
+			}
+			if (contractsRes.data) {
+				setContracts(contractsRes.data.contracts);
+			}
 
-  const handleDeleteRoom = async (roomId: string) => {
-    if (!confirm('Bạn có chắc muốn xóa phòng này?')) return;
-    await api.delete(`/api/rooms/${roomId}`);
-    loadBuildings();
-  };
+			// Load amenities (needed for room modal)
+			// If /api/search/amenities is not available, we can mock it or fetch from another route
+			if (amenitiesRes.data) {
+				setAmenities(amenitiesRes.data.amenities);
+			} else {
+				// Fallback mock amenities if route fails
+				setAmenities([
+					{ id: 1, name: "wifi", name_vi: "Wi-Fi", icon: "wifi", created_at: "" },
+					{ id: 2, name: "ac", name_vi: "Điều hòa", icon: "snowflake", created_at: "" },
+					{ id: 3, name: "parking", name_vi: "Chỗ để xe", icon: "parking", created_at: "" },
+					{ id: 4, name: "fridge", name_vi: "Tủ lạnh", icon: "fridge", created_at: "" },
+					{ id: 5, name: "kitchen", name_vi: "Bếp", icon: "utensils", created_at: "" },
+				]);
+			}
+		} catch (err: any) {
+			setError("Không thể tải dữ liệu dashboard. Vui lòng thử lại sau.");
+			console.error(err);
+		} finally {
+			setLoading(false);
+		}
+	};
 
-  const currentBuilding = buildings.find(b => b.id === selectedBuilding);
-  const stats = currentBuilding ? {
-    total: currentBuilding.rooms.length,
-    available: currentBuilding.rooms.filter(r => r.status === 'available').length,
-    occupied: currentBuilding.rooms.filter(r => r.status === 'occupied').length,
-    maintenance: currentBuilding.rooms.filter(r => r.status === 'maintenance').length,
-  } : { total: 0, available: 0, occupied: 0, maintenance: 0 };
+	const currentBuilding = buildings.find((b) => b.id === selectedBuildingId);
 
-  if (!canManageBuildings) {
-    return (
-      <div className="flex-1 flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-6xl mb-4">🔒</div>
-          <h2 className="text-2xl font-bold text-slate-800">Bạn cần tài khoản Chủ trọ / Môi giới</h2>
-        </div>
-      </div>
-    );
-  }
+	// Actions: Room
+	const handleSaveRoom = async (data: CreateRoomInput) => {
+		try {
+			const { error: apiError } =
+				editingRoom ?
+					await api.put(`/api/rooms/${editingRoom.id}`, data)
+				:	await api.post("/api/rooms", { ...data, building_id: selectedBuildingId });
 
-  return (
-    <div className="flex-1 overflow-y-auto bg-slate-50">
-      <div className="max-w-7xl mx-auto p-6">
-        {/* Header */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-3xl font-extrabold text-slate-900">Bảng điều khiển</h1>
-            <p className="text-slate-500 mt-1">Quản lý tòa nhà và phòng trọ của bạn</p>
-          </div>
-          <div className="flex gap-3">
-            <Link to="/create-listing" className="px-5 py-2.5 bg-emerald-700 text-white rounded-xl font-semibold text-sm hover:bg-emerald-800 transition-colors">
-              + Đăng tin
-            </Link>
-            <button onClick={() => setShowBuildingForm(true)} className="px-5 py-2.5 bg-white border-2 border-emerald-700 text-emerald-700 rounded-xl font-semibold text-sm hover:bg-emerald-50 transition-colors cursor-pointer">
-              + Thêm tòa nhà
-            </button>
-          </div>
-        </motion.div>
+			if (apiError) return alert(apiError);
 
-        {/* Stats */}
-        <div className="grid grid-cols-4 gap-4 mb-6">
-          {[
-            { label: 'Tổng phòng', value: stats.total, color: 'bg-blue-500', icon: '🏠' },
-            { label: 'Còn trống', value: stats.available, color: 'bg-emerald-500', icon: '✅' },
-            { label: 'Đang thuê', value: stats.occupied, color: 'bg-orange-500', icon: '👤' },
-            { label: 'Bảo trì', value: stats.maintenance, color: 'bg-slate-500', icon: '🔧' },
-          ].map(s => (
-            <motion.div key={s.label} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-2xl p-5 border border-slate-200">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-2xl">{s.icon}</span>
-                <span className={`w-3 h-3 rounded-full ${s.color}`} />
-              </div>
-              <p className="text-3xl font-extrabold text-slate-900">{s.value}</p>
-              <p className="text-sm text-slate-500">{s.label}</p>
-            </motion.div>
-          ))}
-        </div>
+			setIsRoomModalOpen(false);
+			setEditingRoom(undefined);
+			loadInitialData(); // Reload stats and buildings
+		} catch {
+			alert("Lỗi khi lưu phòng");
+		}
+	};
 
-        {/* Building Tabs */}
-        {buildings.length > 0 && (
-          <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
-            {buildings.map(b => (
-              <button key={b.id} onClick={() => setSelectedBuilding(b.id)}
-                className={`px-5 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap cursor-pointer transition-all ${
-                  selectedBuilding === b.id ? 'bg-emerald-700 text-white shadow-lg shadow-emerald-900/20' : 'bg-white text-slate-600 border border-slate-200 hover:border-emerald-300'
-                }`}>
-                🏢 {b.name}
-              </button>
-            ))}
-          </div>
-        )}
+	const handleDeleteRoom = async (id: string) => {
+		if (!confirm("Xác nhận xóa phòng này?")) return;
+		const { error: apiError } = await api.delete(`/api/rooms/${id}`);
+		if (apiError) alert(apiError);
+		else loadInitialData();
+	};
 
-        {/* Floor Diagram */}
-        {currentBuilding && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-white rounded-2xl p-6 border border-slate-200">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-bold text-slate-800">Sơ đồ phòng — {currentBuilding.name}</h3>
-              <div className="flex gap-4 text-xs">
-                {Object.entries(STATUS_LABELS).map(([status, label]) => (
-                  <div key={status} className="flex items-center gap-1.5">
-                    <span className={`w-3 h-3 rounded-full ${STATUS_COLORS[status as RoomStatus]}`} />
-                    {label}
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-sm text-slate-500">{currentBuilding.floors} tầng • {currentBuilding.address}</p>
-              <button onClick={() => setShowRoomForm(true)} className="px-4 py-2 bg-emerald-100 text-emerald-700 rounded-lg text-sm font-semibold cursor-pointer hover:bg-emerald-200 transition-colors">
-                + Thêm phòng
-              </button>
-            </div>
+	const handleStatusChange = async (id: string, status: RoomStatus) => {
+		await api.put(`/api/rooms/${id}/status`, { status });
+		loadInitialData();
+	};
 
-            {Array.from({ length: currentBuilding.floors }, (_, i) => currentBuilding.floors - i).map(floor => {
-              const floorRooms = currentBuilding.rooms.filter(r => r.floor === floor);
-              return (
-                <div key={floor} className="mb-3">
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs font-bold text-slate-400 w-12">Tầng {floor}</span>
-                    <div className="flex-1 flex gap-2 flex-wrap">
-                      {floorRooms.length > 0 ? floorRooms.map(room => (
-                        <div key={room.id} className="relative group">
-                          <div className={`w-20 h-16 rounded-xl flex flex-col items-center justify-center cursor-pointer transition-all hover:scale-105 ${STATUS_COLORS[room.status]} bg-opacity-20 border-2 ${
-                            room.status === 'available' ? 'border-emerald-300 bg-emerald-50' : room.status === 'occupied' ? 'border-orange-300 bg-orange-50' : 'border-slate-300 bg-slate-100'
-                          }`}>
-                            <span className="text-xs font-bold text-slate-800">{room.room_number}</span>
-                            <span className={`text-[10px] ${room.status === 'available' ? 'text-emerald-600' : room.status === 'occupied' ? 'text-orange-600' : 'text-slate-500'}`}>
-                              {STATUS_LABELS[room.status]}
-                            </span>
-                          </div>
-                          {/* Popup on hover */}
-                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-40 bg-white rounded-xl shadow-xl border border-slate-200 p-3 z-10 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity">
-                            <p className="text-xs font-bold text-slate-800 mb-1">Phòng {room.room_number}</p>
-                            {room.area && <p className="text-[10px] text-slate-500">{room.area} m²</p>}
-                            {room.price && <p className="text-[10px] text-emerald-600 font-bold">{(Number(room.price) / 1000000).toFixed(1)} triệu/th</p>}
-                            <div className="flex gap-1 mt-2">
-                              {(['available', 'occupied', 'maintenance'] as RoomStatus[]).map(s => (
-                                <button key={s} onClick={() => handleRoomStatusChange(room.id, s)}
-                                  className={`flex-1 px-1 py-0.5 text-[9px] rounded font-semibold cursor-pointer ${
-                                    room.status === s ? 'bg-emerald-700 text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}>
-                                  {STATUS_LABELS[s].slice(0, 4)}
-                                </button>
-                              ))}
-                            </div>
-                            <button onClick={() => handleDeleteRoom(room.id)}
-                              className="w-full mt-1 text-[9px] text-red-500 hover:text-red-600 cursor-pointer font-semibold">
-                              Xóa phòng
-                            </button>
-                          </div>
-                        </div>
-                      )) : (
-                        <span className="text-xs text-slate-400 italic">Chưa có phòng</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </motion.div>
-        )}
+	// Actions: Building
+	const handleSaveBuilding = async (data: CreateBuildingInput) => {
+		try {
+			const { error: apiError } =
+				editingBuilding ?
+					await api.put(`/api/buildings/${editingBuilding.id}`, data)
+				:	await api.post("/api/buildings", data);
 
-        {loading && <p className="text-center text-slate-400 mt-10">Đang tải...</p>}
-        {!loading && buildings.length === 0 && (
-          <div className="text-center py-20">
-            <div className="text-6xl mb-4">🏗️</div>
-            <h2 className="text-xl font-bold text-slate-700 mb-2">Chưa có tòa nhà nào</h2>
-            <p className="text-slate-500 mb-4">Bắt đầu bằng cách thêm tòa nhà đầu tiên</p>
-            <button onClick={() => setShowBuildingForm(true)} className="px-6 py-3 bg-emerald-700 text-white rounded-xl font-bold cursor-pointer">+ Thêm tòa nhà</button>
-          </div>
-        )}
+			if (apiError) return alert(apiError);
 
-        {/* Building Form Modal */}
-        {showBuildingForm && (
-          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" onClick={() => setShowBuildingForm(false)}>
-            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-white rounded-2xl p-6 w-full max-w-md mx-4" onClick={e => e.stopPropagation()}>
-              <h3 className="text-lg font-bold text-slate-800 mb-4">Thêm tòa nhà mới</h3>
-              <div className="space-y-3">
-                <input type="text" placeholder="Tên tòa nhà *" value={newBuilding.name} onChange={e => setNewBuilding(p => ({...p, name: e.target.value}))}
-                  className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-600" />
-                <input type="text" placeholder="Địa chỉ *" value={newBuilding.address} onChange={e => setNewBuilding(p => ({...p, address: e.target.value}))}
-                  className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-600" />
-                <div className="grid grid-cols-2 gap-3">
-                  <input type="text" placeholder="Tỉnh/TP" value={newBuilding.city} onChange={e => setNewBuilding(p => ({...p, city: e.target.value}))}
-                    className="px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-600" />
-                  <input type="text" placeholder="Quận/Huyện" value={newBuilding.district} onChange={e => setNewBuilding(p => ({...p, district: e.target.value}))}
-                    className="px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-600" />
-                </div>
-                <input type="number" placeholder="Số tầng" value={newBuilding.floors} onChange={e => setNewBuilding(p => ({...p, floors: e.target.value}))}
-                  className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-600" />
-              </div>
-              <div className="flex gap-3 mt-5">
-                <button onClick={() => setShowBuildingForm(false)} className="flex-1 py-3 border border-slate-300 rounded-xl font-semibold text-sm cursor-pointer">Hủy</button>
-                <button onClick={handleCreateBuilding} className="flex-1 py-3 bg-emerald-700 text-white rounded-xl font-semibold text-sm cursor-pointer">Tạo tòa nhà</button>
-              </div>
-            </motion.div>
-          </div>
-        )}
+			setIsBuildingModalOpen(false);
+			setEditingBuilding(undefined);
+			loadInitialData();
+		} catch {
+			alert("Lỗi khi lưu tòa nhà");
+		}
+	};
 
-        {/* Room Form Modal */}
-        {showRoomForm && (
-          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50" onClick={() => setShowRoomForm(false)}>
-            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="bg-white rounded-2xl p-6 w-full max-w-md mx-4" onClick={e => e.stopPropagation()}>
-              <h3 className="text-lg font-bold text-slate-800 mb-4">Thêm phòng mới</h3>
-              <div className="space-y-3">
-                <input type="text" placeholder="Số phòng (VD: 101) *" value={newRoom.room_number} onChange={e => setNewRoom(p => ({...p, room_number: e.target.value}))}
-                  className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-600" />
-                <div className="grid grid-cols-3 gap-3">
-                  <input type="number" placeholder="Tầng" value={newRoom.floor} onChange={e => setNewRoom(p => ({...p, floor: e.target.value}))}
-                    className="px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-600" />
-                  <input type="number" placeholder="Diện tích m²" value={newRoom.area} onChange={e => setNewRoom(p => ({...p, area: e.target.value}))}
-                    className="px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-600" />
-                  <input type="number" placeholder="Giá (triệu)" value={newRoom.price} onChange={e => setNewRoom(p => ({...p, price: e.target.value}))}
-                    className="px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-600" />
-                </div>
-              </div>
-              <div className="flex gap-3 mt-5">
-                <button onClick={() => setShowRoomForm(false)} className="flex-1 py-3 border border-slate-300 rounded-xl font-semibold text-sm cursor-pointer">Hủy</button>
-                <button onClick={handleCreateRoom} className="flex-1 py-3 bg-emerald-700 text-white rounded-xl font-semibold text-sm cursor-pointer">Tạo phòng</button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
+	const handleDeleteBuilding = async (id: string) => {
+		if (!confirm("Cảnh báo: Tòa nhà chỉ xóa được khi không còn phòng. Tiếp tục?")) return;
+		const { error } = await api.delete(`/api/buildings/${id}`);
+		if (error) alert(error);
+		else loadInitialData();
+	};
+
+	// Actions: Contract
+	const handleSaveContract = async (data: any) => {
+		try {
+			if (editingContract) {
+				await api.put(`/api/contracts/${editingContract.id}`, data);
+			} else {
+				await api.post("/api/contracts", data);
+			}
+			setIsContractModalOpen(false);
+			setEditingContract(undefined);
+			setSelectedRoomForContract(undefined);
+			loadInitialData();
+		} catch {
+			alert("Lỗi khi lưu hợp đồng");
+		}
+	};
+
+	const handleDeleteContract = async (id: string) => {
+		if (!confirm("Xác nhận kết thúc hợp đồng này? Phòng sẽ được chuyển sang trạng thái trống."))
+			return;
+		await api.delete(`/api/contracts/${id}`);
+		loadInitialData();
+	};
+
+	if (!canManageBuildings) {
+		return (
+			<div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+				<div className="w-32 h-32 bg-rose-50 rounded-[48px] flex items-center justify-center mb-10 border-4 border-white shadow-xl rotate-6">
+					<AlertCircle className="w-16 h-16 text-rose-500" />
+				</div>
+				<h2 className="text-4xl font-black text-slate-900 mb-4 tracking-tighter">
+					Tính năng giới hạn
+				</h2>
+				<p className="max-w-md text-slate-500 font-medium leading-relaxed mb-10">
+					Bạn cần tài khoản **Chủ trọ** hoặc **Môi giới** để sử dụng bộ công cụ quản lý chuyên
+					nghiệp này.
+				</p>
+				<button
+					onClick={() => (window.location.href = "/")}
+					className="px-10 py-4 bg-slate-900 text-white rounded-3xl font-black uppercase tracking-widest text-xs shadow-2xl shadow-slate-900/40 hover:scale-105 transition-transform"
+				>
+					Quay lại Trang chủ
+				</button>
+			</div>
+		);
+	}
+
+	return (
+		<div className="flex-1 overflow-y-auto bg-brand-bg scroll-smooth">
+			<div className="max-w-360 mx-auto p-4 md:p-8 space-y-8">
+				{/* Top Navigation / Header */}
+				<div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 px-4">
+					<div>
+						<div className="flex items-center gap-3 mb-2">
+							<span className="px-3 py-1 bg-brand-primary/10 text-brand-primary rounded-lg text-[10px] font-black uppercase tracking-widest">
+								LANDLORD DASHBOARD
+							</span>
+							{loading && <RefreshCw className="w-4 h-4 text-brand-primary/50 animate-spin" />}
+						</div>
+						<h1 className="text-4xl font-black text-brand-ink tracking-tighter">
+							Quản lý Phòng trọ
+						</h1>
+					</div>
+
+					<div className="flex items-center gap-2 bg-white p-2 rounded-3xl shadow-sm border border-slate-100">
+						{(["overview", "floors", "buildings", "contracts"] as const).map((tab) => (
+							<button
+								key={tab}
+								onClick={() => setActiveTab(tab)}
+								className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all cursor-pointer ${
+									activeTab === tab ?
+										"bg-brand-primary text-white shadow-lg shadow-brand-primary/20"
+									:	"text-slate-400 hover:bg-slate-50 hover:text-brand-ink"
+								}`}
+							>
+								{tab === "overview" && <PieChart className="w-4 h-4" />}
+								{tab === "floors" && <LayoutGrid className="w-4 h-4" />}
+								{tab === "buildings" && <Building2 className="w-4 h-4" />}
+								{tab === "contracts" && <FileText className="w-4 h-4" />}
+								{tab === "overview" ?
+									"Tổng quan"
+								: tab === "floors" ?
+									"Sơ đồ phòng"
+								: tab === "buildings" ?
+									"Tòa nhà"
+								:	"Hợp đồng"}
+							</button>
+						))}
+					</div>
+				</div>
+
+				{error && (
+					<div className="mx-4 p-4 bg-rose-50 border border-rose-100 rounded-3xl text-rose-600 font-bold text-sm flex items-center gap-3">
+						<AlertCircle className="w-5 h-5 shrink-0" />
+						{error}
+						<button
+							onClick={loadInitialData}
+							className="ml-auto underline decoration-2 underline-offset-4"
+						>
+							Thử lại
+						</button>
+					</div>
+				)}
+
+				{/* Tab Content */}
+				<AnimatePresence mode="wait">
+					<motion.div
+						key={activeTab + (selectedBuildingId || "")}
+						initial={{ opacity: 0, y: 10 }}
+						animate={{ opacity: 1, y: 0 }}
+						exit={{ opacity: 0, y: -10 }}
+						transition={{ duration: 0.3, ease: "easeOut" }}
+						className="px-4"
+					>
+						{activeTab === "overview" && stats && <Overview stats={stats} />}
+
+						{activeTab === "floors" && (
+							<div className="space-y-6">
+								{/* Internal building switch for FloorPlan if needed, or use the tabs below */}
+								{buildings.length > 0 ?
+									<>
+										<div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+											{buildings.map((b) => (
+												<button
+													key={b.id}
+													onClick={() => setSelectedBuildingId(b.id)}
+													className={`flex items-center gap-2 px-5 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all duration-300 cursor-pointer ${
+														selectedBuildingId === b.id ?
+															"bg-brand-ink text-white shadow-xl shadow-brand-ink/20 ring-2 ring-brand-ink/20"
+														:	"bg-white border border-slate-100 text-slate-400 hover:border-brand-primary/30 hover:text-brand-primary hover:shadow-lg hover:shadow-brand-primary/10"
+													}`}
+												>
+													<Building2 className="w-3 h-3 shrink-0" />
+													{b.name}
+												</button>
+											))}
+										</div>
+										{currentBuilding ?
+											<FloorPlan
+												building={currentBuilding}
+												onStatusChange={handleStatusChange}
+												onAddRoom={() => {
+													setEditingRoom(undefined);
+													setIsRoomModalOpen(true);
+												}}
+												onEditRoom={(room) => {
+													setEditingRoom(room);
+													setIsRoomModalOpen(true);
+												}}
+												onDeleteRoom={handleDeleteRoom}
+												onAddContract={(room) => {
+													setSelectedRoomForContract(room);
+													setIsContractModalOpen(true);
+												}}
+											/>
+										:	<div className="py-20 text-center font-bold text-slate-400">
+												Vui lòng chọn hoặc thêm tòa nhà
+											</div>
+										}
+									</>
+								:	<div className="py-20 text-center">
+										<p className="font-bold text-slate-400 mb-4">Bạn chưa có tòa nhà nào.</p>
+										<button
+											onClick={() => setActiveTab("buildings")}
+											className="text-brand-primary font-black uppercase tracking-widest text-xs underline decoration-2 underline-offset-4"
+										>
+											Đi tới Quản lý Tòa nhà
+										</button>
+									</div>
+								}
+							</div>
+						)}
+
+						{activeTab === "buildings" && (
+							<BuildingList
+								buildings={buildings}
+								selectedId={selectedBuildingId}
+								onSelect={setSelectedBuildingId}
+								onAdd={() => navigate("/create-building")}
+								onEdit={(b) => {
+									setEditingBuilding(b);
+									setIsBuildingModalOpen(true);
+								}}
+								onDelete={handleDeleteBuilding}
+							/>
+						)}
+
+						{activeTab === "contracts" && (
+							<ContractList
+								contracts={contracts}
+								onEdit={(c) => {
+									setEditingContract(c);
+									setIsContractModalOpen(true);
+								}}
+								onDelete={handleDeleteContract}
+							/>
+						)}
+					</motion.div>
+				</AnimatePresence>
+
+				{/* Global Loading Overlay */}
+				{loading && !stats && !buildings.length && (
+					<div className="py-40 flex flex-col items-center justify-center space-y-6">
+						<div className="w-16 h-16 border-4 border-brand-primary/20 border-t-brand-primary rounded-full animate-spin" />
+						<p className="text-brand-primary/50 font-black uppercase tracking-[0.3em] text-xs">
+							Loading Intelligence...
+						</p>
+					</div>
+				)}
+			</div>
+
+			{/* Modals */}
+			<RoomModal
+				isOpen={isRoomModalOpen}
+				onClose={() => setIsRoomModalOpen(false)}
+				onSave={handleSaveRoom}
+				initialData={editingRoom}
+				amenities={amenities}
+			/>
+
+			<BuildingModal
+				isOpen={isBuildingModalOpen}
+				onClose={() => setIsBuildingModalOpen(false)}
+				onSave={handleSaveBuilding}
+				initialData={editingBuilding}
+			/>
+
+			<ContractModal
+				isOpen={isContractModalOpen}
+				onClose={() => setIsContractModalOpen(false)}
+				onSave={handleSaveContract}
+				initialData={editingContract}
+				room={selectedRoomForContract || (editingContract?.room as any)}
+			/>
+		</div>
+	);
 }

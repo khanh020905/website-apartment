@@ -53,4 +53,52 @@ router.get('/config', (_req: Request, res: Response) => {
   });
 });
 
+// GET /api/map/reverse-geocode?lat=...&lng=... — Resolve coordinate to address fields
+router.get('/reverse-geocode', async (req: Request, res: Response) => {
+  const lat = Number(req.query.lat);
+  const lng = Number(req.query.lng);
+
+  if (Number.isNaN(lat) || Number.isNaN(lng)) {
+    res.status(400).json({ error: 'lat và lng không hợp lệ' });
+    return;
+  }
+
+  try {
+    const reverseUrl = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&addressdetails=1&accept-language=vi`;
+    const response = await fetch(reverseUrl, {
+      headers: {
+        'User-Agent': 'RentalPlatform/1.0',
+      },
+    });
+
+    if (!response.ok) {
+      res.status(400).json({ error: 'Không thể lấy thông tin địa chỉ từ tọa độ' });
+      return;
+    }
+
+    const data = await response.json() as {
+      display_name?: string;
+      address?: Record<string, string | undefined>;
+    };
+    const address = data.address || {};
+
+    const city = address.city || address.town || address.state || address.province || '';
+    const district = address.city_district || address.county || address.state_district || '';
+    const ward = address.suburb || address.quarter || address.neighbourhood || address.village || '';
+    const street = [address.house_number, address.road].filter(Boolean).join(' ');
+
+    res.json({
+      address: street || data.display_name || '',
+      ward,
+      district,
+      city,
+      full_address: data.display_name || '',
+      lat,
+      lng,
+    });
+  } catch {
+    res.status(500).json({ error: 'Lỗi reverse geocoding' });
+  }
+});
+
 export default router;

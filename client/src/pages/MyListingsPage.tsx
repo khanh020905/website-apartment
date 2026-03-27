@@ -8,13 +8,15 @@ import type { Listing, ListingStatus } from '../../../shared/types';
 const STATUS_STYLES: Record<ListingStatus, { bg: string; text: string; label: string }> = {
   draft: { bg: 'bg-slate-100', text: 'text-slate-600', label: 'Bản nháp' },
   pending: { bg: 'bg-yellow-100', text: 'text-yellow-700', label: 'Chờ duyệt' },
-  approved: { bg: 'bg-emerald-100', text: 'text-emerald-700', label: 'Đã duyệt' },
+  approved: { bg: 'bg-teal-100', text: 'text-teal-700', label: 'Đã duyệt' },
   rejected: { bg: 'bg-red-100', text: 'text-red-700', label: 'Từ chối' },
 };
 
 export default function MyListingsPage() {
   const { isAuthenticated } = useAuth();
-  const [listings, setListings] = useState<Listing[]>([]);
+  const [listings, setListings] = useState<(Listing & {
+    listing_reviews?: { action: 'approved' | 'rejected'; notes: string | null; reviewed_at: string }[];
+  })[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<ListingStatus | 'all'>('all');
 
@@ -42,7 +44,7 @@ export default function MyListingsPage() {
             <h1 className="text-3xl font-extrabold text-slate-900">Tin đăng của tôi</h1>
             <p className="text-slate-500 mt-1">{listings.length} tin đăng</p>
           </div>
-          <Link to="/create-listing" className="px-5 py-2.5 bg-emerald-700 text-white rounded-xl font-semibold text-sm hover:bg-emerald-800 transition-colors">
+          <Link to="/create-listing" className="px-5 py-2.5 bg-teal-700 text-white rounded-xl font-semibold text-sm hover:bg-teal-800 transition-colors">
             + Đăng tin mới
           </Link>
         </motion.div>
@@ -52,7 +54,7 @@ export default function MyListingsPage() {
           {[{ value: 'all', label: 'Tất cả' }, ...Object.entries(STATUS_STYLES).map(([value, s]) => ({ value, label: s.label }))].map(opt => (
             <button key={opt.value} onClick={() => setFilter(opt.value as ListingStatus | 'all')}
               className={`px-4 py-2 rounded-lg text-sm font-semibold cursor-pointer transition-all ${
-                filter === opt.value ? 'bg-emerald-700 text-white' : 'bg-white text-slate-600 border border-slate-200 hover:border-emerald-300'
+                filter === opt.value ? 'bg-teal-700 text-white' : 'bg-white text-slate-600 border border-slate-200 hover:border-teal-300'
               }`}>
               {opt.label}
             </button>
@@ -65,7 +67,7 @@ export default function MyListingsPage() {
           <div className="text-center py-20">
             <div className="text-6xl mb-4">📝</div>
             <h2 className="text-xl font-bold text-slate-700 mb-2">Chưa có tin đăng nào</h2>
-            <Link to="/create-listing" className="text-emerald-700 font-semibold hover:underline">Đăng tin ngay →</Link>
+            <Link to="/create-listing" className="text-teal-700 font-semibold hover:underline">Đăng tin ngay →</Link>
           </div>
         ) : (
           <div className="space-y-4">
@@ -92,11 +94,17 @@ export default function MyListingsPage() {
                     </span>
                   </div>
                   <div className="flex items-center gap-4 mt-2 text-sm text-slate-500">
-                    <span className="text-emerald-700 font-bold">{(listing.price / 1000000).toFixed(1)} triệu/th</span>
+                    <span className="text-teal-700 font-bold">{(listing.price / 1000000).toFixed(1)} triệu/th</span>
                     {listing.area && <span>{listing.area} m²</span>}
                     <span>{listing.bedrooms} PN • {listing.bathrooms} WC</span>
                     <span>👁 {listing.view_count}</span>
                   </div>
+                  {listing.status === 'rejected' && listing.listing_reviews && listing.listing_reviews.length > 0 && (
+                    <div className="mt-2 p-2 bg-red-50 border border-red-100 rounded-lg text-xs text-red-700">
+                      <span className="font-semibold">Lý do từ chối:</span>{' '}
+                      {listing.listing_reviews[0].notes || 'Không có ghi chú từ quản trị viên'}
+                    </div>
+                  )}
                   <div className="flex-1" />
                   <div className="flex gap-2 mt-2">
                     <button onClick={() => handleDelete(listing.id)} className="px-3 py-1.5 text-xs text-red-500 hover:bg-red-50 rounded-lg cursor-pointer font-semibold">
@@ -112,3 +120,4 @@ export default function MyListingsPage() {
     </div>
   );
 }
+

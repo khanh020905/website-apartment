@@ -1,6 +1,10 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+
+// Load env vars BEFORE any internal imports that might use them!
+dotenv.config();
+
 import authRoutes from './routes/auth';
 import mapRoutes from './routes/map';
 import buildingRoutes from './routes/buildings';
@@ -9,8 +13,8 @@ import listingRoutes from './routes/listings';
 import searchRoutes from './routes/search';
 import adminRoutes from './routes/admin';
 import qrRoutes from './routes/qr';
-
-dotenv.config();
+import dashboardRoutes from './routes/dashboard';
+import contractRoutes from './routes/contracts';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -32,6 +36,8 @@ app.use('/api/listings', listingRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/qr', qrRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/contracts', contractRoutes);
 
 // Health check route
 app.get('/api/health', (_req: Request, res: Response) => {

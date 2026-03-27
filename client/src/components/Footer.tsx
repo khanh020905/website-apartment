@@ -2,16 +2,19 @@ import { Link } from 'react-router-dom';
 
 const Footer = () => {
   return (
-    <footer className="bg-slate-950 text-white">
+    <footer className="text-white" style={{ background: 'linear-gradient(180deg, #0b7272 0%, #0f9b9b 55%, #0f3f4a 100%)' }}>
       {/* Main footer */}
       <div className="max-w-6xl mx-auto px-6 pt-16 pb-12">
         <div className="flex flex-col lg:flex-row gap-12 lg:gap-8">
 
           {/* Brand */}
           <div className="lg:w-[280px] flex-shrink-0">
-            <h2 className="text-5xl font-extrabold tracking-tight leading-none mb-6" style={{ fontStyle: 'italic' }}>
-              Home<br />Spot
-            </h2>
+            <div className="flex items-center gap-3 mb-5">
+              <img src="/logo.jpg" alt="HomeSpot logo" className="w-14 h-14 rounded-xl object-cover ring-2 ring-white/30" />
+              <h2 className="text-4xl font-extrabold tracking-tight leading-none" style={{ fontStyle: 'italic' }}>
+                Home<br />Spot
+              </h2>
+            </div>
             <p className="text-white/50 text-sm leading-relaxed max-w-[240px]">
               Nền tảng tìm kiếm và cho thuê bất động sản hàng đầu Việt Nam. Kết nối chủ nhà và người thuê một cách minh bạch.
             </p>
@@ -24,7 +27,7 @@ const Footer = () => {
           <div className="flex-1 grid grid-cols-2 md:grid-cols-3 gap-8">
             {/* Column 1 */}
             <div>
-              <h3 className="text-xs font-bold uppercase tracking-[0.15em] text-emerald-400 mb-5">
+                <h3 className="text-xs font-bold uppercase tracking-[0.15em] text-cyan-100 mb-5">
                 Dịch vụ
               </h3>
               <ul className="flex flex-col gap-3">
@@ -37,7 +40,7 @@ const Footer = () => {
 
             {/* Column 2 */}
             <div>
-              <h3 className="text-xs font-bold uppercase tracking-[0.15em] text-emerald-400 mb-5">
+                <h3 className="text-xs font-bold uppercase tracking-[0.15em] text-cyan-100 mb-5">
                 Về chúng tôi
               </h3>
               <ul className="flex flex-col gap-3">
@@ -50,7 +53,7 @@ const Footer = () => {
 
             {/* Column 3 — Newsletter */}
             <div>
-              <h3 className="text-xs font-bold uppercase tracking-[0.15em] text-emerald-400 mb-5">
+                <h3 className="text-xs font-bold uppercase tracking-[0.15em] text-cyan-100 mb-5">
                 Bản tin
               </h3>
               <p className="text-sm text-white/50 leading-relaxed mb-4">
@@ -60,9 +63,9 @@ const Footer = () => {
                 <input
                   type="email"
                   placeholder="Email của bạn"
-                  className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-white/30 focus:outline-none focus:border-emerald-500 transition-colors"
+                  className="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-lg text-sm text-white placeholder-white/40 focus:outline-none focus:border-cyan-200 transition-colors"
                 />
-                <button className="text-sm font-bold text-white uppercase tracking-wider hover:text-emerald-400 transition-colors text-left cursor-pointer">
+                <button className="text-sm font-bold text-white uppercase tracking-wider hover:text-cyan-100 transition-colors text-left cursor-pointer">
                   Đăng ký ngay →
                 </button>
               </div>
@@ -76,13 +79,7 @@ const Footer = () => {
         <div className="max-w-6xl mx-auto px-6 py-5 flex flex-col md:flex-row items-center justify-between gap-4">
           {/* Logo mark */}
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-emerald-700 rounded-md flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none">
-                <path d="M12 2L3 9v11a1 1 0 001 1h5v-6h6v6h5a1 1 0 001-1V9l-9-7z" fill="white" opacity="0.9"/>
-                <circle cx="15" cy="10" r="3" fill="#34d399" stroke="white" strokeWidth="1.5"/>
-                <circle cx="15" cy="10" r="1" fill="white"/>
-              </svg>
-            </div>
+            <img src="/logo.jpg" alt="HomeSpot logo" className="w-7 h-7 rounded-md object-cover ring-1 ring-white/35" />
             <span className="text-sm font-extrabold text-white/80">HOMESPOT</span>
           </div>
 
@@ -107,3 +104,4 @@ const Footer = () => {
 };
 
 export default Footer;
+

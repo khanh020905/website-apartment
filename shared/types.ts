@@ -20,6 +20,8 @@ export type ContractStatus = 'active' | 'expired' | 'terminated' | 'pending';
 
 export type ReviewAction = 'approved' | 'rejected';
 
+export type HomeDirection = 'East' | 'West' | 'South' | 'North' | 'NorthEast' | 'NorthWest' | 'SouthEast' | 'SouthWest';
+
 
 // --- Display Labels (Vietnamese) ---
 
@@ -68,6 +70,7 @@ export interface Profile {
   role: UserRole;
   subscription: SubscriptionTier;
   is_verified: boolean;
+  dob: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -144,10 +147,21 @@ export interface Listing {
   amenity_ids: number[];
   status: ListingStatus;
   available_date: string | null;
+  direction: HomeDirection | null;
+  is_verified: boolean;
   created_at: string;
   updated_at: string;
   approved_at: string | null;
+  assigned_inspector_id: string | null;
+  assigned_at: string | null;
   view_count: number;
+}
+
+export interface ListingReviewChecklist {
+  addressMatched?: boolean;
+  roomConditionMatched?: boolean;
+  amenitiesMatched?: boolean;
+  imagesMatched?: boolean;
 }
 
 export interface ListingReview {
@@ -156,6 +170,7 @@ export interface ListingReview {
   reviewer_id: string;
   action: ReviewAction;
   notes: string | null;
+  checklist: ListingReviewChecklist | null;
   reviewed_at: string;
 }
 
@@ -230,6 +245,7 @@ export interface CreateRoomInput {
   status?: RoomStatus;
   furniture?: FurnitureStatus;
   amenity_ids?: number[];
+  images?: string[];
   description?: string;
 }
 
@@ -264,6 +280,8 @@ export interface SearchFilters {
   bathrooms?: number | null;
   propertyTypes?: PropertyType[];
   furniture?: FurnitureStatus;
+  direction?: HomeDirection;
+  isVerified?: boolean;
   amenityIds?: number[];
   city?: string;
   district?: string;
@@ -272,4 +290,24 @@ export interface SearchFilters {
   sortBy?: 'newest' | 'price_asc' | 'price_desc' | 'area_asc' | 'area_desc';
   page?: number;
   limit?: number;
+}
+
+export interface DashboardStats {
+  totalRooms: number;
+  statusCounts: {
+    available: number;
+    occupied: number;
+    maintenance: number;
+  };
+  revenue: {
+    current: number;
+    last: number;
+  };
+  expiringContracts: {
+    d7: Contract[];
+    d14: Contract[];
+    d30: Contract[];
+  };
+  occupancyRate: number;
+  buildingCount: number;
 }
