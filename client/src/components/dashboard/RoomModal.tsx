@@ -159,8 +159,8 @@ export const RoomModal = ({ isOpen, onClose, onSave, initialData, amenities }: R
 				{/* Header */}
 				<div className="p-8 border-b border-slate-50 flex items-center justify-between bg-slate-50/50">
 					<div>
-						<h3 className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-							<Home className="w-6 h-6 text-indigo-500" />
+						<h3 className="text-xl font-black text-brand-ink tracking-tight flex items-center gap-2">
+							<Home className="w-6 h-6 text-brand-primary" />
 							{initialData ? "Chỉnh sửa phòng" : "Thêm phòng mới"}
 						</h3>
 						<p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">
@@ -183,7 +183,7 @@ export const RoomModal = ({ isOpen, onClose, onSave, initialData, amenities }: R
 					<div className="grid grid-cols-2 gap-6">
 						{/* Room ID / Number */}
 						<div className="space-y-3">
-							<label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-2">
+							<label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">
 								Số phòng *
 							</label>
 							<div className="relative">
@@ -194,14 +194,14 @@ export const RoomModal = ({ isOpen, onClose, onSave, initialData, amenities }: R
 									placeholder="VD: 101, P.01"
 									value={formData.room_number}
 									onChange={(e) => setFormData({ ...formData, room_number: e.target.value })}
-									className="w-full h-14 pl-12 pr-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold placeholder-slate-300 focus:bg-white focus:border-emerald-500 transition-all outline-none"
+									className="w-full h-14 pl-12 pr-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold placeholder-slate-300 focus:bg-white focus:border-brand-primary transition-all outline-none"
 								/>
 							</div>
 						</div>
 
 						{/* Floor */}
 						<div className="space-y-3">
-							<label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-2">
+							<label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">
 								Tầng *
 							</label>
 							<div className="relative">
@@ -212,14 +212,14 @@ export const RoomModal = ({ isOpen, onClose, onSave, initialData, amenities }: R
 									placeholder="1"
 									value={formData.floor}
 									onChange={(e) => setFormData({ ...formData, floor: Number(e.target.value) })}
-									className="w-full h-14 pl-12 pr-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold placeholder-slate-300 focus:bg-white focus:border-emerald-500 transition-all outline-none"
+									className="w-full h-14 pl-12 pr-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold placeholder-slate-300 focus:bg-white focus:border-brand-primary transition-all outline-none"
 								/>
 							</div>
 						</div>
 
 						{/* Area */}
 						<div className="space-y-3">
-							<label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-2">
+							<label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">
 								Diện tích (m²)
 							</label>
 							<div className="relative">
@@ -229,14 +229,14 @@ export const RoomModal = ({ isOpen, onClose, onSave, initialData, amenities }: R
 									placeholder="25"
 									value={formData.area}
 									onChange={(e) => setFormData({ ...formData, area: Number(e.target.value) })}
-									className="w-full h-14 pl-12 pr-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold placeholder-slate-300 focus:bg-white focus:border-emerald-500 transition-all outline-none"
+									className="w-full h-14 pl-12 pr-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold placeholder-slate-300 focus:bg-white focus:border-brand-primary transition-all outline-none"
 								/>
 							</div>
 						</div>
 
 						{/* Price */}
 						<div className="space-y-3">
-							<label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-2">
+							<label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">
 								Giá thuê (triệu/tháng)
 							</label>
 							<div className="relative">
@@ -247,7 +247,7 @@ export const RoomModal = ({ isOpen, onClose, onSave, initialData, amenities }: R
 									placeholder="3.5"
 									value={formData.price}
 									onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
-									className="w-full h-14 pl-12 pr-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold placeholder-slate-300 focus:bg-white focus:border-emerald-500 transition-all outline-none text-emerald-600"
+									className="w-full h-14 pl-12 pr-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold placeholder-slate-300 focus:bg-white focus:border-brand-primary transition-all outline-none text-brand-ink"
 								/>
 							</div>
 						</div>
@@ -256,7 +256,7 @@ export const RoomModal = ({ isOpen, onClose, onSave, initialData, amenities }: R
 					<div className="grid grid-cols-2 gap-6">
 						{/* Furniture */}
 						<div className="space-y-3">
-							<label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-2">
+							<label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">
 								Nội thất
 							</label>
 							<div className="grid grid-cols-2 gap-2">
@@ -265,9 +265,9 @@ export const RoomModal = ({ isOpen, onClose, onSave, initialData, amenities }: R
 										key={f}
 										type="button"
 										onClick={() => setFormData({ ...formData, furniture: f })}
-										className={`h-12 rounded-xl text-xs font-black uppercase tracking-tight transition-all border-2 ${
+										className={`h-12 rounded-xl text-xs font-black uppercase tracking-tight transition-all border-2 cursor-pointer ${
 											formData.furniture === f ?
-												"bg-emerald-50 border-emerald-600 text-emerald-700"
+												"bg-brand-primary/10 border-brand-primary text-brand-ink"
 											:	"bg-slate-50 border-transparent text-slate-400"
 										}`}
 									>
@@ -279,7 +279,7 @@ export const RoomModal = ({ isOpen, onClose, onSave, initialData, amenities }: R
 
 						{/* Max Occupants */}
 						<div className="space-y-3">
-							<label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-2">
+							<label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">
 								Sức chứa (người)
 							</label>
 							<div className="relative">
@@ -290,7 +290,7 @@ export const RoomModal = ({ isOpen, onClose, onSave, initialData, amenities }: R
 									onChange={(e) =>
 										setFormData({ ...formData, max_occupants: Number(e.target.value) })
 									}
-									className="w-full h-14 pl-12 pr-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold focus:bg-white focus:border-emerald-500 transition-all outline-none"
+									className="w-full h-14 pl-12 pr-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold focus:bg-white focus:border-brand-primary transition-all outline-none"
 								/>
 							</div>
 						</div>
@@ -298,7 +298,7 @@ export const RoomModal = ({ isOpen, onClose, onSave, initialData, amenities }: R
 
 					{/* Status Select */}
 					<div className="space-y-3">
-						<label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-2">
+						<label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">
 							Trạng thái phòng
 						</label>
 						<div className="grid grid-cols-3 gap-3">
@@ -309,7 +309,7 @@ export const RoomModal = ({ isOpen, onClose, onSave, initialData, amenities }: R
 									onClick={() => setFormData({ ...formData, status: s })}
 									className={`flex flex-col items-center justify-center p-4 rounded-3xl border-2 transition-all gap-1 cursor-pointer ${
 										formData.status === s ?
-											s === "available" ? "bg-emerald-50 border-emerald-600 text-emerald-700"
+											s === "available" ? "bg-brand-primary/10 border-brand-primary text-brand-ink"
 											: s === "occupied" ? "bg-orange-50 border-orange-600 text-orange-700"
 											: "bg-slate-50 border-slate-600 text-slate-700"
 										:	"bg-white border-slate-100 text-slate-400"
@@ -317,7 +317,7 @@ export const RoomModal = ({ isOpen, onClose, onSave, initialData, amenities }: R
 								>
 									<span
 										className={`w-2 h-2 rounded-full mb-1 ${
-											s === "available" ? "bg-emerald-500"
+											s === "available" ? "bg-brand-primary"
 											: s === "occupied" ? "bg-orange-500"
 											: "bg-slate-400"
 										}`}
@@ -332,7 +332,7 @@ export const RoomModal = ({ isOpen, onClose, onSave, initialData, amenities }: R
 
 					{/* Amenities Multi-select */}
 					<div className="space-y-3">
-						<label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-2">
+						<label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">
 							Tiện nghi có sẵn
 						</label>
 						<div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2">
@@ -343,9 +343,9 @@ export const RoomModal = ({ isOpen, onClose, onSave, initialData, amenities }: R
 										key={item.id}
 										type="button"
 										onClick={() => toggleAmenity(item.id)}
-										className={`p-3 rounded-2xl flex flex-col items-center gap-1.5 transition-all text-center border-2 ${
+										className={`p-3 rounded-2xl flex flex-col items-center gap-1.5 transition-all text-center border-2 cursor-pointer ${
 											isSelected ?
-												"bg-indigo-50 border-indigo-500 text-indigo-700"
+												"bg-brand-primary/10 border-brand-primary text-brand-ink"
 											:	"bg-slate-50 border-transparent text-slate-400"
 										}`}
 									>
@@ -372,7 +372,7 @@ export const RoomModal = ({ isOpen, onClose, onSave, initialData, amenities }: R
 					{/* Images Upload */}
 					<div className="space-y-3">
 						<div className="flex items-center justify-between">
-							<label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-2">
+							<label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">
 								Hình ảnh phòng
 							</label>
 							<span className="text-[10px] font-bold text-slate-400">
@@ -387,7 +387,7 @@ export const RoomModal = ({ isOpen, onClose, onSave, initialData, amenities }: R
 						)}
 
 						<div className="p-4 rounded-xl border border-dashed border-slate-300 bg-slate-50">
-							<label className="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-lg text-sm font-semibold cursor-pointer hover:bg-indigo-700 transition-colors">
+							<label className="inline-flex items-center gap-2 px-4 py-2.5 bg-brand-primary text-white rounded-lg text-sm font-semibold cursor-pointer hover:bg-brand-dark transition-colors">
 								<input
 									type="file"
 									accept="image/jpeg,image/png,image/webp"
@@ -431,7 +431,7 @@ export const RoomModal = ({ isOpen, onClose, onSave, initialData, amenities }: R
 											className="w-full h-full object-cover"
 										/>
 										{i === 0 && (
-											<span className="absolute bottom-1 left-1 px-1.5 py-0.5 bg-indigo-600 text-white text-[9px] font-black uppercase tracking-tight rounded">
+											<span className="absolute bottom-1 left-1 px-1.5 py-0.5 bg-brand-primary text-white text-[9px] font-black uppercase tracking-tight rounded">
 												Ảnh chính
 											</span>
 										)}
@@ -455,7 +455,7 @@ export const RoomModal = ({ isOpen, onClose, onSave, initialData, amenities }: R
 
 					{/* Description */}
 					<div className="space-y-3">
-						<label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-2">
+						<label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-2">
 							Ghi chú / Mô tả thêm
 						</label>
 						<textarea
@@ -463,7 +463,7 @@ export const RoomModal = ({ isOpen, onClose, onSave, initialData, amenities }: R
 							placeholder="VD: Phòng có cửa sổ lớn, WC riêng biệt, giờ giấc tự do..."
 							value={formData.description}
 							onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-							className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold placeholder-slate-300 focus:bg-white focus:border-emerald-500 transition-all outline-none resize-none text-sm"
+							className="w-full p-4 bg-slate-50 border border-slate-100 rounded-2xl font-bold placeholder-slate-300 focus:bg-white focus:border-brand-primary transition-all outline-none resize-none text-sm"
 						/>
 					</div>
 				</form>
@@ -478,7 +478,7 @@ export const RoomModal = ({ isOpen, onClose, onSave, initialData, amenities }: R
 					</button>
 					<button
 						onClick={handleSave}
-						className="flex-1 h-14 rounded-2xl bg-indigo-600 text-white font-black text-xs uppercase tracking-widest shadow-xl shadow-indigo-900/10 hover:bg-indigo-700 transition-colors cursor-pointer"
+						className="flex-1 h-14 rounded-2xl bg-brand-ink text-white font-black text-xs uppercase tracking-widest shadow-xl shadow-brand-ink/10 hover:bg-brand-primary transition-colors cursor-pointer"
 					>
 						{initialData ? "Lưu thay đổi" : "Tạo phòng ngay"}
 					</button>

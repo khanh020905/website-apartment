@@ -208,18 +208,18 @@ export default function DashboardPage() {
 	}
 
 	return (
-		<div className="flex-1 overflow-y-auto bg-slate-100/30 scroll-smooth">
+		<div className="flex-1 overflow-y-auto bg-brand-bg scroll-smooth">
 			<div className="max-w-360 mx-auto p-4 md:p-8 space-y-8">
 				{/* Top Navigation / Header */}
 				<div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 px-4">
 					<div>
 						<div className="flex items-center gap-3 mb-2">
-							<span className="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-[10px] font-black uppercase tracking-widest">
+							<span className="px-3 py-1 bg-brand-primary/10 text-brand-primary rounded-lg text-[10px] font-black uppercase tracking-widest">
 								LANDLORD DASHBOARD
 							</span>
-							{loading && <RefreshCw className="w-4 h-4 text-slate-300 animate-spin" />}
+							{loading && <RefreshCw className="w-4 h-4 text-brand-primary/50 animate-spin" />}
 						</div>
-						<h1 className="text-4xl font-black text-slate-900 tracking-tighter">
+						<h1 className="text-4xl font-black text-brand-ink tracking-tighter">
 							Quản lý Phòng trọ
 						</h1>
 					</div>
@@ -231,8 +231,8 @@ export default function DashboardPage() {
 								onClick={() => setActiveTab(tab)}
 								className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all cursor-pointer ${
 									activeTab === tab ?
-										"bg-indigo-600 text-white shadow-lg shadow-indigo-900/20"
-									:	"text-slate-400 hover:bg-slate-50"
+										"bg-brand-primary text-white shadow-lg shadow-brand-primary/20"
+									:	"text-slate-400 hover:bg-slate-50 hover:text-brand-ink"
 								}`}
 							>
 								{tab === "overview" && <PieChart className="w-4 h-4" />}
@@ -281,17 +281,18 @@ export default function DashboardPage() {
 								{/* Internal building switch for FloorPlan if needed, or use the tabs below */}
 								{buildings.length > 0 ?
 									<>
-										<div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+										<div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
 											{buildings.map((b) => (
 												<button
 													key={b.id}
 													onClick={() => setSelectedBuildingId(b.id)}
-													className={`px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all border-2 cursor-pointer ${
+													className={`flex items-center gap-2 px-5 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all duration-300 cursor-pointer ${
 														selectedBuildingId === b.id ?
-															"bg-emerald-600 border-emerald-600 text-white shadow-lg shadow-emerald-900/10"
-														:	"bg-white border-slate-100 text-slate-400 hover:border-slate-300"
+															"bg-brand-ink text-white shadow-xl shadow-brand-ink/20 ring-2 ring-brand-ink/20"
+														:	"bg-white border border-slate-100 text-slate-400 hover:border-brand-primary/30 hover:text-brand-primary hover:shadow-lg hover:shadow-brand-primary/10"
 													}`}
 												>
+													<Building2 className="w-3 h-3 shrink-0" />
 													{b.name}
 												</button>
 											))}
@@ -323,7 +324,7 @@ export default function DashboardPage() {
 										<p className="font-bold text-slate-400 mb-4">Bạn chưa có tòa nhà nào.</p>
 										<button
 											onClick={() => setActiveTab("buildings")}
-											className="text-indigo-600 font-black uppercase tracking-widest text-xs underline decoration-2 underline-offset-4"
+											className="text-brand-primary font-black uppercase tracking-widest text-xs underline decoration-2 underline-offset-4"
 										>
 											Đi tới Quản lý Tòa nhà
 										</button>
@@ -362,8 +363,8 @@ export default function DashboardPage() {
 				{/* Global Loading Overlay */}
 				{loading && !stats && !buildings.length && (
 					<div className="py-40 flex flex-col items-center justify-center space-y-6">
-						<div className="w-16 h-16 border-4 border-indigo-100 border-t-indigo-600 rounded-full animate-spin" />
-						<p className="text-slate-400 font-black uppercase tracking-[0.3em] text-xs">
+						<div className="w-16 h-16 border-4 border-brand-primary/20 border-t-brand-primary rounded-full animate-spin" />
+						<p className="text-brand-primary/50 font-black uppercase tracking-[0.3em] text-xs">
 							Loading Intelligence...
 						</p>
 					</div>

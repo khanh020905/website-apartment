@@ -26,21 +26,21 @@ interface SummaryCardProps {
 	label: string;
 	value: string | number;
 	icon: React.ReactNode;
-	color: string;
+	iconWrapperClass: string;
 	trend?: {
 		value: number;
 		isUp: boolean;
 	};
 }
 
-const SummaryCard = ({ label, value, icon, color, trend }: SummaryCardProps) => (
+const SummaryCard = ({ label, value, icon, iconWrapperClass, trend }: SummaryCardProps) => (
 	<motion.div
 		initial={{ opacity: 0, y: 10 }}
 		animate={{ opacity: 1, y: 0 }}
-		className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow"
+		className="bg-white p-5 rounded-4xl border border-slate-100 shadow-sm hover:shadow-2xl hover:shadow-brand-ink/5 transition-all"
 	>
 		<div className="flex items-center justify-between mb-4">
-			<div className={`p-4 rounded-2xl ${color} bg-opacity-10 text-${color.split("-")[1]}-600`}>
+			<div className={`p-4 rounded-3xl ${iconWrapperClass}`}>
 				{icon}
 			</div>
 			{trend && (
@@ -55,7 +55,7 @@ const SummaryCard = ({ label, value, icon, color, trend }: SummaryCardProps) => 
 			)}
 		</div>
 		<div className="space-y-1">
-			<h3 className="text-3xl font-black text-slate-900 tracking-tight">{value}</h3>
+			<h3 className="text-3xl font-black text-brand-ink tracking-tight">{value}</h3>
 			<p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{label}</p>
 		</div>
 	</motion.div>
@@ -103,26 +103,26 @@ export const Overview = ({ stats }: OverviewProps) => {
 					label="Tổng phòng"
 					value={stats.totalRooms}
 					icon={<Building2 className="w-6 h-6" />}
-					color="bg-blue-500"
+					iconWrapperClass="bg-brand-ink/10 text-brand-ink"
 				/>
 				<SummaryCard
 					label="Đang sử dụng"
 					value={stats.statusCounts.occupied}
 					icon={<Users className="w-6 h-6" />}
-					color="bg-orange-500"
+					iconWrapperClass="bg-brand-primary/10 text-brand-primary"
 					trend={{ value: 4, isUp: true }}
 				/>
 				<SummaryCard
 					label="Phòng trống"
 					value={stats.statusCounts.available}
 					icon={<Home className="w-6 h-6" />}
-					color="bg-emerald-500"
+					iconWrapperClass="bg-white border-2 border-brand-primary/20 text-brand-primary"
 				/>
 				<SummaryCard
 					label="Doanh thu dự kiến"
 					value={formatPrice(stats.revenue.current)}
 					icon={<DollarSign className="w-6 h-6" />}
-					color="bg-indigo-500"
+					iconWrapperClass="bg-brand-light/30 text-brand-ink"
 					trend={revTrend}
 				/>
 			</div>
@@ -132,14 +132,14 @@ export const Overview = ({ stats }: OverviewProps) => {
 				<div className="lg:col-span-2 bg-white p-6 rounded-4xl border border-slate-100 shadow-sm">
 					<div className="flex items-center justify-between mb-8">
 						<div>
-							<h3 className="text-lg font-black text-slate-900">Tỷ lệ lấp đầy</h3>
+							<h3 className="text-lg font-black text-brand-ink">Tỷ lệ lấp đầy</h3>
 							<p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">
 								Xu hướng 6 tháng gần nhất
 							</p>
 						</div>
-						<div className="flex items-center gap-2 px-4 py-2 bg-emerald-50 rounded-xl">
-							<TrendingUp className="w-4 h-4 text-emerald-600" />
-							<span className="text-sm font-black text-emerald-700">
+						<div className="flex items-center gap-2 px-4 py-2 bg-brand-primary/10 rounded-2xl">
+							<TrendingUp className="w-4 h-4 text-brand-primary" />
+							<span className="text-sm font-black text-brand-primary">
 								{Math.round(stats.occupancyRate)}%
 							</span>
 						</div>
@@ -165,12 +165,12 @@ export const Overview = ({ stats }: OverviewProps) => {
 									>
 										<stop
 											offset="5%"
-											stopColor="#10b981"
-											stopOpacity={0.1}
+											stopColor="#0f9b9b"
+											stopOpacity={0.15}
 										/>
 										<stop
 											offset="95%"
-											stopColor="#10b981"
+											stopColor="#0f9b9b"
 											stopOpacity={0}
 										/>
 									</linearGradient>
@@ -203,7 +203,7 @@ export const Overview = ({ stats }: OverviewProps) => {
 								<Area
 									type="monotone"
 									dataKey="rate"
-									stroke="#10b981"
+									stroke="#0f9b9b"
 									strokeWidth={4}
 									fillOpacity={1}
 									fill="url(#colorRate)"
@@ -217,8 +217,8 @@ export const Overview = ({ stats }: OverviewProps) => {
 				{/* Expiring Contracts / Notifications */}
 				<div className="space-y-6">
 					<div className="bg-white p-6 rounded-4xl border border-slate-100 shadow-sm h-full">
-						<h3 className="text-lg font-black text-slate-900 mb-6 flex items-center gap-2">
-							<Calendar className="w-5 h-5 text-indigo-500" />
+						<h3 className="text-lg font-black text-brand-ink mb-6 flex items-center gap-2">
+							<Calendar className="w-5 h-5 text-brand-primary" />
 							Sắp hết hạn
 						</h3>
 
@@ -250,7 +250,7 @@ export const Overview = ({ stats }: OverviewProps) => {
 													{c.end_date}
 												</p>
 											</div>
-											<button className="text-[10px] font-black text-indigo-600 hover:text-indigo-800 uppercase tracking-widest px-3 py-1 bg-indigo-50 rounded-lg">
+											<button className="text-[10px] font-black text-brand-primary hover:text-brand-ink uppercase tracking-widest px-3 py-1 bg-brand-primary/10 rounded-lg transition-colors cursor-pointer">
 												Gia hạn
 											</button>
 										</div>
