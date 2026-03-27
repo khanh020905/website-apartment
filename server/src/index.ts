@@ -1,6 +1,10 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+
+// Load env vars BEFORE any internal imports that might use them!
+dotenv.config();
+
 import authRoutes from './routes/auth';
 import mapRoutes from './routes/map';
 import buildingRoutes from './routes/buildings';
@@ -11,8 +15,6 @@ import adminRoutes from './routes/admin';
 import qrRoutes from './routes/qr';
 import dashboardRoutes from './routes/dashboard';
 import contractRoutes from './routes/contracts';
-
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;

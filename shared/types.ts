@@ -245,6 +245,7 @@ export interface CreateRoomInput {
   status?: RoomStatus;
   furniture?: FurnitureStatus;
   amenity_ids?: number[];
+  images?: string[];
   description?: string;
 }
 
