@@ -684,30 +684,7 @@ export default function SearchPage() {
 
 				{/* Results Main Content */}
 				<main className="flex-1 overflow-y-auto p-8 lg:p-12 space-y-10 scroll-smooth">
-					{/* Quick Selection Toolbar */}
-					<div className="flex flex-wrap items-center gap-3">
-						<div className="flex items-center gap-2 px-6 py-2 bg-slate-100 rounded-full text-xs font-black text-slate-500 uppercase tracking-widest">
-							<MapPin className="w-3 h-3" /> TP. Hồ Chí Minh
-						</div>
-						{["Quận 1", "Quận 7", "Quận 10", "Bình Thạnh", "Tân Bình", "Thủ Đức", "Gò Vấp"].map(
-							(d) => (
-								<button
-									key={d}
-									onClick={() => {
-										setProvince("Thành phố Hồ Chí Minh");
-										setDistrict(d);
-									}}
-									className={`px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer border-2 ${
-										district === d ?
-											"bg-brand-primary border-brand-primary text-white shadow-lg shadow-brand-primary/20"
-										:	"bg-white border-slate-100 text-slate-400 hover:border-brand-primary/30 hover:text-brand-primary"
-									}`}
-								>
-									{d}
-								</button>
-							),
-						)}
-					</div>
+
 
 					{/* Header & Sort */}
 					<div className="flex flex-col md:flex-row md:items-center justify-between gap-6">

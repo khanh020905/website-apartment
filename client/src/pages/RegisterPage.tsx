@@ -15,8 +15,8 @@ const RegisterPage = () => {
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [accountRole, setAccountRole] = useState<UserRole>('user');
-  const [subscriptionTier, setSubscriptionTier] = useState<SubscriptionTier>('free');
+  const [accountRole] = useState<UserRole>('user');
+  const [subscriptionTier] = useState<SubscriptionTier>('free');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
