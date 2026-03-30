@@ -19,6 +19,7 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 
 	try {
 		const res = await fetch(`${API_URL}${endpoint}`, {
+			cache: 'no-store', // Disable browser caching aggressively to prevent stale data
 			...options,
 			headers,
 		});

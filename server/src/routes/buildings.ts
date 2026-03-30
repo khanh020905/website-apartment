@@ -11,7 +11,7 @@ router.get('/', authenticate, async (req: AuthRequest, res: Response) => {
 
   const { data, error } = await getSupabase()
     .from('buildings')
-    .select('*, rooms(count)')
+    .select('*, rooms(*)')
     .eq('owner_id', req.user.id)
     .order('created_at', { ascending: false });
 
@@ -37,7 +37,7 @@ router.get('/:id', async (req: AuthRequest, res: Response) => {
 router.post('/', authenticate, requireRole('landlord', 'broker', 'admin'), async (req: AuthRequest, res: Response) => {
   if (!req.user) { res.status(401).json({ error: 'Chưa xác thực' }); return; }
 
-  const { name, address, ward, district, city, lat, lng, floors, description } = req.body;
+  const { name, address, ward, district, city, lat, lng, floors, description, images } = req.body;
 
   if (!name || !address) {
     res.status(400).json({ error: 'Tên và địa chỉ tòa nhà là bắt buộc' });
@@ -57,6 +57,7 @@ router.post('/', authenticate, requireRole('landlord', 'broker', 'admin'), async
       lng: lng || null,
       floors: floors || 1,
       description: description || null,
+      images: images || [],
     })
     .select()
     .single();
@@ -82,7 +83,7 @@ router.put('/:id', authenticate, async (req: AuthRequest, res: Response) => {
     return;
   }
 
-  const { name, address, ward, district, city, lat, lng, floors, description } = req.body;
+  const { name, address, ward, district, city, lat, lng, floors, description, images } = req.body;
   const updates: Record<string, unknown> = {};
   if (name !== undefined) updates.name = name;
   if (address !== undefined) updates.address = address;
@@ -93,6 +94,7 @@ router.put('/:id', authenticate, async (req: AuthRequest, res: Response) => {
   if (lng !== undefined) updates.lng = lng;
   if (floors !== undefined) updates.floors = floors;
   if (description !== undefined) updates.description = description;
+  if (images !== undefined) updates.images = images;
 
   const { data, error } = await getSupabase()
     .from('buildings')

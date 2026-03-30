@@ -45,7 +45,7 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response) => {
 
   const {
     building_id, room_number, floor, area, price,
-    max_occupants, status, furniture, amenity_ids, description,
+    max_occupants, status, furniture, amenity_ids, images, description,
   } = req.body;
 
   if (!building_id || !room_number) {
@@ -77,6 +77,7 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response) => {
       status: status || 'available',
       furniture: furniture || 'none',
       amenity_ids: amenity_ids || [],
+      images: images || [],
       description: description || null,
     })
     .select()
@@ -114,7 +115,7 @@ router.put('/:id', authenticate, async (req: AuthRequest, res: Response) => {
 
   const {
     room_number, floor, area, price, max_occupants,
-    current_occupants, status, furniture, amenity_ids, description,
+    current_occupants, status, furniture, amenity_ids, images, description,
   } = req.body;
 
   const updates: Record<string, unknown> = {};
@@ -127,6 +128,7 @@ router.put('/:id', authenticate, async (req: AuthRequest, res: Response) => {
   if (status !== undefined) updates.status = status;
   if (furniture !== undefined) updates.furniture = furniture;
   if (amenity_ids !== undefined) updates.amenity_ids = amenity_ids;
+  if (images !== undefined) updates.images = images;
   if (description !== undefined) updates.description = description;
 
   const { data, error } = await getSupabase()

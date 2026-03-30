@@ -29,7 +29,7 @@ export const BuildingList = ({
         </h3>
         <button 
           onClick={onAdd}
-          className="text-[10px] font-black text-indigo-600 hover:text-indigo-800 uppercase tracking-widest cursor-pointer"
+          className="text-[10px] font-black text-brand-primary hover:text-brand-ink uppercase tracking-widest cursor-pointer"
         >
           + Thêm mới
         </button>
@@ -42,19 +42,23 @@ export const BuildingList = ({
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             onClick={() => onSelect(b.id)}
-            className={`p-5 rounded-[28px] border-2 transition-all group relative cursor-pointer ${
+            className={`p-6 rounded-4xl border border-white/50 transition-all duration-300 group relative cursor-pointer overflow-hidden ${
               selectedId === b.id 
-                ? 'bg-white border-emerald-600 shadow-xl shadow-emerald-900/5' 
-                : 'bg-white border-slate-50 hover:border-slate-200'
+                ? 'bg-linear-to-br from-brand-primary/10 to-transparent shadow-xl shadow-brand-primary/10 ring-1 ring-brand-primary' 
+                : 'bg-white shadow-sm hover:shadow-2xl hover:shadow-brand-ink/5 hover:-translate-y-1'
             }`}
           >
-            <div className="flex items-start justify-between gap-4">
-              <div className={`p-4 rounded-2xl ${selectedId === b.id ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-400 group-hover:text-slate-600'}`}>
+            {/* Glossy highlight effect on active */}
+            {selectedId === b.id && (
+                <div className="absolute inset-x-0 -top-px h-px bg-linear-to-r from-transparent via-brand-primary/50 to-transparent" />
+            )}
+            <div className="flex items-start justify-between gap-4 relative z-10">
+              <div className={`p-4 rounded-3xl transition-colors ${selectedId === b.id ? 'bg-linear-to-br from-brand-primary to-brand-primary/80 text-white shadow-lg shadow-brand-primary/20' : 'bg-slate-50 text-slate-400 group-hover:bg-brand-primary/5 group-hover:text-brand-primary'}`}>
                 <Building2 className="w-6 h-6" />
               </div>
               
               <div className="flex-1 min-w-0">
-                <h4 className="text-lg font-black text-slate-800 truncate mb-1">{b.name}</h4>
+                <h4 className={`text-xl font-black truncate mb-1 transition-colors ${selectedId === b.id ? 'text-brand-ink' : 'text-slate-800'}`}>{b.name}</h4>
                 <div className="flex items-center gap-1.5 text-slate-400 font-bold text-[10px] uppercase tracking-tight">
                   <MapPin className="w-3 h-3 shrink-0" />
                   <span className="truncate">{b.district}, {b.city}</span>
@@ -65,14 +69,14 @@ export const BuildingList = ({
               <div className="flex flex-col gap-2">
                 <button 
                   onClick={(e) => { e.stopPropagation(); setShowQR({ id: b.id, name: b.name }); }}
-                  className="p-2 text-slate-300 hover:text-indigo-500 hover:bg-slate-50 rounded-xl transition-colors"
+                  className="p-2 text-slate-300 hover:text-brand-primary hover:bg-brand-primary/10 rounded-xl transition-colors"
                   title="Quản lý mã QR"
                 >
                   <QrCode className="w-4 h-4" />
                 </button>
                 <button 
                   onClick={(e) => { e.stopPropagation(); onEdit(b); }}
-                  className="p-2 text-slate-300 hover:text-indigo-500 hover:bg-slate-50 rounded-xl transition-colors"
+                  className="p-2 text-slate-300 hover:text-brand-primary hover:bg-brand-primary/10 rounded-xl transition-colors"
                 >
                   <Edit3 className="w-4 h-4" />
                 </button>
@@ -97,8 +101,8 @@ export const BuildingList = ({
                 </div>
               </div>
 
-              <div className={`text-[10px] font-black uppercase tracking-[0.1em] px-3 py-1.5 rounded-lg transition-all ${
-                selectedId === b.id ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-900/20' : 'bg-slate-100 text-slate-400'
+              <div className={`text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-xl transition-all ${
+                selectedId === b.id ? 'bg-brand-ink text-white shadow-lg shadow-brand-ink/20' : 'bg-slate-50 text-slate-400 group-hover:bg-brand-primary/10 group-hover:text-brand-primary'
               }`}>
                 {selectedId === b.id ? 'Đang bật' : 'Xem sơ đồ'}
               </div>
@@ -115,7 +119,7 @@ export const BuildingList = ({
             <p className="text-sm font-bold text-slate-400 mb-6">Bắt đầu bằng cách thêm tòa nhà đầu tiên của bạn</p>
             <button 
               onClick={onAdd}
-              className="px-8 py-3 bg-emerald-700 text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-emerald-900/10 cursor-pointer"
+              className="px-8 py-3 bg-brand-primary text-white rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl shadow-brand-primary/20 hover:bg-brand-dark transition-colors cursor-pointer"
             >
               + Thêm Tòa nhà ngay
             </button>

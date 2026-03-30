@@ -1,0 +1,4 @@
+src/pages/CreateListingPage.tsx(180,9): error TS6133: 'reviewFlowByStatus' is declared but its value is never read.
+src/pages/PricingPage.tsx(2,18): error TS6133: 'AnimatePresence' is declared but its value is never read.
+src/pages/SearchPage.tsx(8,28): error TS6133: 'Lock' is declared but its value is never read.
+src/pages/SearchPage.tsx(11,64): error TS6196: 'HomeDirection' is declared but never used.
