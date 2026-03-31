@@ -69,8 +69,8 @@ import path from 'path';
 const clientBuildPath = path.join(process.cwd(), '../client/dist');
 app.use(express.static(clientBuildPath));
 
-// Catch-all route to serve the React app for non-API requests
-app.get('*', (_req: Request, res: Response) => {
+// Catch-all route to serve the React app for non-API requests (Using Regex for Express 5 compatibility)
+app.get(/^(.*)$/, (_req: Request, res: Response) => {
   res.sendFile(path.join(clientBuildPath, 'index.html'));
 });
 
