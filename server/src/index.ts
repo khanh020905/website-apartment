@@ -71,7 +71,21 @@ app.use(express.static(clientBuildPath));
 
 // Catch-all route to serve the React app for non-API requests (Using Regex for Express 5 compatibility)
 app.get(/^(.*)$/, (_req: Request, res: Response) => {
-  res.sendFile(path.join(clientBuildPath, 'index.html'));
+  const fs = require('fs');
+  const indexPath = path.join(clientBuildPath, 'index.html');
+  
+  if (fs.existsSync(indexPath)) {
+    res.sendFile(indexPath);
+  } else {
+    // If it fails, print exactly what paths Render is seeing to the screen instead of crashing
+    res.status(404).json({
+      error: "Frontend not found",
+      cwd: process.cwd(),
+      dirname: __dirname,
+      attemptedPath: indexPath,
+      clientDirectoryExists: fs.existsSync(clientBuildPath)
+    });
+  }
 });
 
 // Start server
