@@ -1,24 +1,31 @@
 FROM node:20-alpine AS builder
 
 WORKDIR /app
-COPY package*.json ./
-# Install ALL dependencies including dev dependencies to run 'tsc'
-RUN npm install
 
-COPY . .
-RUN npm run build
+# Copy the server's package.json
+COPY server/package*.json ./server/
 
+# Install dependencies (cd into server)
+RUN cd server && npm install
+
+# Copy ONLY what is needed (the shared folder AND the server folder)
+COPY shared ./shared
+COPY server ./server
+
+# Build the server (which will now successfully find the shared folder)
+RUN cd server && npm run build
+
+# --- Stage 2: Production ---
 FROM node:20-alpine
 WORKDIR /app
 
-# Copy package and install ONLY production dependencies
-COPY package*.json ./
-RUN npm install --production
+COPY server/package*.json ./server/
+RUN cd server && npm install --production
 
-# Copy compiled TS from builder
-COPY --from=builder /app/dist ./dist
+# Copy compiled TS
+COPY --from=builder /app/server/dist ./server/dist
 
-# Provide default PORT if not provided by Railway
+WORKDIR /app/server
 ENV PORT=5000
 EXPOSE 5000
 
