@@ -64,28 +64,9 @@ app.get('/api/health', (_req: Request, res: Response) => {
   });
 });
 
-import path from 'path';
-// Serve static frontend files AFTER all API routes
-const clientBuildPath = path.join(process.cwd(), '../client/dist');
-app.use(express.static(clientBuildPath));
-
-// Catch-all route to serve the React app for non-API requests (Using Regex for Express 5 compatibility)
-app.get(/^(.*)$/, (_req: Request, res: Response) => {
-  const fs = require('fs');
-  const indexPath = path.join(clientBuildPath, 'index.html');
-  
-  if (fs.existsSync(indexPath)) {
-    res.sendFile(indexPath);
-  } else {
-    // If it fails, print exactly what paths Render is seeing to the screen instead of crashing
-    res.status(404).json({
-      error: "Frontend not found",
-      cwd: process.cwd(),
-      dirname: __dirname,
-      attemptedPath: indexPath,
-      clientDirectoryExists: fs.existsSync(clientBuildPath)
-    });
-  }
+// Catch-all route for undefined API endpoints
+app.use('*', (_req: Request, res: Response) => {
+  res.status(404).json({ error: 'Endpoint not found' });
 });
 
 // Start server
