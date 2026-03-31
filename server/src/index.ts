@@ -65,7 +65,7 @@ app.get('/api/health', (_req: Request, res: Response) => {
 });
 
 // Catch-all route for undefined API endpoints
-app.use('*', (_req: Request, res: Response) => {
+app.use(/^(.*)$/, (_req: Request, res: Response) => {
   res.status(404).json({ error: 'Endpoint not found' });
 });
 
