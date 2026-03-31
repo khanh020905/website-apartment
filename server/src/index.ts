@@ -46,7 +46,7 @@ app.use(cors({
 }));
 
 // crucial: automatically respond to all OPTIONS preflight requests with 204 instead of letting them fall through to 404!
-app.options('*', cors({
+app.options(/^(.*)$/, cors({
   origin: (origin, callback) => {
     if (!origin) return callback(null, true);
     if (allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
