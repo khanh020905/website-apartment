@@ -64,6 +64,16 @@ app.get('/api/health', (_req: Request, res: Response) => {
   });
 });
 
+import path from 'path';
+// Serve static frontend files AFTER all API routes
+const clientBuildPath = path.join(process.cwd(), '../client/dist');
+app.use(express.static(clientBuildPath));
+
+// Catch-all route to serve the React app for non-API requests
+app.get('*', (_req: Request, res: Response) => {
+  res.sendFile(path.join(clientBuildPath, 'index.html'));
+});
+
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on http://localhost:${PORT}`);
