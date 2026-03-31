@@ -131,7 +131,7 @@ export const FloorPlan = ({
 								</div>
 
 								{/* Rooms Row */}
-								<div className="flex-1 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
+								<div className="flex-1 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
 									{floorGroups[floor]
 										.sort((a, b) => a.room_number.localeCompare(b.room_number))
 										.map((room) => {
@@ -145,10 +145,10 @@ export const FloorPlan = ({
 													className="group relative"
 												>
 													<div
-														className={`aspect-5/4 ${cfg.bg} border ${cfg.border} rounded-3xl p-4 flex flex-col items-center justify-center gap-1.5 transition-all duration-300 hover:shadow-2xl hover:shadow-brand-ink/10 hover:-translate-y-1 cursor-pointer overflow-hidden relative group/card`}
+														className={`min-h-30 ${cfg.bg} border ${cfg.border} rounded-3xl p-4 flex flex-col items-center justify-center gap-2 transition-all duration-300 hover:shadow-2xl hover:shadow-brand-ink/10 hover:-translate-y-1 cursor-pointer overflow-hidden relative group/card`}
 													>
 														<div className="absolute inset-x-0 -top-px h-px bg-linear-to-r from-transparent via-white/50 to-transparent opacity-0 group-hover/card:opacity-100 transition-opacity" />
-														<span className="text-base font-black text-brand-ink tracking-tight z-10">
+														<span className="text-lg font-black text-brand-ink tracking-tight z-10">
 															{room.room_number}
 														</span>
 														<button
@@ -164,12 +164,12 @@ export const FloorPlan = ({
 																	statuses[Math.max(0, currentIndex + 1) % statuses.length];
 																onStatusChange(room.id, next);
 															}}
-															className={`flex items-center gap-1.5 ${cfg.color} text-[10px] font-black uppercase tracking-widest bg-white/60 px-2 py-1 rounded-lg backdrop-blur-sm cursor-pointer hover:bg-white transition-colors`}
+															className={`flex items-center gap-1.5 ${cfg.color} text-[9px] font-black uppercase tracking-wide bg-white/70 px-2.5 py-1.5 rounded-xl backdrop-blur-sm cursor-pointer hover:bg-white transition-colors text-center leading-tight`}
 														>
 															{cfg.icon}
-															{statusLabel.split(" ")[1] || statusLabel}
+															{statusLabel}
 														</button>
-														<p className="text-[10px] text-slate-400 font-bold opacity-0 group-hover:opacity-100 transition-opacity">
+														<p className="text-[9px] text-slate-400 font-bold opacity-0 group-hover:opacity-100 transition-opacity">
 															{room.area}m² • {room.current_occupants}/{room.max_occupants}
 														</p>
 
