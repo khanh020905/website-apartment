@@ -1,20 +1,25 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell } from 'lucide-react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Bell, Search, PlusCircle, MinusCircle, ChevronDown, Settings, Grid } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useBuilding } from '../contexts/BuildingContext';
 import { api } from '../lib/api';
 
 const Navbar = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
-  const { user, loading, signOut, role, canPost, isAdmin } = useAuth();
+  const { user, signOut, role } = useAuth();
+  const { buildings, selectedBuildingId, setSelectedBuildingId } = useBuilding();
+  
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [notificationCount, setNotificationCount] = useState(0);
+  const [search, setSearch] = useState('');
+  const [isBuildingOpen, setIsBuildingOpen] = useState(false);
+  
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const buildingRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (user) {
+    if (user && (role === 'landlord' || role === 'admin')) {
       api.get<{ listings: any[] }>('/api/listings/my').then(({ data }) => {
         if (data && data.listings) {
           const attention = data.listings.filter(l => l.status === 'pending' || l.status === 'rejected').length;
@@ -22,22 +27,28 @@ const Navbar = () => {
         }
       });
     }
-  }, [user]);
+  }, [user, role]);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setDropdownOpen(false);
       }
+      if (buildingRef.current && !buildingRef.current.contains(e.target as Node)) {
+        setIsBuildingOpen(false);
+      }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  const selectedBuildingName = selectedBuildingId 
+    ? buildings.find(b => b.id === selectedBuildingId)?.name || 'N/A'
+    : 'Mọi toà nhà';
+
   const handleSignOut = async () => {
     setDropdownOpen(false);
     await signOut();
-    navigate('/');
   };
 
   const ROLE_LABELS: Record<string, string> = {
@@ -48,230 +59,164 @@ const Navbar = () => {
   };
 
   return (
-    <motion.nav
-      initial={{ y: -60, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-      className="h-[56px] flex items-center justify-between px-6 z-50 relative"
-      style={{ background: 'linear-gradient(135deg, #0b7272 0%, #0f9b9b 50%, #78c9d3 100%)' }}
-    >
-      {/* Left — Logo */}
-      <Link to="/" className="flex items-center gap-2.5 cursor-pointer">
-        <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center shadow-lg shadow-cyan-950/20 overflow-hidden">
-          <img src="/logo.jpg" alt="HomeSpot" className="w-full h-full object-cover" />
-        </div>
-        <span className="text-xl font-extrabold text-white tracking-tight">HomeSpot</span>
-      </Link>
+    <div className="h-[64px] bg-white border-b border-slate-100 flex items-center justify-between px-8 z-40 sticky top-0 shadow-sm shadow-slate-200/50 gap-6">
+      {/* Building Switcher & Search Bar */}
+      <div className="flex-1 flex items-center gap-4 max-w-3xl">
+        {/* Building Switcher */}
+        <div className="relative" ref={buildingRef}>
+          <button
+            onClick={() => setIsBuildingOpen(!isBuildingOpen)}
+            className={`flex items-center gap-3 px-4 py-2 bg-white border-2 rounded-xl text-sm font-black transition-all cursor-pointer min-w-[200px] ${
+              isBuildingOpen ? 'border-amber-400 shadow-lg shadow-amber-400/10' : 'border-slate-100 hover:border-slate-200'
+            }`}
+          >
+            <span className="text-slate-800 truncate">{selectedBuildingName}</span>
+            <ChevronDown className={`w-4 h-4 ml-auto text-slate-400 transition-transform ${isBuildingOpen ? 'rotate-180 text-amber-500' : ''}`} />
+          </button>
 
-      {/* Center — Nav links */}
-      <div className="hidden md:flex items-center gap-6">
-        <Link to="/search" className={`text-sm font-medium transition-colors ${location.pathname === '/search' ? 'text-white' : 'text-white/70 hover:text-white'}`}>
-          Tìm kiếm
-        </Link>
-        {canPost && (
-          <>
-            <Link to="/dashboard" className={`text-sm font-medium transition-colors ${location.pathname === '/dashboard' ? 'text-white' : 'text-white/70 hover:text-white'}`}>
-              Bảng điều khiển
-            </Link>
-            <Link to="/my-listings" className={`text-sm font-medium transition-colors ${location.pathname === '/my-listings' ? 'text-white' : 'text-white/70 hover:text-white'}`}>
-              Tin của tôi
-            </Link>
-          </>
-        )}
-        <Link to="/pricing" className={`text-sm font-medium transition-colors ${location.pathname === '/pricing' ? 'text-white' : 'text-white/70 hover:text-white'}`}>
-          Gói dịch vụ
-        </Link>
-        {isAdmin && (
-          <Link to="/admin" className={`text-sm font-medium transition-colors ${location.pathname === '/admin' ? 'text-white' : 'text-white/70 hover:text-white'}`}>
-            Quản trị
-          </Link>
-        )}
-        {!canPost && !loading && (
-          <Link to="/create-listing" className={`text-sm font-medium transition-colors ${location.pathname === '/create-listing' ? 'text-white' : 'text-white/70 hover:text-white'}`}>
-            Đăng tin
-          </Link>
-        )}
+          <AnimatePresence>
+            {isBuildingOpen && (
+              <motion.div
+                initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                transition={{ duration: 0.15 }}
+                className="absolute left-0 top-[calc(100%+8px)] w-[260px] bg-white rounded-2xl shadow-2xl shadow-black/10 border border-slate-100 overflow-hidden z-50 py-1"
+              >
+                <div className="px-3 py-2 border-b border-slate-50">
+                  <div className="relative">
+                    <input 
+                      type="text" 
+                      placeholder="Tìm kiếm tòa nhà..." 
+                      className="w-full pl-9 pr-3 py-1.5 bg-slate-50 border-none rounded-lg text-xs font-bold focus:ring-0"
+                    />
+                    <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  </div>
+                </div>
+                <div className="max-h-[300px] overflow-y-auto py-1 scrollbar-hide">
+                  <button
+                    onClick={() => { setSelectedBuildingId(null); setIsBuildingOpen(false); }}
+                    className={`w-full text-left px-4 py-2.5 text-sm font-bold transition-colors ${
+                      selectedBuildingId === null ? 'bg-amber-50 text-amber-700' : 'text-slate-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    Mọi toà nhà
+                  </button>
+                  {buildings.map((b) => (
+                    <button
+                      key={b.id}
+                      onClick={() => { setSelectedBuildingId(b.id); setIsBuildingOpen(false); }}
+                      className={`w-full text-left px-4 py-2.5 text-sm font-bold transition-colors ${
+                        selectedBuildingId === b.id ? 'bg-amber-50 text-amber-700' : 'text-slate-600 hover:bg-slate-50'
+                      }`}
+                    >
+                      {b.name}
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Search Bar */}
+        <div className="relative flex-1 group">
+          <input
+            type="text"
+            placeholder="Tìm kiếm khu vực, dự án, tên phòng..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-teal-600/5 focus:border-teal-600/30 transition-all"
+          />
+          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 group-focus-within:text-teal-600 transition-colors" />
+        </div>
       </div>
 
-      {/* Right — Actions */}
-      <div className="flex items-center gap-4">
-        {canPost && (
-          <Link to="/create-listing">
-            <motion.button
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-                className="flex items-center gap-2 px-5 py-2 bg-white text-[#0b7272] rounded-full text-sm font-semibold hover:bg-white/90 transition-all cursor-pointer shadow-sm"
-              >
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <circle cx="12" cy="12" r="10" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v8m4-4H8" />
-              </svg>
-              Đăng tin
-            </motion.button>
-          </Link>
-        )}
-        {!canPost && !loading && (
-          <Link to="/create-listing">
-            <motion.button
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-              className="flex items-center gap-2 px-5 py-2 border border-white/50 text-white rounded-full text-sm font-semibold hover:bg-white/10 transition-all cursor-pointer"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <circle cx="12" cy="12" r="10" />
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v8m4-4H8" />
-              </svg>
-              Đăng tin
-            </motion.button>
-          </Link>
-        )}
+      {/* Right Actions */}
+      <div className="flex items-center gap-6">
+        {/* Income/Expense Buttons (Mock) */}
+        <div className="hidden md:flex items-center gap-3 pr-6 border-r border-slate-100">
+          <motion.button 
+            whileHover={{ scale: 1.02 }} 
+            whileTap={{ scale: 0.98 }}
+            className="flex items-center gap-2 px-4 py-2 bg-amber-400/10 text-amber-600 rounded-xl text-xs font-black uppercase tracking-widest cursor-pointer"
+          >
+            <PlusCircle className="w-4 h-4" />
+            <span>Thu nhập</span>
+          </motion.button>
+          <motion.button 
+            whileHover={{ scale: 1.02 }} 
+            whileTap={{ scale: 0.98 }}
+            className="flex items-center gap-2 px-4 py-2 bg-neutral-100 text-neutral-500 rounded-xl text-xs font-black uppercase tracking-widest cursor-pointer"
+          >
+            <MinusCircle className="w-4 h-4" />
+            <span>Chi phí</span>
+          </motion.button>
+        </div>
 
-        <Link to="/contact" className="flex items-center gap-1.5 text-sm text-white/70 hover:text-white transition-colors">
-          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-          </svg>
-          Liên hệ
-        </Link>
-
-        {user && (
-          <Link to="/my-listings" className="relative p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-all">
+        {/* Icons */}
+        <div className="flex items-center gap-1.5 pt-0.5">
+          <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-xl transition-all cursor-pointer">
+            <Grid className="w-5 h-5" />
+          </button>
+          <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-xl transition-all relative cursor-pointer">
             <Bell className="w-5 h-5" />
             {notificationCount > 0 && (
-              <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-orange-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center border-2 border-[#0f9b9b]">
-                {notificationCount}
-              </span>
+              <span className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full border-2 border-white shadow-sm" />
             )}
-          </Link>
-        )}
+          </button>
+          <button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-xl transition-all cursor-pointer">
+            <Settings className="w-5 h-5" />
+          </button>
+        </div>
 
-        {loading ? null : user ? (
-          <div className="relative" ref={dropdownRef}>
+        {/* Profile */}
+        {user && (
+          <div className="relative pl-6 border-l border-slate-100" ref={dropdownRef}>
             <button
               onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="flex items-center gap-2 cursor-pointer"
+              className="flex items-center gap-3 h-full cursor-pointer group"
             >
-              <div className="w-9 h-9 bg-[#0f9b9b] rounded-full flex items-center justify-center text-white text-sm font-bold hover:ring-2 hover:ring-white/30 transition-all">
-                {(user.user_metadata?.full_name?.[0] || user.email?.[0] || 'U').toUpperCase()}
+              <div className="text-right hidden sm:block">
+                <p className="text-sm font-black text-slate-800 leading-tight truncate max-w-[120px]">
+                  {user.user_metadata?.full_name || 'Người dùng'}
+                </p>
+                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                  {ROLE_LABELS[role] || role}
+                </p>
               </div>
-              <span className="hidden md:block text-xs text-cyan-100 font-semibold">{ROLE_LABELS[role] || role}</span>
+              <div className="w-10 h-10 bg-teal-600 rounded-full flex items-center justify-center text-white ring-4 ring-teal-50 group-hover:ring-teal-100 transition-all shadow-sm">
+                <span className="text-sm font-black italic">{(user.user_metadata?.full_name?.[0] || 'U').toUpperCase()}</span>
+              </div>
+              <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${dropdownOpen ? 'rotate-180' : ''}`} />
             </button>
 
             <AnimatePresence>
               {dropdownOpen && (
                 <motion.div
-                  initial={{ opacity: 0, y: -8, scale: 0.95 }}
+                  initial={{ opacity: 0, y: 8, scale: 0.95 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -8, scale: 0.95 }}
+                  exit={{ opacity: 0, y: 8, scale: 0.95 }}
                   transition={{ duration: 0.15 }}
-                  className="absolute right-0 top-[calc(100%+8px)] w-[220px] bg-white rounded-xl shadow-xl shadow-black/10 border border-slate-100 overflow-hidden z-50"
+                  className="absolute right-0 top-[calc(100%+8px)] w-[200px] bg-white rounded-2xl shadow-2xl shadow-black/10 border border-slate-100 overflow-hidden z-50 py-1"
                 >
-                  <div className="px-4 py-3 border-b border-slate-100">
-                    <p className="text-sm font-bold text-slate-800 truncate">
-                      {user.user_metadata?.full_name || 'Người dùng'}
-                    </p>
-                    <p className="text-xs text-slate-400 truncate">{user.email}</p>
-                    <span className="inline-block mt-1 px-2 py-0.5 bg-cyan-100 text-[#0b7272] text-[10px] font-bold rounded-full">
-                      {ROLE_LABELS[role] || role}
-                    </span>
-                  </div>
-
-                  <div className="py-1">
-                    <Link to="/profile" onClick={() => setDropdownOpen(false)}
-                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
-                      <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                      </svg>
-                      Hồ sơ cá nhân
-                    </Link>
-                    {canPost && (
-                      <>
-                        <Link to="/dashboard" onClick={() => setDropdownOpen(false)}
-                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
-                          <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zm0 9.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zm9.75-9.75A2.25 2.25 0 0115.75 3.75H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6z" />
-                          </svg>
-                          Bảng điều khiển
-                        </Link>
-                        <Link to="/my-listings" onClick={() => setDropdownOpen(false)}
-                          className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
-                          <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-                          </svg>
-                          Tin đăng của tôi
-                        </Link>
-                      </>
-                    )}
-                    {isAdmin && (
-                      <Link to="/admin" onClick={() => setDropdownOpen(false)}
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
-                        <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-                        </svg>
-                        Quản trị
-                      </Link>
-                    )}
-                    <Link to="/search" onClick={() => setDropdownOpen(false)}
-                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
-                      <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-                      </svg>
-                      Tìm kiếm nâng cao
-                    </Link>
-                    <Link to="/create-listing" onClick={() => setDropdownOpen(false)}
-                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
-                      <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                      </svg>
-                      Đăng tin cho thuê
-                    </Link>
-                    <Link to="/pricing" onClick={() => setDropdownOpen(false)}
-                      className="flex items-center gap-3 px-4 py-2.5 text-sm text-teal-600 font-bold hover:bg-teal-50 transition-colors">
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v12m-3-2.818l.879.659c1.171.879 3.07.879 4.242 0 1.172-.879 1.172-2.303 0-3.182C13.536 12.219 12.768 12 12 12c-.725 0-1.45-.22-2.003-.659-1.106-.879-1.106-2.303 0-3.182s2.9-.879 4.006 0l.415.33M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      Nâng cấp tài khoản
-                    </Link>
-                  </div>
-
-                  <div className="border-t border-slate-100 py-1">
-                    <button
-                      onClick={handleSignOut}
-                      className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
-                    >
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
-                      </svg>
-                      Đăng xuất
-                    </button>
-                  </div>
+                  <Link to="/profile" onClick={() => setDropdownOpen(false)}
+                    className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
+                    Hồ sơ cá nhân
+                  </Link>
+                  <button
+                    onClick={handleSignOut}
+                    className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors cursor-pointer text-left"
+                  >
+                    Đăng xuất
+                  </button>
                 </motion.div>
               )}
             </AnimatePresence>
           </div>
-        ) : (
-          <>
-            <Link to="/login" className={`text-sm font-medium transition-colors ${
-              location.pathname === '/login' ? 'text-white underline underline-offset-4' : 'text-white/80 hover:text-white'
-            }`}>
-              Đăng nhập
-            </Link>
-            <Link to="/register">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className={`px-5 py-1.5 text-sm rounded-lg font-semibold transition-all cursor-pointer ${
-                  location.pathname === '/register'
-                    ? 'bg-white text-[#0b7272]'
-                    : 'border border-white/50 text-white hover:bg-white/10'
-                }`}
-              >
-                Đăng ký
-              </motion.button>
-            </Link>
-          </>
         )}
       </div>
-    </motion.nav>
+    </div>
   );
 };
 

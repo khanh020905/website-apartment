@@ -16,6 +16,11 @@ import CreateListingPage from "./pages/CreateListingPage";
 import CreateBuildingPage from "./pages/CreateBuildingPage";
 import MyListingsPage from "./pages/MyListingsPage";
 import DashboardPage from "./pages/DashboardPage";
+import CustomerPage from "./pages/CustomerPage";
+import VehiclePage from "./pages/VehiclePage";
+import BookingPage from "./pages/BookingPage";
+import BookingHistoryPage from "./pages/BookingHistoryPage";
+import AppointmentPage from "./pages/AppointmentPage";
 import AdminVerificationPage from "./pages/AdminVerificationPage";
 import BuildingStatusPage from "./pages/BuildingStatusPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
@@ -117,116 +122,153 @@ function HomePage() {
 	);
 }
 
+import AppSidebar from "./components/AppSidebar";
+
+import { BuildingProvider } from "./contexts/BuildingContext";
+
 function App() {
 	return (
 		<Router>
 			<AuthProvider>
-				<div className="h-screen w-screen flex flex-col overflow-hidden font-sans bg-white">
+				<BuildingProvider>
+					<div className="h-screen w-screen flex overflow-hidden font-sans bg-white">
 					<Routes>
-						{/* QR Status page — no navbar, standalone  */}
+						{/* QR Status page — no navbar/sidebar, standalone  */}
 						<Route
 							path="/qr/:code"
 							element={<BuildingStatusPage />}
 						/>
 
-						{/* All other routes with navbar */}
+						{/* All other routes with layout */}
 						<Route
 							path="*"
 							element={
 								<>
-									<Navbar />
-									<Routes>
-										<Route
-											path="/"
-											element={<HomePage />}
-										/>
-										<Route
-											path="/register"
-											element={<RegisterPage />}
-										/>
-										<Route
-											path="/login"
-											element={<LoginPage />}
-										/>
-										<Route
-											path="/contact"
-											element={<ContactPage />}
-										/>
-										<Route
-											path="/search"
-											element={<SearchPage />}
-										/>
-										<Route
-											path="/forgot-password"
-											element={<ForgotPasswordPage />}
-										/>
-										<Route
-											path="/pricing"
-											element={<PricingPage />}
-										/>
-										<Route
-											path="/listings/:id"
-											element={<ListingDetailPage />}
-										/>
+									<AppSidebar />
+									<div className="flex-1 flex flex-col overflow-hidden bg-slate-50">
+										<Navbar />
+										<main className="flex-1 overflow-y-auto">
+											<Routes>
+												<Route
+													path="/"
+													element={<HomePage />}
+												/>
+												<Route
+													path="/register"
+													element={<RegisterPage />}
+												/>
+												<Route
+													path="/login"
+													element={<LoginPage />}
+												/>
+												<Route
+													path="/contact"
+													element={<ContactPage />}
+												/>
+												<Route
+													path="/search"
+													element={<SearchPage />}
+												/>
+												<Route
+													path="/forgot-password"
+													element={<ForgotPasswordPage />}
+												/>
+												<Route
+													path="/pricing"
+													element={<PricingPage />}
+												/>
+												<Route
+													path="/listings/:id"
+													element={<ListingDetailPage />}
+												/>
 
-										{/* Authenticated routes */}
-										<Route
-											path="/create-building"
-											element={
-												<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-													<CreateBuildingPage />
-												</ProtectedRoute>
-											}
-										/>
-										<Route
-											path="/create-listing"
-											element={
-												<ProtectedRoute>
-													<CreateListingPage />
-												</ProtectedRoute>
-											}
-										/>
-										<Route
-											path="/profile"
-											element={
-												<ProtectedRoute>
-													<ProfilePage />
-												</ProtectedRoute>
-											}
-										/>
-										<Route
-											path="/my-listings"
-											element={
-												<ProtectedRoute>
-													<MyListingsPage />
-												</ProtectedRoute>
-											}
-										/>
-										<Route
-											path="/dashboard"
-											element={
-												<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-													<DashboardPage />
-												</ProtectedRoute>
-											}
-										/>
-										<Route
-											path="/admin"
-											element={
-												<ProtectedRoute roles={["admin"]}>
-													<AdminVerificationPage />
-												</ProtectedRoute>
-											}
-										/>
-									</Routes>
+												{/* Authenticated routes */}
+												<Route
+													path="/create-building"
+													element={
+														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+															<CreateBuildingPage />
+														</ProtectedRoute>
+													}
+												/>
+												<Route
+													path="/create-listing"
+													element={
+														<ProtectedRoute>
+															<CreateListingPage />
+														</ProtectedRoute>
+													}
+												/>
+												<Route
+													path="/profile"
+													element={
+														<ProtectedRoute>
+															<ProfilePage />
+														</ProtectedRoute>
+													}
+												/>
+												<Route
+													path="/my-listings"
+													element={
+														<ProtectedRoute>
+															<MyListingsPage />
+														</ProtectedRoute>
+													}
+												/>
+												<Route
+													path="/dashboard"
+													element={
+														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+															<DashboardPage />
+														</ProtectedRoute>
+													}
+												/>
+												<Route
+													path="/customers"
+													element={
+														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+															<CustomerPage />
+														</ProtectedRoute>
+													}
+												/>
+												<Route
+													path="/customers/vehicles"
+													element={
+														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+															<VehiclePage />
+														</ProtectedRoute>
+													}
+												/>
+												<Route
+													path="/bookings"
+													element={
+														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+															<BookingPage />
+														</ProtectedRoute>
+													}
+												/>
+												<Route path="/bookings/history" element={<ProtectedRoute roles={["landlord", "broker", "admin"]}><BookingHistoryPage /></ProtectedRoute>} />
+												<Route path="/bookings/appointments" element={<ProtectedRoute roles={["landlord", "broker", "admin"]}><AppointmentPage /></ProtectedRoute>} />
+												<Route
+													path="/admin"
+													element={
+														<ProtectedRoute roles={["admin"]}>
+															<AdminVerificationPage />
+														</ProtectedRoute>
+													}
+												/>
+											</Routes>
+										</main>
+									</div>
 								</>
 							}
 						/>
 					</Routes>
 				</div>
-			</AuthProvider>
-		</Router>
-	);
+			</BuildingProvider>
+		</AuthProvider>
+	</Router>
+);
 }
 
 export default App;
