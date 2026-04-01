@@ -193,14 +193,14 @@ export default function SearchPage() {
 	return (
 		<div className="flex-1 flex flex-col bg-brand-bg overflow-hidden">
 			{/* Top Hero Banner */}
-			<div className="shrink-0 bg-linear-to-r from-brand-ink to-brand-primary relative pt-10 -mt-5 pb-8 px-6 overflow-hidden">
+			<div className="shrink-0 bg-linear-to-r from-brand-ink to-brand-primary relative pt-6 -mt-3 pb-5 px-6 overflow-hidden">
 				{/* Decorative shapes */}
 				<div className="absolute top-0 right-0 w-125 h-125 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
 				<div className="absolute bottom-0 left-0 w-64 h-64 bg-brand-light/20 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2" />
 
 				<div className="max-w-7xl mx-auto relative z-10 pt-4">
-					<div className="mb-8 text-center lg:text-left">
-						<h1 className="text-3xl md:text-4xl font-black text-white tracking-wide mb-2 drop-shadow-sm">
+					<div className="mb-5 text-center lg:text-left">
+						<h1 className="text-2xl md:text-3xl font-black text-white tracking-wide mb-2 drop-shadow-sm">
 							Tìm kiếm không gian hoàn hảo
 						</h1>
 						<p className="text-brand-light font-bold text-sm md:text-base tracking-wide">
@@ -210,8 +210,8 @@ export default function SearchPage() {
 
 					<div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center justify-between">
 						<div className="flex-1 relative group">
-							<div className="absolute inset-y-0 left-6 flex items-center pointer-events-none transition-colors group-focus-within:text-brand-primary text-slate-400">
-								<Search className="w-6 h-6" />
+							<div className="absolute inset-y-0 left-4 flex items-center pointer-events-none transition-colors group-focus-within:text-brand-primary text-slate-400">
+								<Search className="w-5 h-5" />
 							</div>
 							<input
 								type="text"
@@ -221,34 +221,34 @@ export default function SearchPage() {
 									setKeyword(e.target.value);
 									setPage(1);
 								}}
-								className="w-full h-16 pl-16 pr-6 bg-white rounded-4xl font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-brand-light/30 shadow-2xl transition-all text-base lg:text-lg"
+								className="w-full h-12 pl-12 pr-6 bg-white rounded-4xl font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-brand-light/30 shadow-2xl transition-all text-sm lg:text-base"
 							/>
 						</div>
 
 						<div className="flex items-center gap-3">
 							<button
 								onClick={() => setShowFilters(!showFilters)}
-								className={`h-16 px-8 rounded-4xl font-black uppercase tracking-widest text-[11px] lg:text-xs flex items-center gap-3 transition-all cursor-pointer ${showFilters ?
+								className={`h-12 px-6 rounded-4xl font-black uppercase tracking-widest text-[11px] lg:text-xs flex items-center gap-3 transition-all cursor-pointer ${showFilters ?
 										"bg-white text-brand-ink shadow-xl"
 										: "bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20"
 									}`}
 							>
-								<Sliders className="w-5 h-5" />
+								<Sliders className="w-4 h-4" />
 								<span><span className="hidden sm:inline">Bộ lọc</span> nâng cao</span>
 							</button>
 
-							<div className="p-1.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-4xl hidden md:flex items-center gap-1 h-16">
+							<div className="p-1 bg-white/10 backdrop-blur-md border border-white/20 rounded-4xl hidden md:flex items-center gap-1 h-12">
 								<button
 									onClick={() => setViewMode("grid")}
-									className={`p-3 rounded-3xl transition-all cursor-pointer ${viewMode === "grid" ? "bg-white text-brand-primary shadow-md" : "text-white/70 hover:text-white hover:bg-white/10"}`}
+									className={`p-2.5 rounded-3xl transition-all cursor-pointer ${viewMode === "grid" ? "bg-white text-brand-primary shadow-md" : "text-white/70 hover:text-white hover:bg-white/10"}`}
 								>
-									<LayoutGrid className="w-6 h-6" />
+									<LayoutGrid className="w-5 h-5" />
 								</button>
 								<button
 									onClick={() => setViewMode("list")}
-									className={`p-3 rounded-3xl transition-all cursor-pointer ${viewMode === "list" ? "bg-white text-brand-primary shadow-md" : "text-white/70 hover:text-white hover:bg-white/10"}`}
+									className={`p-2.5 rounded-3xl transition-all cursor-pointer ${viewMode === "list" ? "bg-white text-brand-primary shadow-md" : "text-white/70 hover:text-white hover:bg-white/10"}`}
 								>
-									<List className="w-6 h-6" />
+									<List className="w-5 h-5" />
 								</button>
 							</div>
 						</div>
