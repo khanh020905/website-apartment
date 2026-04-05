@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
@@ -44,16 +44,9 @@ export default function CreateBuildingPage() {
 	const [success, setSuccess] = useState("");
 	const [step, setStep] = useState(1); // 1=basic, 2=location, 3=images, 4=preview
 	const [uploadingImages, setUploadingImages] = useState(false);
-	const [loadingMapConfig, setLoadingMapConfig] = useState(true);
 	const [reverseLoading, setReverseLoading] = useState(false);
 	const [dragIndex, setDragIndex] = useState<number | null>(null);
 	const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
-	const [mapConfig, setMapConfig] = useState({
-		tileUrl: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-		attribution: "&copy; OpenStreetMap contributors",
-		maxZoom: 20,
-	});
-
 	// Form state
 	const [form, setForm] = useState({
 		name: "",
@@ -67,21 +60,6 @@ export default function CreateBuildingPage() {
 		lng: 0,
 	});
 	const [imageUrls, setImageUrls] = useState<string[]>([]);
-
-	useEffect(() => {
-		api
-			.get<{ tileUrl: string; attribution: string; maxZoom: number }>("/api/map/config")
-			.then(({ data }) => {
-				if (data) {
-					setMapConfig({
-						tileUrl: data.tileUrl,
-						attribution: data.attribution,
-						maxZoom: data.maxZoom,
-					});
-				}
-				setLoadingMapConfig(false);
-			});
-	}, []);
 
 	const updateForm = useCallback((field: string, value: unknown) => {
 		setForm((prev) => ({ ...prev, [field]: value }));
@@ -346,27 +324,24 @@ export default function CreateBuildingPage() {
 									Chọn vị trí trực tiếp trên bản đồ (click vào vị trí tòa nhà)
 								</p>
 								<div className="h-72 rounded-xl overflow-hidden border border-slate-200">
-									{loadingMapConfig ?
-										<div className="h-full w-full flex items-center justify-center text-slate-500 text-sm">
-											Đang tải bản đồ...
-										</div>
-									:	<MapContainer
-											center={[form.lat || 16.047079, form.lng || 108.20623]}
-											zoom={13}
-											className="w-full h-full"
-											scrollWheelZoom
-										>
-											<TileLayer
-												url={mapConfig.tileUrl}
-												attribution={mapConfig.attribution}
-												maxZoom={mapConfig.maxZoom}
-											/>
-											<LocationPicker
-												value={{ lat: form.lat, lng: form.lng }}
-												onPick={handleMapPick}
-											/>
-										</MapContainer>
-									}
+									<MapContainer
+										center={[form.lat || 16.047079, form.lng || 108.20623]}
+										zoom={13}
+										className="w-full h-full"
+										scrollWheelZoom
+										attributionControl={false}
+									>
+										<TileLayer
+											url="https://mt1.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}"
+											attribution="Dữ liệu bản đồ &copy;2026 Google, Hình ảnh &copy;2026 Airbus, CNES / Airbus, Maxar Technologies"
+											maxZoom={20}
+											subdomains={['mt0', 'mt1', 'mt2', 'mt3']}
+										/>
+										<LocationPicker
+											value={{ lat: form.lat, lng: form.lng }}
+											onPick={handleMapPick}
+										/>
+									</MapContainer>
 								</div>
 								<p className="mt-2 text-xs text-slate-600">
 									Tọa độ GPS: <span className="font-semibold">{Number(form.lat).toFixed(6)}</span>,{" "}

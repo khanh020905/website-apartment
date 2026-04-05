@@ -16,7 +16,7 @@ export type PropertyType = 'phong_tro' | 'can_ho_mini' | 'chung_cu' | 'nha_nguye
 
 export type FurnitureStatus = 'full' | 'basic' | 'none';
 
-export type ContractStatus = 'active' | 'expired' | 'terminated' | 'pending';
+export type ContractStatus = 'active' | 'expired' | 'terminated' | 'pending' | 'confirmed' | 'completed' | 'cancelled';
 
 export type ReviewAction = 'approved' | 'rejected';
 
@@ -174,6 +174,8 @@ export interface ListingReview {
   reviewed_at: string;
 }
 
+export type ResidenceStatus = 'pending' | 'completed' | 'not_registered';
+
 export interface Contract {
   id: string;
   room_id: string;
@@ -181,6 +183,9 @@ export interface Contract {
   tenant_name: string;
   tenant_phone: string | null;
   tenant_email: string | null;
+  tenant_gender: 'male' | 'female' | 'other' | null;
+  tenant_id_number: string | null;
+  residence_status: ResidenceStatus | null;
   start_date: string;
   end_date: string | null;
   rent_amount: number;
