@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:tra-my.smartos.space)",
+      "Bash(npx playwright:*)",
+      "Bash(where playwright:*)",
+      "Bash(npx --yes playwright --version)",
+      "Bash(node -e \"const p = require\\('C:/Users/ducan/AppData/Roaming/npm/node_modules/playwright'\\); console.log\\('found'\\)\")",
+      "Read(//c/tmp/**)",
+      "Bash(npm init:*)",
+      "Bash(npm install:*)",
+      "Bash(node -e ':*)"
+    ]
+  }
+}

@@ -1,205 +1,233 @@
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { 
-  CalendarDays, 
-  Search, 
-  Filter, 
-  Plus, 
-  Clock, 
-  CheckCircle2, 
-  XCircle,
-  MoreVertical,
-  Building2,
-  Home,
-  Phone,
-  ChevronLeft,
-  ChevronRight
+import { useState, useEffect, useCallback } from "react";
+import {
+  CalendarDays,
+  Globe,
+  List,
+  Calendar as CalendarIcon,
+  ChevronDown,
+  Users,
 } from "lucide-react";
+import { api } from "../lib/api";
+import type { BuildingWithRooms, Room, RoomStatus } from "../../../shared/types";
+import { useBuilding } from "../contexts/BuildingContext";
 
-interface Booking {
-  id: string;
-  customer_name: string;
-  phone: string;
-  room_number: string;
-  building_name: string;
-  check_in: string;
-  status: 'confirmed' | 'pending' | 'cancelled';
-  deposit: number;
-}
+const STATUS = {
+  available: {
+    label: "Đang trống",
+    colorClass: "bg-emerald-500",
+    borderColorClass: "border-emerald-500",
+  },
+  occupied: {
+    label: "Đang sử dụng",
+    colorClass: "bg-amber-400",
+    borderColorClass: "border-amber-400",
+  },
+  maintenance: {
+    label: "Đang bảo trì",
+    colorClass: "bg-slate-300",
+    borderColorClass: "border-slate-300",
+  },
+} as const;
 
 const BookingPage = () => {
-  const [loading] = useState(false);
-  const [search, setSearch] = useState("");
+  const { selectedBuildingId } = useBuilding();
 
-  const mockBookings: Booking[] = [
-    {
-      id: "1",
-      customer_name: "Nguyễn Văn A",
-      phone: "0901234567",
-      room_number: "P.101",
-      building_name: "Tòa nhà Trà My",
-      check_in: "2024-04-10",
-      status: 'confirmed',
-      deposit: 1000000
-    },
-    {
-      id: "2",
-      customer_name: "Trần Thị B",
-      phone: "0987654321",
-      room_number: "P.202",
-      building_name: "Tòa nhà Trà My",
-      check_in: "2024-04-12",
-      status: 'pending',
-      deposit: 500000
-    }
-  ];
+  const [buildings, setBuildings] = useState<BuildingWithRooms[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const d = new Date();
+    return d.toISOString().split("T")[0];
+  });
+  const [selectedFloor, setSelectedFloor] = useState<number | "all">("all");
+  const [selectedRoom, setSelectedRoom] = useState("");
 
-  const stats = [
-    { label: "Tổng đặt phòng", value: 42, icon: CalendarDays, color: "text-blue-600", bg: "bg-blue-50" },
-    { label: "Chờ xác nhận", value: 8, icon: Clock, color: "text-amber-600", bg: "bg-amber-50" },
-    { label: "Đã xác nhận", value: 28, icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-50" },
-    { label: "Đã hủy", value: 6, icon: XCircle, color: "text-rose-600", bg: "bg-rose-50" },
-  ];
+  const fetchBuildings = useCallback(async () => {
+    setLoading(true);
+    const params = selectedBuildingId ? `?building_id=${selectedBuildingId}` : "";
+    const { data } = await api.get<{ buildings: BuildingWithRooms[] }>(`/api/buildings${params}`);
+    if (data) setBuildings(data.buildings);
+    setLoading(false);
+  }, [selectedBuildingId]);
+
+  useEffect(() => {
+    fetchBuildings();
+  }, [fetchBuildings]);
+
+  const currentBuilding = selectedBuildingId
+    ? buildings.find((b) => b.id === selectedBuildingId) ?? buildings[0]
+    : buildings[0];
+
+  const allRooms: Room[] = currentBuilding?.rooms ?? [];
+  const floors = [...new Set(allRooms.map((r) => r.floor || 1))].sort((a, b) => a - b);
+
+  const filteredRooms = allRooms.filter((r) => {
+    if (selectedFloor !== "all" && (r.floor || 1) !== selectedFloor) return false;
+    if (selectedRoom && r.room_number !== selectedRoom) return false;
+    return true;
+  });
+
+  const byFloor: Record<number, Room[]> = {};
+  filteredRooms.forEach((r) => {
+    const f = r.floor || 1;
+    if (!byFloor[f]) byFloor[f] = [];
+    byFloor[f].push(r);
+  });
+  const sortedFloors = Object.keys(byFloor).map(Number).sort((a, b) => a - b);
+
+  const formatDate = (iso: string) => {
+    const [y, m, d] = iso.split("-");
+    return `${d}/${m}/${y}`;
+  };
 
   return (
-    <div className="p-8 space-y-8 bg-slate-50 min-h-full">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-black text-slate-900 tracking-tight">Đặt phòng</h1>
-        <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 px-6 py-2 bg-[#fcd34d] text-black rounded-xl text-sm font-black transition-all hover:shadow-lg hover:shadow-yellow-500/20 cursor-pointer">
-            <Plus className="w-5 h-5" />
-            Tạo đặt phòng
+    <div className="flex flex-col h-full bg-white text-slate-800">
+      {/* Page Header matching the screenshot */}
+      <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+        <h1 className="text-xl font-bold">Đặt phòng</h1>
+        <div className="flex items-center gap-2">
+          {/* View Toggle Icons */}
+          <button className="p-2 border border-slate-200 rounded text-slate-500 hover:bg-slate-50 bg-slate-100">
+            <Globe className="w-4 h-4 text-slate-700" />
+          </button>
+          <button className="p-2 border border-slate-200 rounded text-slate-500 hover:bg-slate-50">
+            <CalendarIcon className="w-4 h-4" />
+          </button>
+          <button className="p-2 border border-slate-200 rounded text-slate-500 hover:bg-slate-50">
+            <List className="w-4 h-4" />
           </button>
         </div>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.1 }}
-            className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center justify-between"
+      {/* Filters */}
+      <div className="flex items-center px-6 py-3 gap-3">
+        {/* Date */}
+        <label className="relative flex items-center gap-2 px-3 py-2 border border-slate-200 rounded text-sm text-slate-600 bg-white min-w-[150px] cursor-pointer">
+          <span className="text-slate-800">{formatDate(selectedDate)}</span>
+          <CalendarDays className="w-4 h-4 ml-auto text-slate-400" />
+          <input
+            type="date"
+            value={selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value)}
+            className="absolute inset-0 opacity-0 cursor-pointer w-full"
+          />
+        </label>
+
+        {/* Floor Select - Built as a native select to match simple dropdown style */}
+        <div className="relative border border-slate-200 rounded bg-white min-w-[150px]">
+          <select
+            value={selectedFloor}
+            onChange={(e) => setSelectedFloor(e.target.value === "all" ? "all" : Number(e.target.value))}
+            className="w-full appearance-none bg-transparent px-3 py-2 text-sm text-slate-600 focus:outline-none"
           >
-            <div>
-              <p className="text-3xl font-black text-slate-900 mb-1">{stat.value}</p>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{stat.label}</p>
-            </div>
-            <div className={`p-4 rounded-2xl ${stat.bg} ${stat.color}`}>
-              <stat.icon className="w-6 h-6" />
-            </div>
-          </motion.div>
-        ))}
+            <option value="all">Chọn tầng</option>
+            {floors.map((f) => (
+              <option key={f} value={f}>
+                Tầng {f}
+              </option>
+            ))}
+          </select>
+          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+        </div>
+
+        {/* Room Select */}
+        <div className="relative border border-slate-200 rounded bg-white min-w-[150px]">
+          <select
+            value={selectedRoom}
+            onChange={(e) => setSelectedRoom(e.target.value)}
+            className="w-full appearance-none bg-transparent px-3 py-2 text-sm text-slate-600 focus:outline-none"
+          >
+            <option value="">Chọn phòng</option>
+            {allRooms.map((r) => (
+              <option key={r.id} value={r.room_number}>
+                {r.room_number}
+              </option>
+            ))}
+          </select>
+          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+        </div>
       </div>
 
-      {/* Table Section */}
-      <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
-        {/* Filters */}
-        <div className="p-6 border-b border-slate-50 flex flex-wrap items-center gap-4">
-          <div className="relative flex-1 min-w-[300px]">
-            <input
-              type="text"
-              placeholder="Tìm kiếm theo tên khách, số điện thoại..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium focus:outline-none focus:ring-4 focus:ring-teal-600/5 focus:border-teal-600/30 transition-all"
-            />
-            <Search className="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
+      {/* Main Grid Content */}
+      <div className="flex-1 p-6 overflow-y-auto">
+        <div className="border border-slate-200 bg-white rounded flex flex-col">
+          {/* Table Header & Legend */}
+          <div className="flex items-center justify-between border-b border-slate-200 bg-slate-100 px-4 py-3">
+            <div className="w-24 font-semibold text-sm text-slate-700">
+              Tầng <span className="text-[10px] ml-1">⇅</span>
+            </div>
+            
+            <div className="flex items-center gap-4 text-sm text-slate-600">
+              {(Object.entries(STATUS) as [RoomStatus, typeof STATUS[RoomStatus]][]).map(([, cfg]) => (
+                <div key={cfg.label} className="flex items-center gap-1.5">
+                  <span className={`w-[14px] h-[14px] rounded-[3px] border-2 bg-white ${cfg.borderColorClass}`} />
+                  <span>{cfg.label}</span>
+                </div>
+              ))}
+            </div>
           </div>
-          <button className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 rounded-2xl text-sm font-bold text-slate-600 hover:bg-slate-50 transition-all cursor-pointer">
-            <Filter className="w-4 h-4" />
-            Bộ lọc
-          </button>
-        </div>
 
-        {/* Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead className="bg-slate-50/50 border-b border-slate-100">
-              <tr>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Khách hàng</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest">Phòng / Tòa nhà</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Ngày nhận phòng</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Trạng thái</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Tiền cọc</th>
-                <th className="px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-widest text-right">Thao tác</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-50">
-              {loading ? (
-                <tr>
-                  <td colSpan={6} className="px-6 py-20 text-center">
-                    <div className="w-10 h-10 border-4 border-teal-600/20 border-t-teal-600 rounded-full animate-spin mx-auto mb-3" />
-                    <p className="text-sm font-bold text-slate-400">Đang tải dữ liệu...</p>
-                  </td>
-                </tr>
-              ) : (
-                mockBookings.map((b) => (
-                  <tr key={b.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center font-black">
-                          {b.customer_name[0]}
-                        </div>
-                        <div>
-                          <p className="text-sm font-black text-slate-900">{b.customer_name}</p>
-                          <div className="flex items-center gap-1 text-[10px] font-bold text-slate-400">
-                            <Phone className="w-3 h-3" />
-                            {b.phone}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div>
-                        <div className="flex items-center gap-2 text-sm font-bold text-slate-700">
-                          <Home className="w-4 h-4 text-slate-400" />
-                          {b.room_number}
-                        </div>
-                        <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400">
-                          <Building2 className="w-3 h-3 text-slate-300" />
-                          {b.building_name}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <span className="text-xs font-bold text-slate-600">{b.check_in}</span>
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
-                        b.status === 'confirmed' ? 'bg-emerald-50 text-emerald-600' : 
-                        b.status === 'pending' ? 'bg-amber-50 text-amber-600' : 'bg-rose-50 text-rose-600'
-                      }`}>
-                        {b.status === 'confirmed' ? 'Đã xác nhận' : b.status === 'pending' ? 'Chờ xác nhận' : 'Đã hủy'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <span className="text-sm font-black text-slate-900">{b.deposit.toLocaleString()}đ</span>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <button className="p-2 hover:bg-slate-100 rounded-lg text-slate-400">
-                        <MoreVertical className="w-5 h-5" />
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+          {/* Table Body */}
+          {loading ? (
+            <div className="py-20 text-center text-slate-500">Đang tải...</div>
+          ) : !currentBuilding || sortedFloors.length === 0 ? (
+            <div className="py-20 text-center text-slate-500">Chưa có phòng nào.</div>
+          ) : (
+            <div className="divide-y divide-slate-200">
+              {sortedFloors.map((floor) => {
+                const rooms = byFloor[floor].sort((a, b) =>
+                  a.room_number.localeCompare(b.room_number, undefined, { numeric: true })
+                );
 
-        {/* Pagination */}
-        <div className="p-4 border-t border-slate-50 flex items-center justify-end gap-4 bg-slate-50/10">
-          <span className="text-sm font-bold text-slate-400">1-2/2</span>
-          <div className="flex items-center gap-1">
-            <button className="p-1 hover:bg-slate-100 rounded-lg text-slate-400" disabled><ChevronLeft className="w-4 h-4" /></button>
-            <button className="p-1 hover:bg-slate-100 rounded-lg text-slate-400" disabled><ChevronRight className="w-4 h-4" /></button>
-          </div>
-          <select className="px-3 py-1 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-500 outline-none">
-            <option>20/trang</option>
-          </select>
+                return (
+                  <div key={floor} className="flex min-h-[140px]">
+                    {/* Left Floor Label Column */}
+                    <div className="w-24 py-4 px-4 flex items-center border-r border-slate-200 font-semibold text-sm text-slate-700">
+                      Tầng {floor}
+                    </div>
+
+                    {/* Right Rooms Grid */}
+                    <div className="flex-1 py-4 px-4">
+                      {/* Using flex wrap to match the varying column layout instead of rigid CSS grid */}
+                      <div className="flex flex-wrap gap-4">
+                        {rooms.map((room) => {
+                          const status = room.status as RoomStatus;
+                          const cfg = STATUS[status] ?? STATUS.available;
+
+                          return (
+                            <div
+                              key={room.id}
+                              className="w-[200px] h-24 border border-slate-200 rounded-[4px] bg-white flex overflow-hidden shadow-sm"
+                            >
+                              {/* Left Edge Status Line */}
+                              <div className={`w-[5px] shrink-0 ${cfg.colorClass}`} />
+                              
+                              <div className="flex-1 p-3 flex flex-col justify-between hover:bg-slate-50 transition-colors">
+                                <div className="flex items-start justify-between">
+                                  <span className="font-bold text-slate-800 tracking-tight">
+                                    {room.room_number}
+                                  </span>
+                                  <button className="border border-slate-300 text-xs px-2 py-1 rounded-[4px] font-medium text-slate-600 hover:border-slate-400 bg-white">
+                                    Đặt phòng
+                                  </button>
+                                </div>
+                                
+                                <div className="flex items-center justify-end text-slate-500 gap-1 mt-auto">
+                                  <Users className="w-3.5 h-3.5" />
+                                  <span className="text-xs font-medium">
+                                    {room.current_occupants ?? 0}/{room.max_occupants ?? 0}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
     </div>
