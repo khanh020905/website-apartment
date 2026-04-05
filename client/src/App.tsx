@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { AuthProvider } from "./contexts/AuthContext";
 import { api } from "./lib/api";
@@ -26,6 +26,14 @@ import BuildingStatusPage from "./pages/BuildingStatusPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import PricingPage from "./pages/PricingPage";
 import ProfilePage from "./pages/ProfilePage";
+// PMS Pages
+import InvoicesPage from "./pages/InvoicesPage";
+import ContractsPage from "./pages/ContractsPage";
+import IncidentsPage from "./pages/IncidentsPage";
+import AssetsPage from "./pages/AssetsPage";
+import EventsPage from "./pages/EventsPage";
+import ReportsPage from "./pages/ReportsPage";
+import BusinessSettingsPage from "./pages/BusinessSettingsPage";
 import type { Listing, Amenity } from "../../shared/types";
 
 function HomePage() {
@@ -223,6 +231,8 @@ function App() {
 														</ProtectedRoute>
 													}
 												/>
+
+												{/* ── CUSTOMERS ── */}
 												<Route
 													path="/customers"
 													element={
@@ -231,24 +241,315 @@ function App() {
 														</ProtectedRoute>
 													}
 												/>
+												{/* Legacy route kept for compatibility */}
 												<Route
 													path="/customers/vehicles"
+													element={<Navigate to="/vehicles" replace />}
+												/>
+												<Route
+													path="/vehicles"
 													element={
 														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
 															<VehiclePage />
 														</ProtectedRoute>
 													}
 												/>
+
+												{/* ── RESERVATIONS / BOOKINGS ── */}
+												{/* PMS-style routes */}
 												<Route
-													path="/bookings"
+													path="/reservations"
 													element={
 														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
 															<BookingPage />
 														</ProtectedRoute>
 													}
 												/>
-												<Route path="/bookings/history" element={<ProtectedRoute roles={["landlord", "broker", "admin"]}><BookingHistoryPage /></ProtectedRoute>} />
-												<Route path="/bookings/appointments" element={<ProtectedRoute roles={["landlord", "broker", "admin"]}><AppointmentPage /></ProtectedRoute>} />
+												<Route
+													path="/reservation-history"
+													element={
+														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+															<BookingHistoryPage />
+														</ProtectedRoute>
+													}
+												/>
+												<Route
+													path="/visitTours"
+													element={
+														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+															<AppointmentPage />
+														</ProtectedRoute>
+													}
+												/>
+												{/* Extra services / utilities — placeholder */}
+												<Route
+													path="/extra-services"
+													element={
+														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+															<BookingPage />
+														</ProtectedRoute>
+													}
+												/>
+												<Route
+													path="/utilities"
+													element={
+														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+															<BookingPage />
+														</ProtectedRoute>
+													}
+												/>
+												<Route
+													path="/messages"
+													element={
+														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+															<AppointmentPage />
+														</ProtectedRoute>
+													}
+												/>
+												{/* Legacy bookings routes kept for compatibility */}
+												<Route path="/bookings" element={<Navigate to="/reservations" replace />} />
+												<Route path="/bookings/history" element={<Navigate to="/reservation-history" replace />} />
+												<Route path="/bookings/appointments" element={<Navigate to="/visitTours" replace />} />
+
+												{/* ── PAYMENTS ── */}
+												<Route
+													path="/invoices"
+													element={
+														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+															<InvoicesPage />
+														</ProtectedRoute>
+													}
+												/>
+												<Route
+													path="/transactions"
+													element={
+														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+															<InvoicesPage />
+														</ProtectedRoute>
+													}
+												/>
+												<Route
+													path="/proof-of-payment"
+													element={
+														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+															<InvoicesPage />
+														</ProtectedRoute>
+													}
+												/>
+												<Route
+													path="/transaction-config"
+													element={
+														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+															<InvoicesPage />
+														</ProtectedRoute>
+													}
+												/>
+
+												{/* ── CONTRACTS ── */}
+												<Route
+													path="/contracts"
+													element={
+														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+															<ContractsPage />
+														</ProtectedRoute>
+													}
+												/>
+												<Route
+													path="/contract-templates"
+													element={
+														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+															<ContractsPage />
+														</ProtectedRoute>
+													}
+												/>
+
+												{/* ── MAINTENANCE / INCIDENTS ── */}
+												<Route
+													path="/incidents"
+													element={
+														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+															<IncidentsPage />
+														</ProtectedRoute>
+													}
+												/>
+												<Route
+													path="/incident-types"
+													element={
+														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+															<IncidentsPage />
+														</ProtectedRoute>
+													}
+												/>
+
+												{/* ── ASSETS ── */}
+												<Route
+													path="/assets/id-base"
+													element={
+														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+															<AssetsPage />
+														</ProtectedRoute>
+													}
+												/>
+												<Route
+													path="/assets/quantity-base"
+													element={
+														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+															<AssetsPage />
+														</ProtectedRoute>
+													}
+												/>
+
+												{/* ── COMMUNITY ── */}
+												<Route
+													path="/events"
+													element={
+														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+															<EventsPage />
+														</ProtectedRoute>
+													}
+												/>
+												<Route
+													path="/posts"
+													element={
+														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+															<EventsPage />
+														</ProtectedRoute>
+													}
+												/>
+												<Route
+													path="/blogs"
+													element={
+														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+															<EventsPage />
+														</ProtectedRoute>
+													}
+												/>
+												<Route
+													path="/blogs/:id"
+													element={
+														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+															<EventsPage />
+														</ProtectedRoute>
+													}
+												/>
+
+												{/* ── REPORTS ── */}
+												<Route
+													path="/operation/occupancy-rate"
+													element={
+														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+															<ReportsPage />
+														</ProtectedRoute>
+													}
+												/>
+												<Route
+													path="/customer-report"
+													element={
+														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+															<ReportsPage />
+														</ProtectedRoute>
+													}
+												/>
+												<Route
+													path="/revenues"
+													element={
+														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+															<ReportsPage />
+														</ProtectedRoute>
+													}
+												/>
+												<Route
+													path="/for-owner"
+													element={
+														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+															<ReportsPage />
+														</ProtectedRoute>
+													}
+												/>
+
+												{/* ── SETTINGS / MANAGEMENT ── */}
+												<Route
+													path="/business-information"
+													element={
+														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+															<BusinessSettingsPage />
+														</ProtectedRoute>
+													}
+												/>
+												<Route
+													path="/locations"
+													element={
+														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+															<BusinessSettingsPage />
+														</ProtectedRoute>
+													}
+												/>
+												<Route
+													path="/services"
+													element={
+														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+															<BusinessSettingsPage />
+														</ProtectedRoute>
+													}
+												/>
+												<Route
+													path="/users"
+													element={
+														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+															<BusinessSettingsPage />
+														</ProtectedRoute>
+													}
+												/>
+												<Route
+													path="/roles"
+													element={
+														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+															<BusinessSettingsPage />
+														</ProtectedRoute>
+													}
+												/>
+												<Route
+													path="/integrations"
+													element={
+														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+															<BusinessSettingsPage />
+														</ProtectedRoute>
+													}
+												/>
+												<Route
+													path="/api-management"
+													element={
+														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+															<BusinessSettingsPage />
+														</ProtectedRoute>
+													}
+												/>
+												<Route
+													path="/asset-groups"
+													element={
+														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+															<BusinessSettingsPage />
+														</ProtectedRoute>
+													}
+												/>
+												<Route
+													path="/asset-types"
+													element={
+														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+															<BusinessSettingsPage />
+														</ProtectedRoute>
+													}
+												/>
+												<Route
+													path="/suppliers"
+													element={
+														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+															<BusinessSettingsPage />
+														</ProtectedRoute>
+													}
+												/>
+
+												{/* ── ADMIN ── */}
 												<Route
 													path="/admin"
 													element={
