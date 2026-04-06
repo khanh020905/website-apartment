@@ -24,14 +24,14 @@ const Navbar = () => {
 				api.get<{ listings: any[] }>("/api/listings/my").then(({ data }) => {
 					if (data && data.listings) {
 						const attention = data.listings.filter(
-							(l) => l.status === "peknding" || l.status === "rejected",
+							(l) => l.status === "pending" || l.status === "rejected",
 						).length;
 						setNotificationCount(attention);
 					}
 				});
 			}
 		},
-		k[(user, role)],
+		[user, role],
 	);
 
 	useEffect(() => {
@@ -50,7 +50,7 @@ const Navbar = () => {
 	const selectedBuildingName =
 		selectedBuildingId ?
 			buildings.find((b) => b.id === selectedBuildingId)?.name || "N/A"
-		:	"Mọi toà nhà";
+			: "Mọi toà nhà";
 
 	const handleSignOut = async () => {
 		setDropdownOpen(false);
@@ -75,15 +75,14 @@ const Navbar = () => {
 				>
 					<button
 						onClick={() => setIsBuildingOpen(!isBuildingOpen)}
-						className={`flex items-center gap-3 px-4 py-2 bg-white border-2 rounded-xl text-sm font-black transition-all cursor-pointer min-w-[200px] ${
-							isBuildingOpen ?
-								"border-amber-400 shadow-lg shadow-amber-400/10"
-							:	"border-slate-100 hover:border-slate-200"
-						}`}
+						className={`flex items-center gap-3 px-3 py-1.5 bg-[#f8f9fa] border border-slate-200 rounded-lg text-sm font-semibold transition-all cursor-pointer min-w-[160px] ${isBuildingOpen ?
+								"border-amber-400 shadow-sm"
+								: "hover:border-slate-300"
+							}`}
 					>
-						<span className="text-slate-800 truncate">{selectedBuildingName}</span>
+						<span className="text-slate-700 truncate">{selectedBuildingName}</span>
 						<ChevronDown
-							className={`w-4 h-4 ml-auto text-slate-400 transition-transform ${isBuildingOpen ? "rotate-180 text-amber-500" : ""}`}
+							className={`w-3.5 h-3.5 ml-auto text-slate-400 transition-transform ${isBuildingOpen ? "rotate-180 text-amber-500" : ""}`}
 						/>
 					</button>
 
@@ -112,11 +111,10 @@ const Navbar = () => {
 											setSelectedBuildingId(null);
 											setIsBuildingOpen(false);
 										}}
-										className={`w-full text-left px-4 py-2.5 text-sm font-bold transition-colors ${
-											selectedBuildingId === null ?
-												"bg-amber-50 text-amber-700"
-											:	"text-slate-600 hover:bg-slate-50"
-										}`}
+										className={`w-full text-left px-4 py-2.5 text-sm font-bold transition-colors ${selectedBuildingId === null ?
+											"bg-amber-50 text-amber-700"
+											: "text-slate-600 hover:bg-slate-50"
+											}`}
 									>
 										Mọi toà nhà
 									</button>
@@ -127,11 +125,10 @@ const Navbar = () => {
 												setSelectedBuildingId(b.id);
 												setIsBuildingOpen(false);
 											}}
-											className={`w-full text-left px-4 py-2.5 text-sm font-bold transition-colors ${
-												selectedBuildingId === b.id ?
-													"bg-amber-50 text-amber-700"
-												:	"text-slate-600 hover:bg-slate-50"
-											}`}
+											className={`w-full text-left px-4 py-2.5 text-sm font-bold transition-colors ${selectedBuildingId === b.id ?
+												"bg-amber-50 text-amber-700"
+												: "text-slate-600 hover:bg-slate-50"
+												}`}
 										>
 											{b.name}
 										</button>
@@ -158,21 +155,21 @@ const Navbar = () => {
 			{/* Right Actions */}
 			<div className="flex items-center gap-6">
 				{/* Income/Expense Buttons (Mock) */}
-				<div className="hidden md:flex items-center gap-3 pr-6 border-r border-slate-100">
+				<div className="hidden md:flex items-center gap-2 pr-4 border-r border-slate-100">
 					<motion.button
 						whileHover={{ scale: 1.02 }}
 						whileTap={{ scale: 0.98 }}
-						className="flex items-center gap-2 px-4 py-2 bg-amber-400/10 text-amber-600 rounded-xl text-xs font-black uppercase tracking-widest cursor-pointer"
+						className="flex items-center gap-1.5 px-3 py-1.5 bg-[#fcd34d] text-slate-900 rounded-lg text-xs font-bold transition-all cursor-pointer"
 					>
-						<PlusCircle className="w-4 h-4" />
+						<PlusCircle className="w-3.5 h-3.5" />
 						<span>Thu nhập</span>
 					</motion.button>
 					<motion.button
 						whileHover={{ scale: 1.02 }}
 						whileTap={{ scale: 0.98 }}
-						className="flex items-center gap-2 px-4 py-2 bg-neutral-100 text-neutral-500 rounded-xl text-xs font-black uppercase tracking-widest cursor-pointer"
+						className="flex items-center gap-1.5 px-3 py-1.5 bg-[#fcd34d] text-slate-900 rounded-lg text-xs font-bold transition-all cursor-pointer"
 					>
-						<MinusCircle className="w-4 h-4" />
+						<MinusCircle className="w-3.5 h-3.5" />
 						<span>Chi phí</span>
 					</motion.button>
 				</div>

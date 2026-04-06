@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   CalendarDays,
   Globe,
@@ -29,6 +30,9 @@ const STATUS = {
   },
 } as const;
 
+import Modal from "../components/modals/Modal";
+import BookingForm from "../components/modals/BookingForm";
+
 const BookingPage = () => {
   const { selectedBuildingId } = useBuilding();
 
@@ -40,6 +44,8 @@ const BookingPage = () => {
   });
   const [selectedFloor, setSelectedFloor] = useState<number | "all">("all");
   const [selectedRoom, setSelectedRoom] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [activeRoom, setActiveRoom] = useState("");
 
   const fetchBuildings = useCallback(async () => {
     setLoading(true);
@@ -52,6 +58,16 @@ const BookingPage = () => {
   useEffect(() => {
     fetchBuildings();
   }, [fetchBuildings]);
+
+  const handleOpenBooking = (roomNum: string) => {
+    setActiveRoom(roomNum);
+    setIsModalOpen(true);
+  };
+
+  const handleCreateBooking = (data: any) => {
+    console.log("Creating booking:", data);
+    setIsModalOpen(false);
+  };
 
   const currentBuilding = selectedBuildingId
     ? buildings.find((b) => b.id === selectedBuildingId) ?? buildings[0]
@@ -81,27 +97,27 @@ const BookingPage = () => {
 
   return (
     <div className="flex flex-col h-full bg-white text-slate-800">
-      {/* Page Header matching the screenshot */}
+      {/* Page Header */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
         <h1 className="text-xl font-bold">Đặt phòng</h1>
         <div className="flex items-center gap-2">
           {/* View Toggle Icons */}
-          <button className="p-2 border border-slate-200 rounded text-slate-500 hover:bg-slate-50 bg-slate-100">
+          <button className="p-2 border border-slate-200 rounded text-slate-500 hover:bg-slate-50 bg-slate-100 shadow-sm transition-all active:scale-95">
             <Globe className="w-4 h-4 text-slate-700" />
           </button>
-          <button className="p-2 border border-slate-200 rounded text-slate-500 hover:bg-slate-50">
+          <button className="p-2 border border-slate-200 rounded text-slate-500 hover:bg-slate-50 shadow-sm transition-all active:scale-95">
             <CalendarIcon className="w-4 h-4" />
           </button>
-          <button className="p-2 border border-slate-200 rounded text-slate-500 hover:bg-slate-50">
+          <button className="p-2 border border-slate-200 rounded text-slate-500 hover:bg-slate-50 shadow-sm transition-all active:scale-95">
             <List className="w-4 h-4" />
           </button>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="flex items-center px-6 py-3 gap-3">
+      <div className="flex items-center px-6 py-3 gap-3 bg-slate-50/30">
         {/* Date */}
-        <label className="relative flex items-center gap-2 px-3 py-2 border border-slate-200 rounded text-sm text-slate-600 bg-white min-w-[150px] cursor-pointer">
+        <label className="relative flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-xl text-sm text-slate-600 bg-white min-w-[150px] cursor-pointer hover:border-amber-400 transition-all font-medium">
           <span className="text-slate-800">{formatDate(selectedDate)}</span>
           <CalendarDays className="w-4 h-4 ml-auto text-slate-400" />
           <input
@@ -112,14 +128,14 @@ const BookingPage = () => {
           />
         </label>
 
-        {/* Floor Select - Built as a native select to match simple dropdown style */}
-        <div className="relative border border-slate-200 rounded bg-white min-w-[150px]">
+        {/* Floor Select */}
+        <div className="relative border border-slate-200 rounded-xl bg-white min-w-[150px] hover:border-amber-400 transition-all">
           <select
             value={selectedFloor}
             onChange={(e) => setSelectedFloor(e.target.value === "all" ? "all" : Number(e.target.value))}
-            className="w-full appearance-none bg-transparent px-3 py-2 text-sm text-slate-600 focus:outline-none"
+            className="w-full appearance-none bg-transparent px-3 py-2 text-sm text-slate-600 focus:outline-none font-medium cursor-pointer"
           >
-            <option value="all">Chọn tầng</option>
+            <option value="all">Tất cả tầng</option>
             {floors.map((f) => (
               <option key={f} value={f}>
                 Tầng {f}
@@ -130,11 +146,11 @@ const BookingPage = () => {
         </div>
 
         {/* Room Select */}
-        <div className="relative border border-slate-200 rounded bg-white min-w-[150px]">
+        <div className="relative border border-slate-200 rounded-xl bg-white min-w-[150px] hover:border-amber-400 transition-all">
           <select
             value={selectedRoom}
             onChange={(e) => setSelectedRoom(e.target.value)}
-            className="w-full appearance-none bg-transparent px-3 py-2 text-sm text-slate-600 focus:outline-none"
+            className="w-full appearance-none bg-transparent px-3 py-2 text-sm text-slate-600 focus:outline-none font-medium cursor-pointer"
           >
             <option value="">Chọn phòng</option>
             {allRooms.map((r) => (
@@ -149,17 +165,17 @@ const BookingPage = () => {
 
       {/* Main Grid Content */}
       <div className="flex-1 p-6 overflow-y-auto">
-        <div className="border border-slate-200 bg-white rounded flex flex-col">
+        <div className="border border-slate-200 bg-white rounded-2xl flex flex-col shadow-sm overflow-hidden min-h-[500px]">
           {/* Table Header & Legend */}
-          <div className="flex items-center justify-between border-b border-slate-200 bg-slate-100 px-4 py-3">
-            <div className="w-24 font-semibold text-sm text-slate-700">
-              Tầng <span className="text-[10px] ml-1">⇅</span>
+          <div className="flex items-center justify-between border-b border-slate-100 bg-slate-50/80 px-6 py-4">
+            <div className="w-24 font-black uppercase text-[10px] tracking-widest text-slate-400">
+              Sơ đồ tầng
             </div>
             
-            <div className="flex items-center gap-4 text-sm text-slate-600">
+            <div className="flex items-center gap-6 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
               {(Object.entries(STATUS) as [RoomStatus, typeof STATUS[RoomStatus]][]).map(([, cfg]) => (
-                <div key={cfg.label} className="flex items-center gap-1.5">
-                  <span className={`w-[14px] h-[14px] rounded-[3px] border-2 bg-white ${cfg.borderColorClass}`} />
+                <div key={cfg.label} className="flex items-center gap-2">
+                  <span className={`w-3 h-3 rounded-full border-2 bg-white ${cfg.borderColorClass}`} />
                   <span>{cfg.label}</span>
                 </div>
               ))}
@@ -168,57 +184,76 @@ const BookingPage = () => {
 
           {/* Table Body */}
           {loading ? (
-            <div className="py-20 text-center text-slate-500">Đang tải...</div>
+            <div className="flex-1 flex flex-col items-center justify-center p-20 text-slate-400 gap-3">
+               <div className="w-10 h-10 border-4 border-amber-200 border-t-amber-500 rounded-full animate-spin" />
+               <p className="text-sm font-bold">Đang tải sơ đồ...</p>
+            </div>
           ) : !currentBuilding || sortedFloors.length === 0 ? (
-            <div className="py-20 text-center text-slate-500">Chưa có phòng nào.</div>
+            <div className="flex-1 flex flex-col items-center justify-center p-20 text-slate-400 gap-4 text-center">
+              <div className="w-16 h-16 bg-slate-100 rounded-xl flex items-center justify-center">
+                <CalendarIcon className="w-8 h-8" />
+              </div>
+              <div>
+                <p className="text-lg font-bold text-slate-700">Chưa có dữ liệu</p>
+                <p className="text-sm">Vui lòng kiểm tra lại cấu trúc toà nhà</p>
+              </div>
+            </div>
           ) : (
-            <div className="divide-y divide-slate-200">
+            <div className="divide-y divide-slate-100">
               {sortedFloors.map((floor) => {
                 const rooms = byFloor[floor].sort((a, b) =>
                   a.room_number.localeCompare(b.room_number, undefined, { numeric: true })
                 );
 
                 return (
-                  <div key={floor} className="flex min-h-[140px]">
+                  <div key={floor} className="flex min-h-[140px] group transition-colors hover:bg-slate-50/30">
                     {/* Left Floor Label Column */}
-                    <div className="w-24 py-4 px-4 flex items-center border-r border-slate-200 font-semibold text-sm text-slate-700">
+                    <div className="w-24 py-4 px-6 flex items-center border-r border-slate-100 font-extrabold text-slate-700 bg-slate-50/20 group-hover:bg-slate-50/50 transition-colors">
                       Tầng {floor}
                     </div>
 
                     {/* Right Rooms Grid */}
-                    <div className="flex-1 py-4 px-4">
-                      {/* Using flex wrap to match the varying column layout instead of rigid CSS grid */}
-                      <div className="flex flex-wrap gap-4">
+                    <div className="flex-1 py-6 px-6">
+                      <div className="flex flex-wrap gap-5">
                         {rooms.map((room) => {
                           const status = room.status as RoomStatus;
                           const cfg = STATUS[status] ?? STATUS.available;
 
                           return (
-                            <div
+                            <motion.div
                               key={room.id}
-                              className="w-[200px] h-24 border border-slate-200 rounded-[4px] bg-white flex overflow-hidden shadow-sm"
+                              whileHover={{ y: -2 }}
+                              className="w-[220px] h-28 border border-slate-200 rounded-2xl bg-white flex overflow-hidden shadow-sm hover:shadow-xl hover:border-amber-300 transition-all cursor-default"
                             >
-                              {/* Left Edge Status Line */}
-                              <div className={`w-[5px] shrink-0 ${cfg.colorClass}`} />
+                              <div className={`w-1.5 shrink-0 ${cfg.colorClass}`} />
                               
-                              <div className="flex-1 p-3 flex flex-col justify-between hover:bg-slate-50 transition-colors">
+                              <div className="flex-1 p-4 flex flex-col justify-between hover:bg-slate-50/50 transition-colors">
                                 <div className="flex items-start justify-between">
-                                  <span className="font-bold text-slate-800 tracking-tight">
+                                  <span className="font-extrabold text-slate-900 tracking-tight text-base">
                                     {room.room_number}
                                   </span>
-                                  <button className="border border-slate-300 text-xs px-2 py-1 rounded-[4px] font-medium text-slate-600 hover:border-slate-400 bg-white">
-                                    Đặt phòng
+                                  <button 
+                                    onClick={() => handleOpenBooking(room.room_number)}
+                                    className="border border-slate-200 text-[11px] font-black uppercase tracking-wider px-3 py-1.5 rounded-xl text-slate-600 hover:bg-amber-400 hover:text-white hover:border-amber-400 bg-white transition-all active:scale-95 shadow-sm"
+                                  >
+                                    Đặt chỗ
                                   </button>
                                 </div>
                                 
-                                <div className="flex items-center justify-end text-slate-500 gap-1 mt-auto">
-                                  <Users className="w-3.5 h-3.5" />
-                                  <span className="text-xs font-medium">
-                                    {room.current_occupants ?? 0}/{room.max_occupants ?? 0}
-                                  </span>
+                                <div className="flex items-center justify-between mt-auto">
+                                  <div className="flex gap-2">
+                                     <div className={`w-2 h-2 rounded-full ${cfg.colorClass}`} />
+                                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wide">{cfg.label}</span>
+                                  </div>
+                                  <div className="flex items-center text-slate-500 gap-1.5">
+                                    <Users className="w-3.5 h-3.5" />
+                                    <span className="text-xs font-bold text-slate-700">
+                                      {room.current_occupants ?? 0}/{room.max_occupants ?? 0}
+                                    </span>
+                                  </div>
                                 </div>
                               </div>
-                            </div>
+                            </motion.div>
                           );
                         })}
                       </div>
@@ -230,8 +265,22 @@ const BookingPage = () => {
           )}
         </div>
       </div>
+
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="Đăng ký giữ chỗ"
+        size="md"
+      >
+        <BookingForm
+          roomNumber={activeRoom}
+          onSubmit={handleCreateBooking}
+          onCancel={() => setIsModalOpen(false)}
+        />
+      </Modal>
     </div>
   );
 };
+
 
 export default BookingPage;

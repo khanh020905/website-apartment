@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { motion } from "framer-motion";
 import { AuthProvider } from "./contexts/AuthContext";
 import { api } from "./lib/api";
@@ -26,15 +26,36 @@ import BuildingStatusPage from "./pages/BuildingStatusPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import PricingPage from "./pages/PricingPage";
 import ProfilePage from "./pages/ProfilePage";
+
 // PMS Pages
 import InvoicesPage from "./pages/InvoicesPage";
+import TransactionsPage from "./pages/TransactionsPage";
+import ProofOfPaymentPage from "./pages/ProofOfPaymentPage";
+import TransactionConfigPage from "./pages/TransactionConfigPage";
+
 import ContractsPage from "./pages/ContractsPage";
+import ContractTemplatesPage from "./pages/ContractTemplatesPage";
+
 import IncidentsPage from "./pages/IncidentsPage";
-import AssetsPage from "./pages/AssetsPage";
-import EventsPage from "./pages/EventsPage";
-import ReportsPage from "./pages/ReportsPage";
-import BusinessSettingsPage from "./pages/BusinessSettingsPage";
+import IncidentTypesPage from "./pages/IncidentTypesPage";
+
+// Reports
+import OccupancyReportPage from "./pages/OccupancyReportPage";
+import CustomerReportPage from "./pages/CustomerReportPage";
+import RevenueReportPage from "./pages/RevenueReportPage";
+import OwnerReportPage from "./pages/OwnerReportPage";
+
+// Management
+import BusinessInfoPage from "./pages/BusinessInfoPage";
+import LocationsPage from "./pages/LocationsPage";
+import UsersPage from "./pages/UsersPage";
+import RolesPage from "./pages/RolesPage";
+import IntegrationsPage from "./pages/IntegrationsPage";
+import ApiManagementPage from "./pages/ApiManagementPage";
+
 import type { Listing, Amenity } from "../../shared/types";
+import AppSidebar from "./components/AppSidebar";
+import { BuildingProvider } from "./contexts/BuildingContext";
 
 function HomePage() {
 	const [listings, setListings] = useState<Listing[]>([]);
@@ -129,10 +150,6 @@ function HomePage() {
 		</motion.div>
 	);
 }
-
-import AppSidebar from "./components/AppSidebar";
-
-import { BuildingProvider } from "./contexts/BuildingContext";
 
 function App() {
 	return (
@@ -241,11 +258,6 @@ function App() {
 														</ProtectedRoute>
 													}
 												/>
-												{/* Legacy route kept for compatibility */}
-												<Route
-													path="/customers/vehicles"
-													element={<Navigate to="/vehicles" replace />}
-												/>
 												<Route
 													path="/vehicles"
 													element={
@@ -256,7 +268,6 @@ function App() {
 												/>
 
 												{/* ── RESERVATIONS / BOOKINGS ── */}
-												{/* PMS-style routes */}
 												<Route
 													path="/reservations"
 													element={
@@ -281,35 +292,6 @@ function App() {
 														</ProtectedRoute>
 													}
 												/>
-												{/* Extra services / utilities — placeholder */}
-												<Route
-													path="/extra-services"
-													element={
-														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<BookingPage />
-														</ProtectedRoute>
-													}
-												/>
-												<Route
-													path="/utilities"
-													element={
-														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<BookingPage />
-														</ProtectedRoute>
-													}
-												/>
-												<Route
-													path="/messages"
-													element={
-														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<AppointmentPage />
-														</ProtectedRoute>
-													}
-												/>
-												{/* Legacy bookings routes kept for compatibility */}
-												<Route path="/bookings" element={<Navigate to="/reservations" replace />} />
-												<Route path="/bookings/history" element={<Navigate to="/reservation-history" replace />} />
-												<Route path="/bookings/appointments" element={<Navigate to="/visitTours" replace />} />
 
 												{/* ── PAYMENTS ── */}
 												<Route
@@ -324,7 +306,7 @@ function App() {
 													path="/transactions"
 													element={
 														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<InvoicesPage />
+															<TransactionsPage />
 														</ProtectedRoute>
 													}
 												/>
@@ -332,7 +314,7 @@ function App() {
 													path="/proof-of-payment"
 													element={
 														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<InvoicesPage />
+															<ProofOfPaymentPage />
 														</ProtectedRoute>
 													}
 												/>
@@ -340,7 +322,7 @@ function App() {
 													path="/transaction-config"
 													element={
 														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<InvoicesPage />
+															<TransactionConfigPage />
 														</ProtectedRoute>
 													}
 												/>
@@ -358,7 +340,7 @@ function App() {
 													path="/contract-templates"
 													element={
 														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<ContractsPage />
+															<ContractTemplatesPage />
 														</ProtectedRoute>
 													}
 												/>
@@ -376,59 +358,7 @@ function App() {
 													path="/incident-types"
 													element={
 														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<IncidentsPage />
-														</ProtectedRoute>
-													}
-												/>
-
-												{/* ── ASSETS ── */}
-												<Route
-													path="/assets/id-base"
-													element={
-														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<AssetsPage />
-														</ProtectedRoute>
-													}
-												/>
-												<Route
-													path="/assets/quantity-base"
-													element={
-														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<AssetsPage />
-														</ProtectedRoute>
-													}
-												/>
-
-												{/* ── COMMUNITY ── */}
-												<Route
-													path="/events"
-													element={
-														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<EventsPage />
-														</ProtectedRoute>
-													}
-												/>
-												<Route
-													path="/posts"
-													element={
-														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<EventsPage />
-														</ProtectedRoute>
-													}
-												/>
-												<Route
-													path="/blogs"
-													element={
-														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<EventsPage />
-														</ProtectedRoute>
-													}
-												/>
-												<Route
-													path="/blogs/:id"
-													element={
-														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<EventsPage />
+															<IncidentTypesPage />
 														</ProtectedRoute>
 													}
 												/>
@@ -438,7 +368,7 @@ function App() {
 													path="/operation/occupancy-rate"
 													element={
 														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<ReportsPage />
+															<OccupancyReportPage />
 														</ProtectedRoute>
 													}
 												/>
@@ -446,7 +376,7 @@ function App() {
 													path="/customer-report"
 													element={
 														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<ReportsPage />
+															<CustomerReportPage />
 														</ProtectedRoute>
 													}
 												/>
@@ -454,7 +384,7 @@ function App() {
 													path="/revenues"
 													element={
 														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<ReportsPage />
+															<RevenueReportPage />
 														</ProtectedRoute>
 													}
 												/>
@@ -462,7 +392,7 @@ function App() {
 													path="/for-owner"
 													element={
 														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<ReportsPage />
+															<OwnerReportPage />
 														</ProtectedRoute>
 													}
 												/>
@@ -472,7 +402,7 @@ function App() {
 													path="/business-information"
 													element={
 														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<BusinessSettingsPage />
+															<BusinessInfoPage />
 														</ProtectedRoute>
 													}
 												/>
@@ -480,15 +410,7 @@ function App() {
 													path="/locations"
 													element={
 														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<BusinessSettingsPage />
-														</ProtectedRoute>
-													}
-												/>
-												<Route
-													path="/services"
-													element={
-														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<BusinessSettingsPage />
+															<LocationsPage />
 														</ProtectedRoute>
 													}
 												/>
@@ -496,7 +418,7 @@ function App() {
 													path="/users"
 													element={
 														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<BusinessSettingsPage />
+															<UsersPage />
 														</ProtectedRoute>
 													}
 												/>
@@ -504,7 +426,7 @@ function App() {
 													path="/roles"
 													element={
 														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<BusinessSettingsPage />
+															<RolesPage />
 														</ProtectedRoute>
 													}
 												/>
@@ -512,7 +434,7 @@ function App() {
 													path="/integrations"
 													element={
 														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<BusinessSettingsPage />
+															<IntegrationsPage />
 														</ProtectedRoute>
 													}
 												/>
@@ -520,31 +442,7 @@ function App() {
 													path="/api-management"
 													element={
 														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<BusinessSettingsPage />
-														</ProtectedRoute>
-													}
-												/>
-												<Route
-													path="/asset-groups"
-													element={
-														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<BusinessSettingsPage />
-														</ProtectedRoute>
-													}
-												/>
-												<Route
-													path="/asset-types"
-													element={
-														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<BusinessSettingsPage />
-														</ProtectedRoute>
-													}
-												/>
-												<Route
-													path="/suppliers"
-													element={
-														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<BusinessSettingsPage />
+															<ApiManagementPage />
 														</ProtectedRoute>
 													}
 												/>
@@ -566,10 +464,10 @@ function App() {
 						/>
 					</Routes>
 				</div>
-			</BuildingProvider>
-		</AuthProvider>
-	</Router>
-);
+				</BuildingProvider>
+			</AuthProvider>
+		</Router>
+	);
 }
 
 export default App;

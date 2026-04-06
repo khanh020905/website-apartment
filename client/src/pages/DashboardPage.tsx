@@ -144,14 +144,8 @@ export default function DashboardPage() {
 				{/* Top Navigation / Header */}
 				<div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 px-4">
 					<div>
-						<div className="flex items-center gap-3 mb-2">
-							<span className="px-3 py-1 bg-brand-primary/10 text-brand-primary rounded-lg text-[10px] font-black uppercase tracking-widest">
-								LANDLORD DASHBOARD
-							</span>
-							{loading && <RefreshCw className="w-4 h-4 text-brand-primary/50 animate-spin" />}
-						</div>
-						<h1 className="text-4xl font-black text-brand-ink tracking-tighter">
-							Quản lý Phòng trọ
+						<h1 className="text-xl font-bold text-slate-900 tracking-tight">
+							Trang tổng quan
 						</h1>
 					</div>
 

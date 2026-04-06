@@ -8,9 +8,6 @@ import {
   Car,
   CalendarDays,
   History,
-  Package,
-  Zap,
-  MessageSquare,
   CalendarSearch,
   CreditCard,
   FileText,
@@ -22,8 +19,6 @@ import {
   AlertTriangle,
   Tag,
   BarChart3,
-  Globe,
-  BookOpen,
   Activity,
   TrendingUp,
   Building2,
@@ -32,9 +27,7 @@ import {
   MapPin,
   Plug,
   Shield,
-  Box,
-  Cog,
-  Truck,
+  Key,
   LogOut,
   ChevronLeft,
 } from 'lucide-react';
@@ -85,13 +78,10 @@ const AppSidebar = () => {
       label: 'Đặt phòng',
       path: '/reservations',
       show: canPost,
-      matchPaths: ['/reservations', '/reservation-history', '/extra-services', '/utilities', '/messages', '/visitTours'],
+      matchPaths: ['/reservations', '/reservation-history', '/visitTours'],
       subItems: [
         { icon: CalendarDays, label: 'Đặt phòng', path: '/reservations' },
         { icon: History, label: 'Lịch sử đặt phòng', path: '/reservation-history' },
-        { icon: Package, label: 'Dịch vụ bổ sung', path: '/extra-services' },
-        { icon: Zap, label: 'Tiện ích', path: '/utilities' },
-        { icon: MessageSquare, label: 'Yêu cầu', path: '/messages' },
         { icon: CalendarSearch, label: 'Lịch hẹn xem phòng', path: '/visitTours' },
       ],
     },
@@ -130,29 +120,7 @@ const AppSidebar = () => {
         { icon: Tag, label: 'Loại sự cố', path: '/incident-types' },
       ],
     },
-    {
-      icon: Package,
-      label: 'Quản lý tài sản',
-      path: '/assets/id-base',
-      show: canPost,
-      matchPaths: ['/assets/id-base', '/assets/quantity-base'],
-      subItems: [
-        { icon: Package, label: 'Tài sản', path: '/assets/id-base' },
-        { icon: BarChart3, label: 'Tài sản (số lượng)', path: '/assets/quantity-base' },
-      ],
-    },
-    {
-      icon: Globe,
-      label: 'Cộng đồng',
-      path: '/events',
-      show: canPost,
-      matchPaths: ['/events', '/posts', '/blogs'],
-      subItems: [
-        { icon: CalendarDays, label: 'Sự kiện', path: '/events' },
-        { icon: FileText, label: 'Bài viết', path: '/posts' },
-        { icon: BookOpen, label: 'Blogs', path: '/blogs' },
-      ],
-    },
+
     {
       icon: BarChart3,
       label: 'Báo cáo',
@@ -171,17 +139,14 @@ const AppSidebar = () => {
       label: 'Quản lý',
       path: '/business-information',
       show: canPost,
-      matchPaths: ['/business-information', '/locations', '/integrations', '/users', '/roles', '/asset-groups', '/asset-types', '/services', '/suppliers'],
+      matchPaths: ['/business-information', '/locations', '/integrations', '/users', '/roles', '/api-management'],
       subItems: [
         { icon: Info, label: 'Thông tin chung', path: '/business-information' },
         { icon: Building2, label: 'Toà nhà', path: '/locations' },
-        { icon: Cog, label: 'Dịch vụ', path: '/services' },
-        { icon: Users, label: 'Người dùng & vai trò', path: '/users' },
-        { icon: Plug, label: 'Tích hợp', path: '/integrations' },
-        { icon: Box, label: 'Nhóm tài sản', path: '/asset-groups' },
-        { icon: Tag, label: 'Loại tài sản', path: '/asset-types' },
-        { icon: Truck, label: 'Nhà cung cấp', path: '/suppliers' },
+        { icon: Users, label: 'Nhân viên', path: '/users' },
         { icon: Shield, label: 'Vai trò', path: '/roles' },
+        { icon: Plug, label: 'Tích hợp', path: '/integrations' },
+        { icon: Key, label: 'Quản lý API', path: '/api-management' },
       ],
     },
     {
@@ -226,7 +191,7 @@ const AppSidebar = () => {
       <motion.div
         animate={{ width: isHovered ? 260 : 68 }}
         transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-        className="h-full bg-[#1e2329] flex flex-col text-white z-20 relative overflow-hidden flex-shrink-0"
+        className="h-full bg-[#1e2329] flex flex-col text-white z-20 relative overflow-hidden flex-shrink-0 border-r border-[#2d3339]"
       >
         {/* Logo */}
         <div className="h-16 flex items-center border-b border-white/5 px-4 flex-shrink-0">
@@ -259,9 +224,9 @@ const AppSidebar = () => {
                   <Link
                     to={item.subItems ? item.subItems[0].path : item.path}
                     onClick={() => setIsSubCollapsed(false)}
-                    className={`flex items-center gap-3.5 px-3 py-3 rounded-2xl text-[13px] font-bold transition-all duration-200 relative overflow-hidden whitespace-nowrap ${
+                    className={`flex items-center gap-3.5 px-3 py-2.5 rounded-xl text-[13px] font-bold transition-all duration-200 relative overflow-hidden whitespace-nowrap ${
                       isActive
-                        ? 'bg-[#fcd34d] text-black shadow-xl shadow-yellow-900/10'
+                        ? 'bg-[#fcd34d] text-slate-900 shadow-lg shadow-yellow-500/10'
                         : 'text-slate-400 hover:text-white hover:bg-white/5'
                     }`}
                   >
@@ -303,34 +268,6 @@ const AppSidebar = () => {
         <div className="p-3 border-t border-white/5 mt-auto flex-shrink-0">
           {user ? (
             <div className="space-y-1">
-              {/* User card */}
-              <div className="flex items-center gap-3 overflow-hidden">
-                <div
-                  className="w-10 h-10 bg-[#fcd34d] rounded-full flex items-center justify-center text-black font-black flex-shrink-0"
-                  title={user.user_metadata?.full_name || user.email || 'User'}
-                >
-                  {(user.user_metadata?.full_name?.[0] || user.email?.[0] || 'U').toUpperCase()}
-                </div>
-                <AnimatePresence>
-                  {isHovered && (
-                    <motion.div
-                      initial={{ opacity: 0, x: -6 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -6 }}
-                      transition={{ duration: 0.18 }}
-                      className="flex-1 min-w-0"
-                    >
-                      <p className="text-sm font-black truncate text-white">
-                        {user.user_metadata?.full_name || 'Người dùng'}
-                      </p>
-                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-                        {role}
-                      </p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-
               {/* Sign out */}
               <button
                 onClick={signOut}
@@ -455,24 +392,7 @@ const AppSidebar = () => {
               })}
             </div>
 
-            {/* User chip */}
-            {user && (
-              <div className="p-3 border-t border-slate-100 flex-shrink-0">
-                <div className="flex items-center gap-2 px-2 py-2 bg-white rounded-xl border border-slate-100">
-                  <div className="w-7 h-7 bg-[#fcd34d] rounded-full flex items-center justify-center text-black font-black text-xs flex-shrink-0">
-                    {(user.user_metadata?.full_name?.[0] || user.email?.[0] || 'U').toUpperCase()}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-bold text-slate-800 truncate">
-                      {user.user_metadata?.full_name || 'Người dùng'}
-                    </p>
-                    <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold truncate">
-                      {role}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            )}
+
           </motion.div>
         )}
       </AnimatePresence>

@@ -1,43 +1,40 @@
 import { useState } from "react";
 import { 
+  CheckSquare, 
   Search, 
   Settings2,
   X,
   ChevronLeft, 
-  ChevronRight, 
-  Home, 
-  Building2, 
-  Settings,
-  Edit3, 
-  Trash2, 
-  Download 
+  ChevronRight,
+  Eye,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  User,
+  Image as ImageIcon,
+  Download,
+  Settings
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
 
-export default function VehiclePage() {
+export default function ProofOfPaymentPage() {
   const [search, setSearch] = useState("");
-  const [vehicleType, setVehicleType] = useState("");
   const [status, setStatus] = useState("");
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [room, setRoom] = useState("");
 
   // MOCK DATA is empty to show empty state like image
-  const MOCK_VEHICLES: any[] = [];
-
-  const clearFilters = () => {
-    setSearch("");
-    setVehicleType("");
-    setStatus("");
-  };
+  const MOCK_PROOFS: any[] = [];
 
   return (
     <div className="flex-1 flex flex-col h-full bg-[#f8f9fa] relative overflow-hidden">
       {/* Header */}
       <div className="bg-white border-b border-slate-200">
         <div className="px-6 py-4 flex items-center justify-between">
-          <h1 className="text-[20px] font-bold text-slate-900 tracking-tight">Phương tiện</h1>
+          <h1 className="text-[20px] font-bold text-slate-900 tracking-tight flex items-center gap-2">
+            Minh chứng thanh toán
+          </h1>
           <button className="flex items-center gap-2 px-4 py-2 border border-slate-200 rounded-lg text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors shadow-sm">
             <Download className="w-4 h-4" />
-            <span className="hidden sm:inline">Xuất Excel</span>
+            <span className="hidden sm:inline">Xuất báo cáo</span>
           </button>
         </div>
         
@@ -47,24 +44,22 @@ export default function VehiclePage() {
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
-              placeholder="Tìm kiếm theo phòng, khách hàng, biển số..."
+              placeholder="Tìm theo khách hàng, hoá đơn..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm text-slate-700 bg-white focus:outline-none focus:border-amber-400 hover:border-slate-300 transition-all"
             />
           </div>
 
-          <div className="w-full sm:w-44 flex-shrink-0">
+          <div className="w-full sm:w-40 flex-shrink-0">
              <select 
-               value={vehicleType} 
-               onChange={(e) => setVehicleType(e.target.value)}
+               value={room} 
+               onChange={(e) => setRoom(e.target.value)}
                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 bg-white focus:outline-none focus:border-amber-400 hover:border-slate-300 transition-all cursor-pointer appearance-none"
              >
-               <option value="">Loại phương tiện</option>
-               <option value="xe_may">Xe máy</option>
-               <option value="xe_hoi">Ô tô</option>
-               <option value="xe_dap">Xe đạp</option>
-               <option value="xe_dien">Xe điện</option>
+               <option value="">Tất cả phòng</option>
+               <option value="101">P.101</option>
+               <option value="102">P.102</option>
              </select>
           </div>
 
@@ -75,24 +70,12 @@ export default function VehiclePage() {
                className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 bg-white focus:outline-none focus:border-amber-400 hover:border-slate-300 transition-all cursor-pointer appearance-none"
              >
                <option value="">Trạng thái</option>
-               <option value="active">Hoạt động</option>
-               <option value="inactive">Ngừng</option>
+               <option value="pending">Chờ duyệt</option>
+               <option value="approved">Đã duyệt</option>
+               <option value="rejected">Từ chối</option>
              </select>
           </div>
 
-          <button 
-            onClick={() => setIsFilterOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-sm cursor-pointer"
-          >
-            <Settings2 className="w-4 h-4" />
-            Bộ lọc
-          </button>
-
-          <button 
-            className="flex items-center gap-2 px-5 py-2 bg-amber-400 text-slate-900 rounded-lg text-sm font-bold transition-colors hover:bg-amber-500 shadow-sm ml-auto cursor-pointer"
-          >
-            + Phương tiện
-          </button>
         </div>
       </div>
 
@@ -106,7 +89,7 @@ export default function VehiclePage() {
                   <th className="px-5 py-3.5 w-10">
                     <input type="checkbox" className="rounded border-slate-300 text-amber-500 focus:ring-amber-500 w-4 h-4" />
                   </th>
-                  {["Khách hàng", "Phòng", "Toà nhà", "Loại xe", "Biển số", "Tên xe", "Màu sắc", "Trạng thái"].map((h, i) => (
+                  {["Khách hàng", "Số tiền (VND)", "Hoá đơn", "Minh chứng", "Ngày gửi", "Trạng thái"].map((h, i) => (
                     <th key={i} className="px-5 py-3.5 text-left text-[12px] font-bold text-slate-600 tracking-wide whitespace-nowrap">
                       {h} <span className="inline-block ml-1 opacity-50">↕</span>
                     </th>
@@ -117,7 +100,7 @@ export default function VehiclePage() {
                 </tr>
               </thead>
               <tbody>
-                {MOCK_VEHICLES.length === 0 && (
+                {MOCK_PROOFS.length === 0 && (
                   <tr>
                     <td colSpan={10} className="px-6 py-28 text-center bg-white cursor-default">
                       <div className="flex flex-col items-center justify-center">
@@ -153,62 +136,6 @@ export default function VehiclePage() {
           </div>
         </div>
       </div>
-
-      {/* Advanced Filter Sidebar */}
-      <AnimatePresence>
-        {isFilterOpen && (
-          <>
-            <motion.div 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsFilterOpen(false)}
-              className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm z-40 transition-opacity"
-            />
-            <motion.div 
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="absolute top-0 right-0 w-[400px] h-full bg-white shadow-2xl z-50 flex flex-col border-l border-slate-200"
-            >
-              <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-white shrink-0">
-                <h2 className="text-lg font-bold text-slate-900">Lọc nâng cao</h2>
-                <button 
-                  onClick={() => setIsFilterOpen(false)}
-                  className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-500 transition-colors"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-
-              <div className="flex-1 overflow-y-auto p-5 space-y-6">
-                <div>
-                  <h3 className="text-sm font-semibold text-slate-800 mb-3">Toà nhà</h3>
-                  <p className="text-sm text-slate-500">Bộ lọc theo toà nhà</p>
-                </div>
-              </div>
-
-              {/* Slider Footer */}
-              <div className="p-5 border-t border-slate-100 bg-white flex items-center justify-end gap-3 shrink-0">
-                <button 
-                  onClick={clearFilters}
-                  className="px-5 py-2.5 text-sm font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors cursor-pointer"
-                >
-                  Đặt lại
-                </button>
-                <button 
-                  onClick={() => setIsFilterOpen(false)}
-                  className="px-6 py-2.5 text-sm font-bold bg-amber-400 hover:bg-amber-500 text-slate-900 rounded-lg transition-colors shadow-sm cursor-pointer"
-                >
-                  Áp dụng
-                </button>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
     </div>
   );
 }
-
