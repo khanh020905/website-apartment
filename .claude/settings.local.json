@@ -12,7 +12,23 @@
       "Bash(node -e ':*)",
       "Bash(ls:*)",
       "Bash(npx tsc:*)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(curl -s -c /tmp/smartos_cookies.txt -b /tmp/smartos_cookies.txt -H 'Content-Type: application/json' -H 'Accept: application/json' https://tra-my.smartos.space/)",
+      "Bash(curl -s \"https://tra-my.smartos.space/assets/index-BlGEoPHF.js\")",
+      "Read(//tmp/**)",
+      "Bash(node:*)",
+      "Bash(curl -s \"https://tra-my.smartos.space/assets/index-BlGEoPHF.js\" -o \"C:/Users/ducan/AppData/Local/Temp/smartos_bundle.js\")",
+      "Read(//c/Users/ducan/AppData/Local/Temp/**)",
+      "Bash(curl -s -c C:/Users/ducan/AppData/Local/Temp/smartos_cookies.txt -X POST -H 'Content-Type: application/json' -d '{\"email\":\"letranbaophucxhb@gmail.com\",\"password\":\"3xnw4$8lb\"}' https://tra-my.smartos.space/api/auth/login)",
+      "Bash(find .:*)",
+      "Bash(curl -s \"https://tra-my.smartos.space/\")",
+      "Bash(curl -s -I \"https://tra-my.smartos.space/graphql\")",
+      "Bash(curl -s -I \"https://tra-my.smartos.space/api/graphql\")",
+      "Bash(curl -sv \"https://pms.smartos.space/\")",
+      "Bash(curl -sv \"https://tra-my.smartos.space/pms\")",
+      "Bash(curl -s \"https://pms.smartos.space/\")",
+      "Bash(curl -s \"https://tra-my.smartos.space/pms/\")",
+      "Bash(curl -s \"https://tra-my.smartos.space/pms/assets/index.10c9f554.js\" -o \"C:/Users/ducan/AppData/Local/Temp/pms_bundle.js\")"
     ]
   }
 }

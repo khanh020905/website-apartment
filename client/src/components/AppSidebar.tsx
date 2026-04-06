@@ -58,6 +58,7 @@ interface MenuItem {
 const AppSidebar = () => {
   const location = useLocation();
   const { user, role, canPost, signOut } = useAuth();
+  const [isHovered, setIsHovered] = useState(false);
   const [isSubCollapsed, setIsSubCollapsed] = useState(false);
 
   const menuItems: MenuItem[] = [
@@ -84,14 +85,7 @@ const AppSidebar = () => {
       label: 'Đặt phòng',
       path: '/reservations',
       show: canPost,
-      matchPaths: [
-        '/reservations',
-        '/reservation-history',
-        '/extra-services',
-        '/utilities',
-        '/messages',
-        '/visitTours',
-      ],
+      matchPaths: ['/reservations', '/reservation-history', '/extra-services', '/utilities', '/messages', '/visitTours'],
       subItems: [
         { icon: CalendarDays, label: 'Đặt phòng', path: '/reservations' },
         { icon: History, label: 'Lịch sử đặt phòng', path: '/reservation-history' },
@@ -164,12 +158,7 @@ const AppSidebar = () => {
       label: 'Báo cáo',
       path: '/operation/occupancy-rate',
       show: canPost,
-      matchPaths: [
-        '/operation/occupancy-rate',
-        '/customer-report',
-        '/revenues',
-        '/for-owner',
-      ],
+      matchPaths: ['/operation/occupancy-rate', '/customer-report', '/revenues', '/for-owner'],
       subItems: [
         { icon: Activity, label: 'Vận hành', path: '/operation/occupancy-rate' },
         { icon: Users, label: 'Khách hàng', path: '/customer-report' },
@@ -182,17 +171,7 @@ const AppSidebar = () => {
       label: 'Quản lý',
       path: '/business-information',
       show: canPost,
-      matchPaths: [
-        '/business-information',
-        '/locations',
-        '/integrations',
-        '/users',
-        '/roles',
-        '/asset-groups',
-        '/asset-types',
-        '/services',
-        '/suppliers',
-      ],
+      matchPaths: ['/business-information', '/locations', '/integrations', '/users', '/roles', '/asset-groups', '/asset-types', '/services', '/suppliers'],
       subItems: [
         { icon: Info, label: 'Thông tin chung', path: '/business-information' },
         { icon: Building2, label: 'Toà nhà', path: '/locations' },
@@ -217,129 +196,222 @@ const AppSidebar = () => {
     const paths = item.matchPaths ?? [item.path];
     return (
       location.pathname === item.path ||
-      paths.some(
-        (p) =>
-          location.pathname === p ||
-          location.pathname.startsWith(p + '/')
-      ) ||
-      (item.subItems &&
-        item.subItems.some((sub) => location.pathname === sub.path || location.pathname.startsWith(sub.path + '/')))
+      paths.some((p) => location.pathname === p || location.pathname.startsWith(p + '/')) ||
+      (item.subItems?.some((sub) => location.pathname === sub.path || location.pathname.startsWith(sub.path + '/')))
     );
   };
 
   const activeItem = menuItems.find((item) => getIsActive(item));
-  const hasSubItems = activeItem?.subItems;
+  const hasSubItems = !!activeItem?.subItems;
 
+  // Reset sub-collapse when navigating to an item without sub-items
   useEffect(() => {
-    if (!hasSubItems) {
-      setIsSubCollapsed(false);
-    }
+    if (!hasSubItems) setIsSubCollapsed(false);
   }, [location.pathname, hasSubItems]);
 
+  // Close sub panel when sidebar collapses
+  useEffect(() => {
+    if (!isHovered) setIsSubCollapsed(false);
+  }, [isHovered]);
+
+  const showSubPanel = isHovered && hasSubItems && !isSubCollapsed;
+
   return (
-    <div className="flex h-full flex-shrink-0 z-50">
-      {/* Primary Sidebar - Dark */}
-      <div className="w-[68px] h-full bg-[#1e2329] flex flex-col text-white z-20 relative">
-        {/* Brand/Logo */}
-        <div className="h-16 flex items-center justify-center border-b border-white/5">
+    <div
+      className="flex h-full flex-shrink-0 z-50"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
+      {/* Primary Sidebar */}
+      <motion.div
+        animate={{ width: isHovered ? 260 : 68 }}
+        transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+        className="h-full bg-[#1e2329] flex flex-col text-white z-20 relative overflow-hidden flex-shrink-0"
+      >
+        {/* Logo */}
+        <div className="h-16 flex items-center border-b border-white/5 px-4 flex-shrink-0">
           <div className="w-10 h-10 bg-[#fcd34d] rounded-xl flex items-center justify-center rotate-3 shadow-lg shadow-yellow-500/20 flex-shrink-0">
             <img src="/logo.jpg" alt="Logo" className="w-8 h-8 object-cover rounded-lg" />
           </div>
+          <AnimatePresence>
+            {isHovered && (
+              <motion.span
+                initial={{ opacity: 0, x: -8 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -8 }}
+                transition={{ duration: 0.2, delay: 0.05 }}
+                className="ml-3 text-xl font-black tracking-tighter text-white uppercase italic truncate"
+              >
+                HomeSpot
+              </motion.span>
+            )}
+          </AnimatePresence>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-2 py-4 space-y-1.5 overflow-y-auto scrollbar-hide">
+        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto overflow-x-hidden scrollbar-hide">
           {menuItems
             .filter((item) => item.show !== false)
             .map((item) => {
               const isActive = getIsActive(item);
               return (
-                <div
-                  key={item.path}
-                  className="relative group"
-                >
+                <div key={item.path} className="relative">
                   <Link
                     to={item.subItems ? item.subItems[0].path : item.path}
                     onClick={() => setIsSubCollapsed(false)}
-                    title={item.label}
-                    className={`flex items-center justify-center w-12 h-12 mx-auto rounded-2xl transition-all duration-200 relative ${
+                    className={`flex items-center gap-3.5 px-3 py-3 rounded-2xl text-[13px] font-bold transition-all duration-200 relative overflow-hidden whitespace-nowrap ${
                       isActive
-                        ? 'bg-[#fcd34d] text-black shadow-lg shadow-yellow-900/20'
-                        : 'text-slate-400 hover:text-white hover:bg-white/8'
+                        ? 'bg-[#fcd34d] text-black shadow-xl shadow-yellow-900/10'
+                        : 'text-slate-400 hover:text-white hover:bg-white/5'
                     }`}
                   >
+                    {/* Icon — fixed width so label doesn't jump */}
                     <item.icon
-                      className={`w-5 h-5 ${isActive ? 'text-black' : 'text-slate-400 group-hover:text-white'} transition-colors`}
+                      className={`w-5 h-5 flex-shrink-0 transition-colors ${isActive ? 'text-black' : 'text-slate-400'}`}
                       strokeWidth={2.5}
                     />
+
+                    {/* Label */}
+                    <AnimatePresence>
+                      {isHovered && (
+                        <motion.span
+                          initial={{ opacity: 0, x: -6 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          exit={{ opacity: 0, x: -6 }}
+                          transition={{ duration: 0.18, delay: 0.04 }}
+                          className={`tracking-wide truncate ${isActive ? 'text-black' : ''}`}
+                        >
+                          {item.label}
+                        </motion.span>
+                      )}
+                    </AnimatePresence>
+
+                    {/* Active indicator pill */}
                     {isActive && (
                       <motion.div
                         layoutId="active-pill"
-                        className="absolute right-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-black rounded-l-full"
+                        className="absolute right-0 top-1/2 -translate-y-1/2 w-1.5 h-6 bg-black rounded-l-full"
                       />
                     )}
                   </Link>
-
-                  {/* Tooltip */}
-                  <div className="absolute left-full ml-3 top-1/2 -translate-y-1/2 bg-slate-900 text-white text-xs font-bold px-3 py-2 rounded-xl whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 shadow-xl">
-                    {item.label}
-                    <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-slate-900" />
-                  </div>
-
-                  {isActive && hasSubItems && isSubCollapsed && (
-                    <button
-                      onClick={() => setIsSubCollapsed(false)}
-                      className="absolute -right-3 top-1/2 -translate-y-1/2 w-6 h-6 bg-teal-500 rounded-full flex items-center justify-center shadow-lg border-2 border-[#1e2329] hover:bg-teal-400 transition-colors cursor-pointer z-30"
-                    >
-                      <motion.div animate={{ rotate: 180 }} className="text-white">
-                        <ChevronLeft className="w-3.5 h-3.5" strokeWidth={3} />
-                      </motion.div>
-                    </button>
-                  )}
                 </div>
               );
             })}
         </nav>
 
-        {/* Footer / User Profile */}
-        <div className="p-2 border-t border-white/5 mt-auto">
+        {/* Footer */}
+        <div className="p-3 border-t border-white/5 mt-auto flex-shrink-0">
           {user ? (
             <div className="space-y-1">
-              <div className="w-12 h-12 mx-auto bg-[#fcd34d] rounded-full flex items-center justify-center text-black font-black text-sm cursor-default" title={user.user_metadata?.full_name || user.email || 'User'}>
-                {(user.user_metadata?.full_name?.[0] || user.email?.[0] || 'U').toUpperCase()}
+              {/* User card */}
+              <div className="flex items-center gap-3 overflow-hidden">
+                <div
+                  className="w-10 h-10 bg-[#fcd34d] rounded-full flex items-center justify-center text-black font-black flex-shrink-0"
+                  title={user.user_metadata?.full_name || user.email || 'User'}
+                >
+                  {(user.user_metadata?.full_name?.[0] || user.email?.[0] || 'U').toUpperCase()}
+                </div>
+                <AnimatePresence>
+                  {isHovered && (
+                    <motion.div
+                      initial={{ opacity: 0, x: -6 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -6 }}
+                      transition={{ duration: 0.18 }}
+                      className="flex-1 min-w-0"
+                    >
+                      <p className="text-sm font-black truncate text-white">
+                        {user.user_metadata?.full_name || 'Người dùng'}
+                      </p>
+                      <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                        {role}
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
+
+              {/* Sign out */}
               <button
                 onClick={signOut}
-                title="Đăng xuất"
-                className="w-12 h-12 mx-auto flex items-center justify-center text-red-400 hover:text-red-300 hover:bg-red-950/20 rounded-2xl transition-all cursor-pointer"
+                className="w-full flex items-center gap-3 px-3 py-2.5 text-red-400 hover:text-red-300 hover:bg-red-950/20 rounded-2xl text-[13px] font-bold transition-all cursor-pointer overflow-hidden"
               >
-                <LogOut className="w-5 h-5" />
+                <LogOut className="w-5 h-5 flex-shrink-0" />
+                <AnimatePresence>
+                  {isHovered && (
+                    <motion.span
+                      initial={{ opacity: 0, x: -6 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -6 }}
+                      transition={{ duration: 0.18 }}
+                    >
+                      Đăng xuất
+                    </motion.span>
+                  )}
+                </AnimatePresence>
               </button>
             </div>
           ) : (
-            <Link
-              to="/login"
-              className="w-12 h-12 mx-auto flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 rounded-2xl text-xs font-bold transition-all"
-              title="Đăng nhập"
-            >
-              <User className="w-5 h-5" />
-            </Link>
+            <div className={`grid gap-2 ${isHovered ? 'grid-cols-2' : 'grid-cols-1'}`}>
+              <AnimatePresence mode="wait">
+                {isHovered ? (
+                  <motion.div
+                    key="expanded-auth"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.15 }}
+                    className="contents"
+                  >
+                    <Link
+                      to="/login"
+                      className="flex items-center justify-center py-2.5 bg-white/5 hover:bg-white/10 rounded-2xl text-xs font-bold transition-all"
+                    >
+                      Đăng nhập
+                    </Link>
+                    <Link
+                      to="/register"
+                      className="flex items-center justify-center py-2.5 bg-[#fcd34d] text-black rounded-2xl text-xs font-bold transition-all"
+                    >
+                      Đăng ký
+                    </Link>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="collapsed-auth"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.15 }}
+                  >
+                    <Link
+                      to="/login"
+                      title="Đăng nhập"
+                      className="flex items-center justify-center w-10 h-10 mx-auto bg-white/5 hover:bg-white/10 rounded-2xl transition-all"
+                    >
+                      <User className="w-5 h-5 text-slate-400" />
+                    </Link>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           )}
         </div>
-      </div>
+      </motion.div>
 
-      {/* Secondary Sidebar - Light */}
-      <AnimatePresence mode="wait">
-        {hasSubItems && !isSubCollapsed && (
+      {/* Secondary Sidebar — only visible when hovered + active item has sub-items */}
+      <AnimatePresence>
+        {showSubPanel && (
           <motion.div
             key={activeItem?.label}
-            initial={{ x: -260, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: -260, opacity: 0 }}
-            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-            className="w-[220px] h-full bg-[#f8f9fa] border-r border-slate-200 flex flex-col z-10 overflow-hidden shadow-2xl shadow-black/5"
+            initial={{ width: 0, opacity: 0 }}
+            animate={{ width: 220, opacity: 1 }}
+            exit={{ width: 0, opacity: 0 }}
+            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            className="h-full bg-[#f8f9fa] border-r border-slate-200 flex flex-col z-10 shadow-2xl shadow-black/5 flex-shrink-0 overflow-hidden"
           >
-            <div className="h-16 flex items-center gap-3 px-4 border-b border-slate-100">
+            {/* Header */}
+            <div className="h-16 flex items-center gap-3 px-4 border-b border-slate-100 flex-shrink-0">
               <button
                 onClick={() => setIsSubCollapsed(true)}
                 className="p-1.5 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer text-slate-500 flex-shrink-0"
@@ -351,6 +423,7 @@ const AppSidebar = () => {
               </h2>
             </div>
 
+            {/* Sub-items */}
             <div className="flex-1 overflow-y-auto px-2 py-3 space-y-0.5">
               {activeItem?.subItems?.map((sub) => {
                 const isSubActive =
@@ -360,7 +433,7 @@ const AppSidebar = () => {
                   <Link
                     key={sub.path}
                     to={sub.path}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold transition-all ${
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-semibold transition-all whitespace-nowrap ${
                       isSubActive
                         ? 'bg-white text-slate-900 shadow-sm'
                         : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700'
@@ -382,9 +455,9 @@ const AppSidebar = () => {
               })}
             </div>
 
-            {/* User info in secondary sidebar */}
+            {/* User chip */}
             {user && (
-              <div className="p-3 border-t border-slate-100">
+              <div className="p-3 border-t border-slate-100 flex-shrink-0">
                 <div className="flex items-center gap-2 px-2 py-2 bg-white rounded-xl border border-slate-100">
                   <div className="w-7 h-7 bg-[#fcd34d] rounded-full flex items-center justify-center text-black font-black text-xs flex-shrink-0">
                     {(user.user_metadata?.full_name?.[0] || user.email?.[0] || 'U').toUpperCase()}
