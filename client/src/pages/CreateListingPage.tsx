@@ -202,10 +202,11 @@ export default function CreateListingPage() {
 								if (i + 1 > step && !form.room_id && i > 1) return setError("Vui lòng chọn Phòng");
 								setStep(i + 1);
 							}}
-							className={`flex-1 py-2 rounded-xl text-[10px] md:text-xs font-bold transition-all uppercase tracking-widest cursor-pointer ${step === i + 1 ? "bg-teal-700 text-white shadow-lg shadow-teal-900/20"
+							className={`flex-1 py-2 rounded-xl text-[10px] md:text-xs font-bold transition-all uppercase tracking-widest cursor-pointer ${
+								step === i + 1 ? "bg-teal-700 text-white shadow-lg shadow-teal-900/20"
 								: step > i + 1 ? "bg-teal-100 text-teal-700"
-									: "bg-slate-200 text-slate-500"
-								}`}
+								: "bg-slate-200 text-slate-500"
+							}`}
 						>
 							<span className="hidden md:inline">{label}</span>
 							<span className="md:hidden">{i + 1}</span>
@@ -272,7 +273,7 @@ export default function CreateListingPage() {
 										Tạo Tòa nhà đầu tiên
 									</Link>
 								</div>
-								: <div className="grid sm:grid-cols-2 gap-4">
+							:	<div className="grid sm:grid-cols-2 gap-4">
 									{buildings.map((b) => (
 										<div
 											key={b.id}
@@ -281,10 +282,11 @@ export default function CreateListingPage() {
 												setForm((prev) => ({ ...prev, room_id: "" })); // reset room
 												setError("");
 											}}
-											className={`p-5 rounded-2xl border-2 cursor-pointer transition-all ${form.building_id === b.id ?
-												"border-teal-600 bg-teal-50 shadow-md shadow-teal-900/5"
-												: "border-slate-100 bg-white hover:border-teal-200 hover:bg-slate-50"
-												}`}
+											className={`p-5 rounded-2xl border-2 cursor-pointer transition-all ${
+												form.building_id === b.id ?
+													"border-teal-600 bg-teal-50 shadow-md shadow-teal-900/5"
+												:	"border-slate-100 bg-white hover:border-teal-200 hover:bg-slate-50"
+											}`}
 										>
 											<h4
 												className={`font-black text-lg tracking-tight ${form.building_id === b.id ? "text-teal-800" : "text-slate-800"}`}
@@ -345,17 +347,18 @@ export default function CreateListingPage() {
 										Vào Dashboard để quản lý
 									</Link>
 								</div>
-								: <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+							:	<div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
 									{selectedBuilding.rooms
 										.filter((r) => r.status === "available")
 										.map((room) => (
 											<div
 												key={room.id}
 												onClick={() => selectRoom(room)}
-												className={`p-4 rounded-2xl border-2 cursor-pointer transition-all ${form.room_id === room.id ?
-													"border-indigo-500 bg-indigo-50 shadow-md shadow-indigo-500/10"
-													: "border-slate-100 bg-white hover:border-indigo-200"
-													}`}
+												className={`p-4 rounded-2xl border-2 cursor-pointer transition-all ${
+													form.room_id === room.id ?
+														"border-indigo-500 bg-indigo-50 shadow-md shadow-indigo-500/10"
+													:	"border-slate-100 bg-white hover:border-indigo-200"
+												}`}
 											>
 												<div className="flex justify-between items-start mb-2">
 													<span
@@ -367,7 +370,7 @@ export default function CreateListingPage() {
 														<span className="text-xs bg-emerald-100 text-emerald-700 font-bold px-1.5 py-0.5 rounded">
 															📸
 														</span>
-														: <span className="text-[9px] bg-amber-100 text-amber-700 font-bold px-1.5 py-0.5 rounded uppercase">
+													:	<span className="text-[9px] bg-amber-100 text-amber-700 font-bold px-1.5 py-0.5 rounded uppercase">
 															Thiếu ảnh
 														</span>
 													}
@@ -562,7 +565,7 @@ export default function CreateListingPage() {
 										</span>
 									</div>
 								</div>
-								: <div className="aspect-21/9 rounded-2xl bg-amber-50 text-amber-600 border border-amber-200 flex flex-col items-center justify-center font-bold">
+							:	<div className="aspect-21/9 rounded-2xl bg-amber-50 text-amber-600 border border-amber-200 flex flex-col items-center justify-center font-bold">
 									Phòng này chưa được gán hình ảnh trong hệ thống!
 								</div>
 							}
@@ -619,13 +622,13 @@ export default function CreateListingPage() {
 										{form.amenity_ids.map((id) => {
 											const am = amenities.find((a) => a.id === id);
 											return am ?
-												<span
-													key={id}
-													className="px-3 py-1.5 bg-white border border-slate-200 text-slate-600 text-xs font-bold rounded-xl shadow-sm"
-												>
-													{am.name_vi}
-												</span>
-												: null;
+													<span
+														key={id}
+														className="px-3 py-1.5 bg-white border border-slate-200 text-slate-600 text-xs font-bold rounded-xl shadow-sm"
+													>
+														{am.name_vi}
+													</span>
+												:	null;
 										})}
 									</div>
 								</div>

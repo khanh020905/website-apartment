@@ -1,16 +1,14 @@
-import L from 'leaflet';
-import type { Listing } from '../../../shared/types';
+import L from "leaflet";
+import type { Listing } from "../../../shared/types";
 
 export const createPriceIcon = (listing: Listing) => {
-  const priceInMillion = Number(listing.price) / 1_000_000;
-  const priceText =
-    priceInMillion % 1 === 0
-      ? `${priceInMillion} Trđ`
-      : `${priceInMillion.toFixed(1)} Trđ`;
+	const priceInMillion = Number(listing.price) / 1_000_000;
+	const priceText =
+		priceInMillion % 1 === 0 ? `${priceInMillion} Trđ` : `${priceInMillion.toFixed(1)} Trđ`;
 
-  return L.divIcon({
-    className: 'leaflet-div-icon',
-    html: `
+	return L.divIcon({
+		className: "leaflet-div-icon",
+		html: `
       <div 
         style="
           display: inline-flex;
@@ -41,7 +39,7 @@ export const createPriceIcon = (listing: Listing) => {
         <span>${priceText}</span>
       </div>
     `,
-    iconSize: [100, 36],
-    iconAnchor: [50, 18],
-  });
+		iconSize: [100, 36],
+		iconAnchor: [50, 18],
+	});
 };

@@ -1,4 +1,3 @@
-import React from "react";
 import { motion } from "framer-motion";
 import {
 	XAxis,
@@ -9,14 +8,7 @@ import {
 	AreaChart,
 	Area,
 } from "recharts";
-import {
-	Home,
-	Users,
-	TrendingUp,
-	Calendar,
-	AlertCircle,
-	DollarSign,
-} from "lucide-react";
+import { Home, Users, TrendingUp, Calendar, AlertCircle, DollarSign } from "lucide-react";
 import type { DashboardStats } from "../../../../shared/types";
 import { SmartosStatCard } from "./SmartosStatCard";
 
@@ -38,10 +30,10 @@ export const Overview = ({ stats }: OverviewProps) => {
 		{ day: "17/04", rate: 16 },
 		{ day: "19/04", rate: 20 },
 		{ day: "21/04", rate: 22 },
-    { day: "23/04", rate: 18 },
-    { day: "25/04", rate: 25 },
-    { day: "27/04", rate: 30 },
-    { day: "29/04", rate: 28 },
+		{ day: "23/04", rate: 18 },
+		{ day: "25/04", rate: 25 },
+		{ day: "27/04", rate: 30 },
+		{ day: "29/04", rate: 28 },
 	];
 
 	return (
@@ -96,16 +88,20 @@ export const Overview = ({ stats }: OverviewProps) => {
 
 			<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 				{/* Occupancy Chart */}
-				<motion.div 
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="lg:col-span-2 bg-white p-6 rounded-xl border border-slate-100 shadow-sm"
-        >
+				<motion.div
+					initial={{ opacity: 0, y: 10 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{ delay: 0.2 }}
+					className="lg:col-span-2 bg-white p-6 rounded-xl border border-slate-100 shadow-sm"
+				>
 					<div className="flex items-center justify-between mb-8">
 						<div>
-							<h3 className="text-sm font-black text-slate-800 uppercase tracking-tighter">Tỷ lệ lấp đầy theo thời gian</h3>
-              <p className="text-[10px] font-bold text-emerald-600 mt-0.5">(trung bình {Math.round(stats.occupancyRate)}%)</p>
+							<h3 className="text-sm font-black text-slate-800 uppercase tracking-tighter">
+								Tỷ lệ lấp đầy theo thời gian
+							</h3>
+							<p className="text-[10px] font-bold text-emerald-600 mt-0.5">
+								(trung bình {Math.round(stats.occupancyRate)}%)
+							</p>
 						</div>
 						<select className="text-[11px] font-bold border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-600 bg-white cursor-pointer">
 							<option>Tháng này</option>
@@ -115,15 +111,36 @@ export const Overview = ({ stats }: OverviewProps) => {
 					</div>
 
 					<div className="h-64 w-full">
-						<ResponsiveContainer width="100%" height="100%">
+						<ResponsiveContainer
+							width="100%"
+							height="100%"
+						>
 							<AreaChart data={chartData}>
 								<defs>
-									<linearGradient id="colorO" x1="0" y1="0" x2="0" y2="1">
-										<stop offset="5%" stopColor="#f59e0b" stopOpacity={0.05} />
-										<stop offset="95%" stopColor="#f59e0b" stopOpacity={0} />
+									<linearGradient
+										id="colorO"
+										x1="0"
+										y1="0"
+										x2="0"
+										y2="1"
+									>
+										<stop
+											offset="5%"
+											stopColor="#f59e0b"
+											stopOpacity={0.05}
+										/>
+										<stop
+											offset="95%"
+											stopColor="#f59e0b"
+											stopOpacity={0}
+										/>
 									</linearGradient>
 								</defs>
-								<CartesianGrid strokeDasharray="0" vertical={false} stroke="#f1f5f9" />
+								<CartesianGrid
+									strokeDasharray="0"
+									vertical={false}
+									stroke="#f1f5f9"
+								/>
 								<XAxis
 									dataKey="day"
 									axisLine={false}
@@ -159,21 +176,21 @@ export const Overview = ({ stats }: OverviewProps) => {
 				</motion.div>
 
 				{/* Overdue/Notices (Secondary content) */}
-				<motion.div 
-          initial={{ opacity: 0, x: 10 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.3 }}
-          className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm h-full"
-        >
+				<motion.div
+					initial={{ opacity: 0, x: 10 }}
+					animate={{ opacity: 1, x: 0 }}
+					transition={{ delay: 0.3 }}
+					className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm h-full"
+				>
 					<h3 className="text-sm font-black text-slate-800 uppercase tracking-tighter mb-6">
 						Sự cố cần xử lý (0)
 					</h3>
 					<div className="flex flex-col items-center justify-center py-10 text-center">
-            <div className="w-16 h-16 bg-slate-50 flex items-center justify-center rounded-full mb-4 text-slate-200">
-              <AlertCircle className="w-8 h-8" />
-            </div>
+						<div className="w-16 h-16 bg-slate-50 flex items-center justify-center rounded-full mb-4 text-slate-200">
+							<AlertCircle className="w-8 h-8" />
+						</div>
 						<p className="text-xs font-bold text-slate-700">Không có sự cố nào cần xử lý</p>
-						<p className="text-[11px] text-slate-400 mt-1 max-w-[180px]">
+						<p className="text-[11px] text-slate-400 mt-1 max-w-45">
 							Khi có báo cáo sự cố, bạn có thể xử lý ở đây.
 						</p>
 					</div>

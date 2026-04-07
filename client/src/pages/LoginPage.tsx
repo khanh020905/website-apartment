@@ -58,7 +58,7 @@ const LoginPage = () => {
 					alt="Modern apartment"
 					className="absolute inset-0 w-full h-full object-cover"
 				/>
-				<div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+				<div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent" />
 
 				{/* Overlay content */}
 				<div className="absolute bottom-0 left-0 right-0 p-8">
@@ -90,7 +90,7 @@ const LoginPage = () => {
 				transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
 				className="flex-1 flex items-center justify-center p-8 overflow-y-auto"
 			>
-				<div className="w-full max-w-[420px]">
+				<div className="w-full max-w-105">
 					{/* Title */}
 					<h1 className="text-3xl font-extrabold text-slate-900 mb-1.5 tracking-tight">
 						Chào mừng trở lại
@@ -104,7 +104,7 @@ const LoginPage = () => {
 						<div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600 flex items-center gap-2">
 							<svg
 								xmlns="http://www.w3.org/2000/svg"
-								className="w-4 h-4 flex-shrink-0"
+								className="w-4 h-4 shrink-0"
 								fill="none"
 								viewBox="0 0 24 24"
 								stroke="currentColor"
@@ -242,9 +242,9 @@ const LoginPage = () => {
 								onClick={() => setRemember(!remember)}
 							>
 								<div
-									className={`w-[18px] h-[18px] rounded border-2 flex-shrink-0 flex items-center justify-center transition-all ${
+									className={`w-4.5 h-4.5 rounded border-2 shrink-0 flex items-center justify-center transition-all ${
 										remember ?
-											"bg-[#0f9b9b] border-[#0f9b9b]"
+											"bg-brand-primary border-brand-primary"
 										:	"border-slate-300 hover:border-slate-400"
 									}`}
 								>
@@ -269,7 +269,7 @@ const LoginPage = () => {
 							</label>
 							<a
 								href="#"
-								className="text-sm text-[#0b7272] font-medium hover:text-[#0f9b9b] transition-colors"
+								className="text-sm text-brand-dark font-medium hover:text-brand-primary transition-colors"
 							>
 								Quên mật khẩu?
 							</a>
@@ -281,7 +281,7 @@ const LoginPage = () => {
 							whileTap={{ scale: 0.99 }}
 							type="submit"
 							disabled={loading}
-							className="w-full py-3.5 bg-[#0b7272] hover:bg-[#0f9b9b] text-white rounded-xl font-bold text-sm transition-colors shadow-lg shadow-cyan-950/20 mt-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+							className="w-full py-3.5 bg-brand-dark hover:bg-brand-primary text-white rounded-xl font-bold text-sm transition-colors shadow-lg shadow-cyan-950/20 mt-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
 						>
 							{loading ? "Đang đăng nhập..." : "Đăng nhập"}
 						</motion.button>
@@ -292,7 +292,7 @@ const LoginPage = () => {
 						Chưa có tài khoản?{" "}
 						<Link
 							to="/register"
-							className="text-[#0b7272] font-semibold hover:text-[#0f9b9b] underline underline-offset-2 transition-colors"
+							className="text-brand-dark font-semibold hover:text-brand-primary underline underline-offset-2 transition-colors"
 						>
 							Đăng ký ngay
 						</Link>
@@ -304,4 +304,3 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
-

@@ -335,7 +335,7 @@ export default function CreateBuildingPage() {
 											url="https://mt1.google.com/vt/lyrs=s,h&x={x}&y={y}&z={z}"
 											attribution="Dữ liệu bản đồ &copy;2026 Google, Hình ảnh &copy;2026 Airbus, CNES / Airbus, Maxar Technologies"
 											maxZoom={20}
-											subdomains={['mt0', 'mt1', 'mt2', 'mt3']}
+											subdomains={["mt0", "mt1", "mt2", "mt3"]}
 										/>
 										<LocationPicker
 											value={{ lat: form.lat, lng: form.lng }}

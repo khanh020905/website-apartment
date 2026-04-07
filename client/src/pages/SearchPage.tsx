@@ -228,13 +228,16 @@ export default function SearchPage() {
 						<div className="flex items-center gap-3">
 							<button
 								onClick={() => setShowFilters(!showFilters)}
-								className={`h-12 px-6 rounded-4xl font-black uppercase tracking-widest text-[11px] lg:text-xs flex items-center gap-3 transition-all cursor-pointer ${showFilters ?
+								className={`h-12 px-6 rounded-4xl font-black uppercase tracking-widest text-[11px] lg:text-xs flex items-center gap-3 transition-all cursor-pointer ${
+									showFilters ?
 										"bg-white text-brand-ink shadow-xl"
-										: "bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20"
-									}`}
+									:	"bg-white/10 backdrop-blur-md border border-white/20 text-white hover:bg-white/20"
+								}`}
 							>
 								<Sliders className="w-4 h-4" />
-								<span><span className="hidden sm:inline">Bộ lọc</span> nâng cao</span>
+								<span>
+									<span className="hidden sm:inline">Bộ lọc</span> nâng cao
+								</span>
 							</button>
 
 							<div className="p-1 bg-white/10 backdrop-blur-md border border-white/20 rounded-4xl hidden md:flex items-center gap-1 h-12">
@@ -471,18 +474,19 @@ export default function SearchPage() {
 												onClick={() =>
 													setBedrooms(
 														n === "0" ? null
-															: n === "4+" ? "4"
-																: n,
+														: n === "4+" ? "4"
+														: n,
 													)
 												}
-												className={`flex-1 min-w-12 h-12 rounded-xl text-sm font-bold transition-all cursor-pointer ${(
+												className={`flex-1 min-w-12 h-12 rounded-xl text-sm font-bold transition-all cursor-pointer ${
+													(
 														(n === "0" && bedrooms === null) ||
 														(n === "4+" && bedrooms === "4") ||
 														(bedrooms === n && n !== "0" && n !== "4+")
 													) ?
 														"bg-brand-ink text-white shadow-lg shadow-brand-ink/20"
-														: "bg-slate-50 text-slate-600 hover:bg-slate-100 border border-transparent"
-													}`}
+													:	"bg-slate-50 text-slate-600 hover:bg-slate-100 border border-transparent"
+												}`}
 											>
 												{n}
 											</button>
@@ -496,10 +500,11 @@ export default function SearchPage() {
 											<button
 												key={n}
 												onClick={() => setBathrooms(n === "3+" ? "3" : n)}
-												className={`flex-1 min-w-12 h-12 rounded-xl text-sm font-bold transition-all cursor-pointer ${(n === "3+" && bathrooms === "3") || (bathrooms === n && n !== "3+") ?
+												className={`flex-1 min-w-12 h-12 rounded-xl text-sm font-bold transition-all cursor-pointer ${
+													(n === "3+" && bathrooms === "3") || (bathrooms === n && n !== "3+") ?
 														"bg-brand-ink text-white shadow-lg shadow-brand-ink/20"
-														: "bg-slate-50 text-slate-600 hover:bg-slate-100 border border-transparent"
-													}`}
+													:	"bg-slate-50 text-slate-600 hover:bg-slate-100 border border-transparent"
+												}`}
 											>
 												{n}
 											</button>
@@ -516,16 +521,18 @@ export default function SearchPage() {
 										<button
 											key={pt.value}
 											onClick={() => togglePropertyType(pt.value)}
-											className={`flex items-center gap-3 p-4 rounded-2xl border-2 transition-all cursor-pointer ${selectedPropertyTypes.includes(pt.value) ?
+											className={`flex items-center gap-3 p-4 rounded-2xl border-2 transition-all cursor-pointer ${
+												selectedPropertyTypes.includes(pt.value) ?
 													"bg-brand-primary/10 border-brand-primary text-brand-ink shadow-lg shadow-brand-primary/5"
-													: "bg-slate-50 border-slate-100 text-slate-500 hover:border-slate-200"
-												}`}
+												:	"bg-slate-50 border-slate-100 text-slate-500 hover:border-slate-200"
+											}`}
 										>
 											<div
-												className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${selectedPropertyTypes.includes(pt.value) ?
+												className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${
+													selectedPropertyTypes.includes(pt.value) ?
 														"bg-brand-primary border-brand-primary"
-														: "border-slate-200 bg-white"
-													}`}
+													:	"border-slate-200 bg-white"
+												}`}
 											>
 												{selectedPropertyTypes.includes(pt.value) && (
 													<Check className="w-4 h-4 text-white" />
@@ -545,10 +552,11 @@ export default function SearchPage() {
 										<button
 											key={f}
 											onClick={() => setFurniture(f === furniture ? "" : f)}
-											className={`px-6 py-3 rounded-2xl flex items-center gap-2 border-2 text-xs font-black uppercase tracking-widest transition-all cursor-pointer ${furniture === f ?
+											className={`px-6 py-3 rounded-2xl flex items-center gap-2 border-2 text-xs font-black uppercase tracking-widest transition-all cursor-pointer ${
+												furniture === f ?
 													"bg-brand-primary border-brand-primary text-white shadow-xl shadow-brand-primary/20"
-													: "bg-slate-50 border-slate-100 text-slate-400 hover:border-slate-200"
-												}`}
+												:	"bg-slate-50 border-slate-100 text-slate-400 hover:border-slate-200"
+											}`}
 										>
 											{f === "none" && <X className="w-3.5 h-3.5" />}
 											{f === "basic" && <Home className="w-3.5 h-3.5" />}
@@ -576,10 +584,11 @@ export default function SearchPage() {
 										<button
 											key={d.val}
 											onClick={() => setDirection(d.val === direction ? null : d.val)}
-											className={`px-4 py-3 rounded-2xl border-2 text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer ${direction === d.val ?
+											className={`px-4 py-3 rounded-2xl border-2 text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer ${
+												direction === d.val ?
 													"bg-slate-900 border-slate-900 text-white shadow-lg"
-													: "bg-slate-50 border-slate-100 text-slate-400 hover:border-slate-200"
-												}`}
+												:	"bg-slate-50 border-slate-100 text-slate-400 hover:border-slate-200"
+											}`}
 										>
 											{d.label}
 										</button>
@@ -595,21 +604,22 @@ export default function SearchPage() {
 										<button
 											key={am.id}
 											onClick={() => toggleAmenity(am.id)}
-											className={`px-4 py-2.5 rounded-2xl border-2 text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer flex items-center gap-2 ${selectedAmenities.includes(am.id) ?
+											className={`px-4 py-2.5 rounded-2xl border-2 text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer flex items-center gap-2 ${
+												selectedAmenities.includes(am.id) ?
 													"bg-brand-primary/10 border-brand-primary/50 text-brand-primary shadow-md"
-													: "bg-slate-50 border-slate-100 text-slate-400 hover:border-slate-200 hover:text-brand-primary"
-												}`}
+												:	"bg-slate-50 border-slate-100 text-slate-400 hover:border-slate-200 hover:text-brand-primary"
+											}`}
 										>
 											<span className="opacity-60">
 												{am.icon === "wifi" ?
 													<Wifi className="w-3 h-3" />
-													: am.icon === "snowflake" ?
-														<Wind className="w-3 h-3" />
-														: am.icon === "bed" ?
-															<Bed className="w-3 h-3" />
-															: am.icon === "parking" ?
-																<Car className="w-3 h-3" />
-																: <Shield className="w-3 h-3" />}
+												: am.icon === "snowflake" ?
+													<Wind className="w-3 h-3" />
+												: am.icon === "bed" ?
+													<Bed className="w-3 h-3" />
+												: am.icon === "parking" ?
+													<Car className="w-3 h-3" />
+												:	<Shield className="w-3 h-3" />}
 											</span>
 											{am.name_vi}
 										</button>
@@ -621,10 +631,11 @@ export default function SearchPage() {
 							<div className="pt-4 border-t border-slate-100">
 								<button
 									onClick={() => setIsVerified(!isVerified)}
-									className={`w-full p-6 h-auto rounded-4xl border-2 flex items-center justify-between transition-all cursor-pointer ${isVerified ?
+									className={`w-full p-6 h-auto rounded-4xl border-2 flex items-center justify-between transition-all cursor-pointer ${
+										isVerified ?
 											"bg-brand-primary/10 border-brand-primary shadow-lg shadow-brand-primary/5"
-											: "bg-white border-slate-100 hover:border-slate-200"
-										}`}
+										:	"bg-white border-slate-100 hover:border-slate-200"
+									}`}
 								>
 									<div className="flex items-center gap-4">
 										<div
@@ -675,8 +686,6 @@ export default function SearchPage() {
 
 				{/* Results Main Content */}
 				<main className="flex-1 overflow-y-auto p-8 lg:p-12 space-y-10 scroll-smooth">
-
-
 					{/* Header & Sort */}
 					<div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
 						<div>
@@ -696,10 +705,11 @@ export default function SearchPage() {
 								<button
 									key={s.value}
 									onClick={() => setSortBy(s.value)}
-									className={`px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap cursor-pointer border-2 ${sortBy === s.value ?
+									className={`px-5 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap cursor-pointer border-2 ${
+										sortBy === s.value ?
 											"bg-brand-ink border-brand-ink text-white shadow-xl shadow-brand-ink/10"
-											: "bg-white border-slate-100 text-slate-400 hover:border-slate-200"
-										}`}
+										:	"bg-white border-slate-100 text-slate-400 hover:border-slate-200"
+									}`}
 								>
 									{s.label}
 								</button>
@@ -715,136 +725,139 @@ export default function SearchPage() {
 								Đang tìm kiếm căn hộ...
 							</p>
 						</div>
-						: listings.length === 0 ?
-							<div className="py-32 text-center animate-in fade-in zoom-in duration-500">
-								<div className="w-24 h-24 bg-white rounded-[40px] shadow-xl shadow-black/5 flex items-center justify-center mx-auto mb-8">
-									<Search className="w-10 h-10 text-slate-200" />
-								</div>
-								<h3 className="text-2xl font-black text-brand-ink mb-2 tracking-tight">
-									Rất tiếc, chưa tìm thấy kết quả phù hợp
-								</h3>
-								<p className="max-w-xs mx-auto text-slate-400 font-medium leading-relaxed mb-8">
-									Thử thay đổi bộ lọc, khoảng giá hoặc từ khóa tìm kiếm để tìm thấy kết quả phù hợp
-									hơn.
-								</p>
-								<button
-									onClick={() => {
-										setPriceValues([PRICE_RANGE.MIN, PRICE_RANGE.MAX]);
-										setAreaValues([AREA_RANGE.MIN, AREA_RANGE.MAX]);
-										setSelectedPropertyTypes([]);
-										setKeyword("");
-										search();
-									}}
-									className="px-10 py-4 bg-brand-primary text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-brand-primary/20 hover:bg-brand-dark transition-all active:scale-95 cursor-pointer"
-								>
-									XÓA TẤT CẢ BỘ LỌC
-								</button>
+					: listings.length === 0 ?
+						<div className="py-32 text-center animate-in fade-in zoom-in duration-500">
+							<div className="w-24 h-24 bg-white rounded-[40px] shadow-xl shadow-black/5 flex items-center justify-center mx-auto mb-8">
+								<Search className="w-10 h-10 text-slate-200" />
 							</div>
-							: <div
-								className={`grid gap-4 sm:gap-6 ${viewMode === "grid" ? "grid-cols-1 md:grid-cols-2 xl:grid-cols-3" : "grid-cols-1"
-									}`}
+							<h3 className="text-2xl font-black text-brand-ink mb-2 tracking-tight">
+								Rất tiếc, chưa tìm thấy kết quả phù hợp
+							</h3>
+							<p className="max-w-xs mx-auto text-slate-400 font-medium leading-relaxed mb-8">
+								Thử thay đổi bộ lọc, khoảng giá hoặc từ khóa tìm kiếm để tìm thấy kết quả phù hợp
+								hơn.
+							</p>
+							<button
+								onClick={() => {
+									setPriceValues([PRICE_RANGE.MIN, PRICE_RANGE.MAX]);
+									setAreaValues([AREA_RANGE.MIN, AREA_RANGE.MAX]);
+									setSelectedPropertyTypes([]);
+									setKeyword("");
+									search();
+								}}
+								className="px-10 py-4 bg-brand-primary text-white rounded-2xl font-black uppercase tracking-widest text-[10px] shadow-xl shadow-brand-primary/20 hover:bg-brand-dark transition-all active:scale-95 cursor-pointer"
 							>
-								{listings.map((listing, i) => (
-									<motion.div
-										key={listing.id}
-										initial={{ opacity: 0, y: 20 }}
-										animate={{ opacity: 1, y: 0 }}
-										transition={{ duration: 0.4, delay: (i % 6) * 0.05 }}
-										className="group"
+								XÓA TẤT CẢ BỘ LỌC
+							</button>
+						</div>
+					:	<div
+							className={`grid gap-4 sm:gap-6 ${
+								viewMode === "grid" ? "grid-cols-1 md:grid-cols-2 xl:grid-cols-3" : "grid-cols-1"
+							}`}
+						>
+							{listings.map((listing, i) => (
+								<motion.div
+									key={listing.id}
+									initial={{ opacity: 0, y: 20 }}
+									animate={{ opacity: 1, y: 0 }}
+									transition={{ duration: 0.4, delay: (i % 6) * 0.05 }}
+									className="group"
+								>
+									<Link
+										to={`/listings/${listing.id}`}
+										className={`block bg-white rounded-4xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-2xl hover:shadow-brand-ink/10 hover:-translate-y-2 transition-all duration-500 ${
+											viewMode === "list" ? "flex flex-col sm:flex-row h-auto sm:h-64" : ""
+										}`}
 									>
-										<Link
-											to={`/listings/${listing.id}`}
-											className={`block bg-white rounded-4xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-2xl hover:shadow-brand-ink/10 hover:-translate-y-2 transition-all duration-500 ${viewMode === "list" ? "flex flex-col sm:flex-row h-auto sm:h-64" : ""
-												}`}
+										{/* Image Area */}
+										<div
+											className={`relative overflow-hidden ${
+												viewMode === "list" ? "sm:w-[40%] shrink-0" : "aspect-[1.4/1]"
+											}`}
 										>
-											{/* Image Area */}
-											<div
-												className={`relative overflow-hidden ${viewMode === "list" ? "sm:w-[40%] shrink-0" : "aspect-[1.4/1]"
-													}`}
-											>
-												<img
-													src={
-														listing.images?.[0]?.url ||
-														(listing.images?.[0] as unknown as string) ||
-														"https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80"
-													}
-													alt={listing.title}
-													className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-												/>
-												<div className="absolute inset-0 bg-linear-to-t from-brand-ink/60 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity" />
+											<img
+												src={
+													listing.images?.[0]?.url ||
+													(listing.images?.[0] as unknown as string) ||
+													"https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=600&q=80"
+												}
+												alt={listing.title}
+												className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+											/>
+											<div className="absolute inset-0 bg-linear-to-t from-brand-ink/60 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity" />
 
-												{/* Price Badge */}
-												<div className="absolute top-4 left-4">
-													<div className="bg-white/10 backdrop-blur-xl border border-white/20 text-white px-4 py-2 rounded-2xl font-black text-sm shadow-xl">
-														{(listing.price / 1000000).toFixed(1)} triệu/th
-													</div>
-												</div>
-
-												{/* Top Right Badges */}
-												<div className="absolute top-4 right-4 flex flex-col gap-2">
-													{listing.is_verified && (
-														<div
-															className="bg-brand-primary text-white p-2 rounded-xl shadow-lg border border-white/20"
-															title="Đã xác thực"
-														>
-															<Shield className="w-4 h-4 fill-white/20" />
-														</div>
-													)}
-													<button className="bg-white/90 backdrop-blur text-brand-primary p-2 rounded-xl shadow-lg hover:bg-white transition-colors">
-														<Users className="w-4 h-4" />
-													</button>
+											{/* Price Badge */}
+											<div className="absolute top-4 left-4">
+												<div className="bg-white/10 backdrop-blur-xl border border-white/20 text-white px-4 py-2 rounded-2xl font-black text-sm shadow-xl">
+													{(listing.price / 1000000).toFixed(1)} triệu/th
 												</div>
 											</div>
 
-											{/* Content Area */}
-											<div className="p-6 flex flex-col justify-between">
-												<div>
-													<p className="text-[10px] font-black text-brand-primary uppercase tracking-widest mb-2 flex items-center gap-1.5">
-														<span className="w-1.5 h-1.5 rounded-full bg-brand-light" />
-														{PROPERTY_TYPE_LABELS[listing.property_type]}
-													</p>
-													<h3 className="text-lg font-black text-brand-ink leading-tight mb-3 line-clamp-2 transition-colors group-hover:text-brand-primary">
-														{listing.title}
-													</h3>
-													<div className="flex items-start gap-1.5 text-slate-400 font-bold text-xs mb-6">
-														<MapPin className="w-3.5 h-3.5 mt-0.5 shrink-0" />
-														<span className="line-clamp-1">
-															{listing.district}, {listing.city}
-														</span>
+											{/* Top Right Badges */}
+											<div className="absolute top-4 right-4 flex flex-col gap-2">
+												{listing.is_verified && (
+													<div
+														className="bg-brand-primary text-white p-2 rounded-xl shadow-lg border border-white/20"
+														title="Đã xác thực"
+													>
+														<Shield className="w-4 h-4 fill-white/20" />
 													</div>
-												</div>
+												)}
+												<button className="bg-white/90 backdrop-blur text-brand-primary p-2 rounded-xl shadow-lg hover:bg-white transition-colors">
+													<Users className="w-4 h-4" />
+												</button>
+											</div>
+										</div>
 
-												<div className="flex items-center gap-4 text-slate-500 border-t border-slate-50 pt-4 mt-auto">
-													<div className="flex flex-col">
-														<span className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-slate-300">
-															<Bed className="w-3 h-3" /> PN
-														</span>
-														<span className="text-sm font-black text-slate-700">
-															{listing.bedrooms}
-														</span>
-													</div>
-													<div className="flex flex-col">
-														<span className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-slate-300">
-															<Bath className="w-3 h-3" /> WC
-														</span>
-														<span className="text-sm font-black text-slate-700">
-															{listing.bathrooms}
-														</span>
-													</div>
-													<div className="flex flex-col">
-														<span className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-slate-300">
-															<Square className="w-3 h-3" /> Diện tích
-														</span>
-														<span className="text-sm font-black text-slate-700">
-															{listing.area}m²
-														</span>
-													</div>
+										{/* Content Area */}
+										<div className="p-6 flex flex-col justify-between">
+											<div>
+												<p className="text-[10px] font-black text-brand-primary uppercase tracking-widest mb-2 flex items-center gap-1.5">
+													<span className="w-1.5 h-1.5 rounded-full bg-brand-light" />
+													{PROPERTY_TYPE_LABELS[listing.property_type]}
+												</p>
+												<h3 className="text-lg font-black text-brand-ink leading-tight mb-3 line-clamp-2 transition-colors group-hover:text-brand-primary">
+													{listing.title}
+												</h3>
+												<div className="flex items-start gap-1.5 text-slate-400 font-bold text-xs mb-6">
+													<MapPin className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+													<span className="line-clamp-1">
+														{listing.district}, {listing.city}
+													</span>
 												</div>
 											</div>
-										</Link>
-									</motion.div>
-								))}
-							</div>
+
+											<div className="flex items-center gap-4 text-slate-500 border-t border-slate-50 pt-4 mt-auto">
+												<div className="flex flex-col">
+													<span className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-slate-300">
+														<Bed className="w-3 h-3" /> PN
+													</span>
+													<span className="text-sm font-black text-slate-700">
+														{listing.bedrooms}
+													</span>
+												</div>
+												<div className="flex flex-col">
+													<span className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-slate-300">
+														<Bath className="w-3 h-3" /> WC
+													</span>
+													<span className="text-sm font-black text-slate-700">
+														{listing.bathrooms}
+													</span>
+												</div>
+												<div className="flex flex-col">
+													<span className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest text-slate-300">
+														<Square className="w-3 h-3" /> Diện tích
+													</span>
+													<span className="text-sm font-black text-slate-700">
+														{listing.area}m²
+													</span>
+												</div>
+											</div>
+										</div>
+									</Link>
+								</motion.div>
+							))}
+						</div>
 					}
 
 					{/* Pagination */}

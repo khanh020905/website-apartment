@@ -157,313 +157,313 @@ function App() {
 			<AuthProvider>
 				<BuildingProvider>
 					<div className="h-screen w-screen flex overflow-hidden font-sans bg-white">
-					<Routes>
-						{/* QR Status page — no navbar/sidebar, standalone  */}
-						<Route
-							path="/qr/:code"
-							element={<BuildingStatusPage />}
-						/>
+						<Routes>
+							{/* QR Status page — no navbar/sidebar, standalone  */}
+							<Route
+								path="/qr/:code"
+								element={<BuildingStatusPage />}
+							/>
 
-						{/* All other routes with layout */}
-						<Route
-							path="*"
-							element={
-								<>
-									<AppSidebar />
-									<div className="flex-1 flex flex-col overflow-hidden bg-slate-50">
-										<Navbar />
-										<main className="flex-1 overflow-y-auto">
-											<Routes>
-												<Route
-													path="/"
-													element={<HomePage />}
-												/>
-												<Route
-													path="/register"
-													element={<RegisterPage />}
-												/>
-												<Route
-													path="/login"
-													element={<LoginPage />}
-												/>
-												<Route
-													path="/contact"
-													element={<ContactPage />}
-												/>
-												<Route
-													path="/search"
-													element={<SearchPage />}
-												/>
-												<Route
-													path="/forgot-password"
-													element={<ForgotPasswordPage />}
-												/>
-												<Route
-													path="/pricing"
-													element={<PricingPage />}
-												/>
-												<Route
-													path="/listings/:id"
-													element={<ListingDetailPage />}
-												/>
+							{/* All other routes with layout */}
+							<Route
+								path="*"
+								element={
+									<>
+										<AppSidebar />
+										<div className="flex-1 flex flex-col overflow-hidden bg-slate-50">
+											<Navbar />
+											<main className="flex-1 overflow-y-auto">
+												<Routes>
+													<Route
+														path="/"
+														element={<HomePage />}
+													/>
+													<Route
+														path="/register"
+														element={<RegisterPage />}
+													/>
+													<Route
+														path="/login"
+														element={<LoginPage />}
+													/>
+													<Route
+														path="/contact"
+														element={<ContactPage />}
+													/>
+													<Route
+														path="/search"
+														element={<SearchPage />}
+													/>
+													<Route
+														path="/forgot-password"
+														element={<ForgotPasswordPage />}
+													/>
+													<Route
+														path="/pricing"
+														element={<PricingPage />}
+													/>
+													<Route
+														path="/listings/:id"
+														element={<ListingDetailPage />}
+													/>
 
-												{/* Authenticated routes */}
-												<Route
-													path="/create-building"
-													element={
-														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<CreateBuildingPage />
-														</ProtectedRoute>
-													}
-												/>
-												<Route
-													path="/create-listing"
-													element={
-														<ProtectedRoute>
-															<CreateListingPage />
-														</ProtectedRoute>
-													}
-												/>
-												<Route
-													path="/profile"
-													element={
-														<ProtectedRoute>
-															<ProfilePage />
-														</ProtectedRoute>
-													}
-												/>
-												<Route
-													path="/my-listings"
-													element={
-														<ProtectedRoute>
-															<MyListingsPage />
-														</ProtectedRoute>
-													}
-												/>
-												<Route
-													path="/dashboard"
-													element={
-														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<DashboardPage />
-														</ProtectedRoute>
-													}
-												/>
+													{/* Authenticated routes */}
+													<Route
+														path="/create-building"
+														element={
+															<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+																<CreateBuildingPage />
+															</ProtectedRoute>
+														}
+													/>
+													<Route
+														path="/create-listing"
+														element={
+															<ProtectedRoute>
+																<CreateListingPage />
+															</ProtectedRoute>
+														}
+													/>
+													<Route
+														path="/profile"
+														element={
+															<ProtectedRoute>
+																<ProfilePage />
+															</ProtectedRoute>
+														}
+													/>
+													<Route
+														path="/my-listings"
+														element={
+															<ProtectedRoute>
+																<MyListingsPage />
+															</ProtectedRoute>
+														}
+													/>
+													<Route
+														path="/dashboard"
+														element={
+															<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+																<DashboardPage />
+															</ProtectedRoute>
+														}
+													/>
 
-												{/* ── CUSTOMERS ── */}
-												<Route
-													path="/customers"
-													element={
-														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<CustomerPage />
-														</ProtectedRoute>
-													}
-												/>
-												<Route
-													path="/vehicles"
-													element={
-														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<VehiclePage />
-														</ProtectedRoute>
-													}
-												/>
+													{/* ── CUSTOMERS ── */}
+													<Route
+														path="/customers"
+														element={
+															<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+																<CustomerPage />
+															</ProtectedRoute>
+														}
+													/>
+													<Route
+														path="/vehicles"
+														element={
+															<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+																<VehiclePage />
+															</ProtectedRoute>
+														}
+													/>
 
-												{/* ── RESERVATIONS / BOOKINGS ── */}
-												<Route
-													path="/reservations"
-													element={
-														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<BookingPage />
-														</ProtectedRoute>
-													}
-												/>
-												<Route
-													path="/reservation-history"
-													element={
-														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<BookingHistoryPage />
-														</ProtectedRoute>
-													}
-												/>
-												<Route
-													path="/visitTours"
-													element={
-														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<AppointmentPage />
-														</ProtectedRoute>
-													}
-												/>
+													{/* ── RESERVATIONS / BOOKINGS ── */}
+													<Route
+														path="/reservations"
+														element={
+															<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+																<BookingPage />
+															</ProtectedRoute>
+														}
+													/>
+													<Route
+														path="/reservation-history"
+														element={
+															<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+																<BookingHistoryPage />
+															</ProtectedRoute>
+														}
+													/>
+													<Route
+														path="/visitTours"
+														element={
+															<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+																<AppointmentPage />
+															</ProtectedRoute>
+														}
+													/>
 
-												{/* ── PAYMENTS ── */}
-												<Route
-													path="/invoices"
-													element={
-														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<InvoicesPage />
-														</ProtectedRoute>
-													}
-												/>
-												<Route
-													path="/transactions"
-													element={
-														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<TransactionsPage />
-														</ProtectedRoute>
-													}
-												/>
-												<Route
-													path="/proof-of-payment"
-													element={
-														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<ProofOfPaymentPage />
-														</ProtectedRoute>
-													}
-												/>
-												<Route
-													path="/transaction-config"
-													element={
-														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<TransactionConfigPage />
-														</ProtectedRoute>
-													}
-												/>
+													{/* ── PAYMENTS ── */}
+													<Route
+														path="/invoices"
+														element={
+															<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+																<InvoicesPage />
+															</ProtectedRoute>
+														}
+													/>
+													<Route
+														path="/transactions"
+														element={
+															<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+																<TransactionsPage />
+															</ProtectedRoute>
+														}
+													/>
+													<Route
+														path="/proof-of-payment"
+														element={
+															<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+																<ProofOfPaymentPage />
+															</ProtectedRoute>
+														}
+													/>
+													<Route
+														path="/transaction-config"
+														element={
+															<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+																<TransactionConfigPage />
+															</ProtectedRoute>
+														}
+													/>
 
-												{/* ── CONTRACTS ── */}
-												<Route
-													path="/contracts"
-													element={
-														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<ContractsPage />
-														</ProtectedRoute>
-													}
-												/>
-												<Route
-													path="/contract-templates"
-													element={
-														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<ContractTemplatesPage />
-														</ProtectedRoute>
-													}
-												/>
+													{/* ── CONTRACTS ── */}
+													<Route
+														path="/contracts"
+														element={
+															<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+																<ContractsPage />
+															</ProtectedRoute>
+														}
+													/>
+													<Route
+														path="/contract-templates"
+														element={
+															<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+																<ContractTemplatesPage />
+															</ProtectedRoute>
+														}
+													/>
 
-												{/* ── MAINTENANCE / INCIDENTS ── */}
-												<Route
-													path="/incidents"
-													element={
-														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<IncidentsPage />
-														</ProtectedRoute>
-													}
-												/>
-												<Route
-													path="/incident-types"
-													element={
-														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<IncidentTypesPage />
-														</ProtectedRoute>
-													}
-												/>
+													{/* ── MAINTENANCE / INCIDENTS ── */}
+													<Route
+														path="/incidents"
+														element={
+															<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+																<IncidentsPage />
+															</ProtectedRoute>
+														}
+													/>
+													<Route
+														path="/incident-types"
+														element={
+															<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+																<IncidentTypesPage />
+															</ProtectedRoute>
+														}
+													/>
 
-												{/* ── REPORTS ── */}
-												<Route
-													path="/operation/occupancy-rate"
-													element={
-														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<OccupancyReportPage />
-														</ProtectedRoute>
-													}
-												/>
-												<Route
-													path="/customer-report"
-													element={
-														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<CustomerReportPage />
-														</ProtectedRoute>
-													}
-												/>
-												<Route
-													path="/revenues"
-													element={
-														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<RevenueReportPage />
-														</ProtectedRoute>
-													}
-												/>
-												<Route
-													path="/for-owner"
-													element={
-														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<OwnerReportPage />
-														</ProtectedRoute>
-													}
-												/>
+													{/* ── REPORTS ── */}
+													<Route
+														path="/operation/occupancy-rate"
+														element={
+															<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+																<OccupancyReportPage />
+															</ProtectedRoute>
+														}
+													/>
+													<Route
+														path="/customer-report"
+														element={
+															<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+																<CustomerReportPage />
+															</ProtectedRoute>
+														}
+													/>
+													<Route
+														path="/revenues"
+														element={
+															<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+																<RevenueReportPage />
+															</ProtectedRoute>
+														}
+													/>
+													<Route
+														path="/for-owner"
+														element={
+															<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+																<OwnerReportPage />
+															</ProtectedRoute>
+														}
+													/>
 
-												{/* ── SETTINGS / MANAGEMENT ── */}
-												<Route
-													path="/business-information"
-													element={
-														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<BusinessInfoPage />
-														</ProtectedRoute>
-													}
-												/>
-												<Route
-													path="/locations"
-													element={
-														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<LocationsPage />
-														</ProtectedRoute>
-													}
-												/>
-												<Route
-													path="/users"
-													element={
-														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<UsersPage />
-														</ProtectedRoute>
-													}
-												/>
-												<Route
-													path="/roles"
-													element={
-														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<RolesPage />
-														</ProtectedRoute>
-													}
-												/>
-												<Route
-													path="/integrations"
-													element={
-														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<IntegrationsPage />
-														</ProtectedRoute>
-													}
-												/>
-												<Route
-													path="/api-management"
-													element={
-														<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-															<ApiManagementPage />
-														</ProtectedRoute>
-													}
-												/>
+													{/* ── SETTINGS / MANAGEMENT ── */}
+													<Route
+														path="/business-information"
+														element={
+															<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+																<BusinessInfoPage />
+															</ProtectedRoute>
+														}
+													/>
+													<Route
+														path="/locations"
+														element={
+															<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+																<LocationsPage />
+															</ProtectedRoute>
+														}
+													/>
+													<Route
+														path="/users"
+														element={
+															<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+																<UsersPage />
+															</ProtectedRoute>
+														}
+													/>
+													<Route
+														path="/roles"
+														element={
+															<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+																<RolesPage />
+															</ProtectedRoute>
+														}
+													/>
+													<Route
+														path="/integrations"
+														element={
+															<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+																<IntegrationsPage />
+															</ProtectedRoute>
+														}
+													/>
+													<Route
+														path="/api-management"
+														element={
+															<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+																<ApiManagementPage />
+															</ProtectedRoute>
+														}
+													/>
 
-												{/* ── ADMIN ── */}
-												<Route
-													path="/admin"
-													element={
-														<ProtectedRoute roles={["admin"]}>
-															<AdminVerificationPage />
-														</ProtectedRoute>
-													}
-												/>
-											</Routes>
-										</main>
-									</div>
-								</>
-							}
-						/>
-					</Routes>
-				</div>
+													{/* ── ADMIN ── */}
+													<Route
+														path="/admin"
+														element={
+															<ProtectedRoute roles={["admin"]}>
+																<AdminVerificationPage />
+															</ProtectedRoute>
+														}
+													/>
+												</Routes>
+											</main>
+										</div>
+									</>
+								}
+							/>
+						</Routes>
+					</div>
 				</BuildingProvider>
 			</AuthProvider>
 		</Router>

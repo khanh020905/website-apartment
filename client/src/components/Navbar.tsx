@@ -18,21 +18,19 @@ const Navbar = () => {
 	const dropdownRef = useRef<HTMLDivElement>(null);
 	const buildingRef = useRef<HTMLDivElement>(null);
 
-	useEffect(
-		() => {
-			if (user && (role === "landlord" || role === "admin")) {
-				api.get<{ listings: any[] }>("/api/listings/my").then(({ data }) => {
-					if (data && data.listings) {
-						const attention = data.listings.filter(
-							(l) => l.status === "pending" || l.status === "rejected",
-						).length;
-						setNotificationCount(attention);
-					}
-				});
-			}
-		},
-		[user, role],
-	);
+	useEffect(() => {
+		if (user && (role === "landlord" || role === "admin")) {
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			api.get<{ listings: any[] }>("/api/listings/my").then(({ data }) => {
+				if (data && data.listings) {
+					const attention = data.listings.filter(
+						(l) => l.status === "pending" || l.status === "rejected",
+					).length;
+					setNotificationCount(attention);
+				}
+			});
+		}
+	}, [user, role]);
 
 	useEffect(() => {
 		const handleClickOutside = (e: MouseEvent) => {
@@ -50,7 +48,7 @@ const Navbar = () => {
 	const selectedBuildingName =
 		selectedBuildingId ?
 			buildings.find((b) => b.id === selectedBuildingId)?.name || "N/A"
-			: "Mọi toà nhà";
+		:	"Mọi toà nhà";
 
 	const handleSignOut = async () => {
 		setDropdownOpen(false);
@@ -65,7 +63,7 @@ const Navbar = () => {
 	};
 
 	return (
-		<div className="h-[64px] bg-white border-b border-slate-100 flex items-center justify-between px-8 z-40 sticky top-0 shadow-sm shadow-slate-200/50 gap-6">
+		<div className="h-16 bg-white border-b border-slate-100 flex items-center justify-between px-8 z-40 sticky top-0 shadow-sm shadow-slate-200/50 gap-6">
 			{/* Building Switcher & Search Bar */}
 			<div className="flex-1 flex items-center gap-4 max-w-3xl">
 				{/* Building Switcher */}
@@ -75,10 +73,9 @@ const Navbar = () => {
 				>
 					<button
 						onClick={() => setIsBuildingOpen(!isBuildingOpen)}
-						className={`flex items-center gap-3 px-3 py-1.5 bg-[#f8f9fa] border border-slate-200 rounded-lg text-sm font-semibold transition-all cursor-pointer min-w-[160px] ${isBuildingOpen ?
-								"border-amber-400 shadow-sm"
-								: "hover:border-slate-300"
-							}`}
+						className={`flex items-center gap-3 px-3 py-1.5 bg-[#f8f9fa] border border-slate-200 rounded-lg text-sm font-semibold transition-all cursor-pointer min-w-40 ${
+							isBuildingOpen ? "border-amber-400 shadow-sm" : "hover:border-slate-300"
+						}`}
 					>
 						<span className="text-slate-700 truncate">{selectedBuildingName}</span>
 						<ChevronDown
@@ -93,7 +90,7 @@ const Navbar = () => {
 								animate={{ opacity: 1, y: 0, scale: 1 }}
 								exit={{ opacity: 0, y: 8, scale: 0.95 }}
 								transition={{ duration: 0.15 }}
-								className="absolute left-0 top-[calc(100%+8px)] w-[260px] bg-white rounded-2xl shadow-2xl shadow-black/10 border border-slate-100 overflow-hidden z-50 py-1"
+								className="absolute left-0 top-[calc(100%+8px)] w-65 bg-white rounded-2xl shadow-2xl shadow-black/10 border border-slate-100 overflow-hidden z-50 py-1"
 							>
 								<div className="px-3 py-2 border-b border-slate-50">
 									<div className="relative">
@@ -105,16 +102,17 @@ const Navbar = () => {
 										<Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
 									</div>
 								</div>
-								<div className="max-h-[300px] overflow-y-auto py-1 scrollbar-hide">
+								<div className="max-h-75 overflow-y-auto py-1 scrollbar-hide">
 									<button
 										onClick={() => {
 											setSelectedBuildingId(null);
 											setIsBuildingOpen(false);
 										}}
-										className={`w-full text-left px-4 py-2.5 text-sm font-bold transition-colors ${selectedBuildingId === null ?
-											"bg-amber-50 text-amber-700"
-											: "text-slate-600 hover:bg-slate-50"
-											}`}
+										className={`w-full text-left px-4 py-2.5 text-sm font-bold transition-colors ${
+											selectedBuildingId === null ?
+												"bg-amber-50 text-amber-700"
+											:	"text-slate-600 hover:bg-slate-50"
+										}`}
 									>
 										Mọi toà nhà
 									</button>
@@ -125,10 +123,11 @@ const Navbar = () => {
 												setSelectedBuildingId(b.id);
 												setIsBuildingOpen(false);
 											}}
-											className={`w-full text-left px-4 py-2.5 text-sm font-bold transition-colors ${selectedBuildingId === b.id ?
-												"bg-amber-50 text-amber-700"
-												: "text-slate-600 hover:bg-slate-50"
-												}`}
+											className={`w-full text-left px-4 py-2.5 text-sm font-bold transition-colors ${
+												selectedBuildingId === b.id ?
+													"bg-amber-50 text-amber-700"
+												:	"text-slate-600 hover:bg-slate-50"
+											}`}
 										>
 											{b.name}
 										</button>
@@ -201,7 +200,7 @@ const Navbar = () => {
 							className="flex items-center gap-3 h-full cursor-pointer group"
 						>
 							<div className="text-right hidden sm:block">
-								<p className="text-sm font-black text-slate-800 leading-tight truncate max-w-[120px]">
+								<p className="text-sm font-black text-slate-800 leading-tight truncate max-w-30">
 									{user.user_metadata?.full_name || "Người dùng"}
 								</p>
 								<p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
@@ -225,7 +224,7 @@ const Navbar = () => {
 									animate={{ opacity: 1, y: 0, scale: 1 }}
 									exit={{ opacity: 0, y: 8, scale: 0.95 }}
 									transition={{ duration: 0.15 }}
-									className="absolute right-0 top-[calc(100%+8px)] w-[200px] bg-white rounded-2xl shadow-2xl shadow-black/10 border border-slate-100 overflow-hidden z-50 py-1"
+									className="absolute right-0 top-[calc(100%+8px)] w-50 bg-white rounded-2xl shadow-2xl shadow-black/10 border border-slate-100 overflow-hidden z-50 py-1"
 								>
 									<Link
 										to="/profile"

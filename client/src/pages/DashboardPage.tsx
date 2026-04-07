@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { Building2, PieChart, RefreshCw, AlertCircle, FileText } from "lucide-react";
+import { Building2, PieChart, AlertCircle, FileText } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { api } from "../lib/api";
 import type {
@@ -43,7 +43,6 @@ export default function DashboardPage() {
 		if (canManageBuildings) {
 			loadInitialData();
 		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [canManageBuildings]);
 
 	const loadInitialData = async () => {
@@ -66,7 +65,6 @@ export default function DashboardPage() {
 			setLoading(false);
 		}
 	};
-
 
 	const handleSaveBuilding = async (data: CreateBuildingInput) => {
 		try {
@@ -144,9 +142,7 @@ export default function DashboardPage() {
 				{/* Top Navigation / Header */}
 				<div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 px-4">
 					<div>
-						<h1 className="text-xl font-bold text-slate-900 tracking-tight">
-							Trang tổng quan
-						</h1>
+						<h1 className="text-xl font-bold text-slate-900 tracking-tight">Trang tổng quan</h1>
 					</div>
 
 					<div className="flex items-center gap-2 bg-white p-2 rounded-3xl shadow-sm border border-slate-100">
@@ -163,7 +159,11 @@ export default function DashboardPage() {
 								{tab === "overview" && <PieChart className="w-4 h-4" />}
 								{tab === "buildings" && <Building2 className="w-4 h-4" />}
 								{tab === "contracts" && <FileText className="w-4 h-4" />}
-								{tab === "overview" ? "Tổng quan" : tab === "buildings" ? "Tòa nhà" : "Hợp đồng"}
+								{tab === "overview" ?
+									"Tổng quan"
+								: tab === "buildings" ?
+									"Tòa nhà"
+								:	"Hợp đồng"}
 							</button>
 						))}
 					</div>

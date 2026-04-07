@@ -1,4 +1,5 @@
-const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? "" : "http://localhost:5000");
+const API_URL =
+	import.meta.env.VITE_API_URL || (import.meta.env.PROD ? "" : "http://localhost:5000");
 
 interface ApiResponse<T = unknown> {
 	data?: T;
@@ -19,7 +20,7 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 
 	try {
 		const res = await fetch(`${API_URL}${endpoint}`, {
-			cache: 'no-store', // Disable browser caching aggressively to prevent stale data
+			cache: "no-store", // Disable browser caching aggressively to prevent stale data
 			...options,
 			headers,
 		});
