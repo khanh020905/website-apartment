@@ -205,6 +205,91 @@ export interface QRCode {
   created_at: string;
 }
 
+export interface Vehicle {
+  id: string;
+  room_id: string;
+  customer_name: string | null;
+  license_plate: string;
+  vehicle_type: string; // xe_may, xe_hoi, etc.
+  vehicle_name: string | null;
+  color: string | null;
+  status: 'active' | 'inactive';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Appointment {
+  id: string;
+  room_id: string;
+  customer_name: string;
+  customer_phone: string | null;
+  schedule_time: string;
+  status: 'pending' | 'viewed' | 'cancelled';
+  notes: string | null;
+  assigned_to: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ContractTemplate {
+  id: string;
+  owner_id: string;
+  name: string;
+  short_name: string | null;
+  prefix_code: string | null;
+  reminder_days: number;
+  content: string | null;
+  status: 'active' | 'inactive';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Invoice {
+  id: string;
+  code: string;
+  room_id: string;
+  customer_name: string | null;
+  total: number;
+  due_date: string;
+  extra_charge: number;
+  discount: number;
+  has_vat: boolean;
+  status: 'paid' | 'pending' | 'overdue' | 'cancelled';
+  creator: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Transaction {
+  id: string;
+  code: string;
+  room_id: string | null;
+  customer: string | null;
+  amount: number;
+  flow: 'income' | 'expense';
+  category: string;
+  pay_type: string;
+  date: string;
+  status: 'confirmed' | 'pending' | 'cancelled';
+  note: string | null;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Incident {
+  id: string;
+  room_id: string;
+  type: string;
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+  description: string | null;
+  reported_by: string | null;
+  assigned_to: string | null;
+  status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
+  created_at: string;
+  updated_at: string;
+}
+
 
 // --- Join / Extended Types ---
 

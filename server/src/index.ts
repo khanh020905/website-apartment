@@ -16,6 +16,7 @@ import qrRoutes from "./routes/qr";
 import dashboardRoutes from "./routes/dashboard";
 import contractRoutes from "./routes/contracts";
 import customerRoutes from "./routes/customers";
+import vehicleRoutes from "./routes/vehicles";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -79,6 +80,7 @@ app.use("/api/qr", qrRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/contracts", contractRoutes);
 app.use("/api/customers", customerRoutes);
+app.use("/api/vehicles", vehicleRoutes);
 
 // Health check route
 app.get("/api/health", (_req: Request, res: Response) => {
