@@ -1,174 +1,133 @@
 import { useState } from "react";
-import {
-	ExternalLink,
-	CheckCircle2,
-	AlertCircle,
-	MessageSquare,
-	Globe,
-	Smartphone,
-	Mail,
-	Zap,
-	CreditCard,
-} from "lucide-react";
-import { motion } from "framer-motion";
+import { MessageSquare, Lock, Settings } from "lucide-react";
+import Modal from "../components/modals/Modal";
 
-const IntegrationsPage = () => {
-	const [filter, setFilter] = useState("all");
+export default function IntegrationsPage() {
+  const [selectedIntegration, setSelectedIntegration] = useState<string | null>(null);
 
-	const MOCK_INTEGRATIONS = [
-		{
-			id: "1",
-			name: "Zalo Official Account",
-			category: "Social",
-			icon: MessageSquare,
-			color: "text-blue-500",
-			bg: "bg-blue-50",
-			status: "connected",
-		},
-		{
-			id: "2",
-			name: "Facebook Messenger",
-			category: "Social",
-			icon: MessageSquare,
-			color: "text-indigo-600",
-			bg: "bg-indigo-50",
-			status: "disconnected",
-		},
-		{
-			id: "3",
-			name: "Website Booking Widget",
-			category: "Website",
-			icon: Globe,
-			color: "text-emerald-500",
-			bg: "bg-emerald-50",
-			status: "connected",
-		},
-		{
-			id: "4",
-			name: "SMS Gateway (SpeedSMS)",
-			category: "Marketing",
-			icon: Smartphone,
-			color: "text-orange-500",
-			bg: "bg-orange-50",
-			status: "connected",
-		},
-		{
-			id: "5",
-			name: "VNPay Payment Gateway",
-			category: "Payment",
-			icon: CreditCard,
-			color: "text-blue-600",
-			bg: "bg-blue-50",
-			status: "disconnected",
-		},
-		{
-			id: "6",
-			name: "Email Marketing (Mailchimp)",
-			category: "Marketing",
-			icon: Mail,
-			color: "text-amber-500",
-			bg: "bg-amber-50",
-			status: "disconnected",
-		},
-	];
+  const INTEGRATIONS = [
+    {
+      id: "zns",
+      name: "Dịch Vụ Thông Báo Zalo (ZNS)",
+      description: "Gửi thông báo chăm sóc khách hàng tự động qua Zalo OA.",
+      icon: MessageSquare,
+      color: "text-blue-500",
+      bg: "bg-blue-50",
+      connected: true,
+    },
+    {
+      id: "ttlock",
+      name: "Khoá Thông Minh TTLock",
+      description: "Quản lý khóa cửa điện tử, cấp pass code từ xa tự động.",
+      icon: Lock,
+      color: "text-emerald-500",
+      bg: "bg-emerald-50",
+      connected: false,
+    },
+    {
+      id: "tingee",
+      name: "Thanh toán Tingee",
+      description: "Nhận thanh toán tự động, gạch nợ hóa đơn real-time.",
+      icon: Settings,
+      color: "text-purple-500",
+      bg: "bg-purple-50",
+      connected: false,
+    }
+  ];
 
-	return (
-		<div className="flex-1 flex flex-col h-full bg-[#f8f9fa] relative overflow-hidden">
-			{/* Header */}
-			<div className="bg-white border-b border-slate-200">
-				<div className="px-6 py-4 flex items-center justify-between">
-					<h1 className="text-[20px] font-bold text-slate-900 tracking-tight flex items-center gap-2">
-						<Zap className="w-5 h-5 text-amber-500" />
-						Tích hợp ứng dụng
-					</h1>
-				</div>
+  return (
+    <div className="flex-1 flex flex-col h-full bg-[#f8f9fa] relative overflow-hidden">
+      {/* Header */}
+      <div className="bg-white border-b border-slate-200">
+        <div className="px-6 py-4 flex items-center justify-between">
+          <h1 className="text-[20px] font-bold text-slate-900 tracking-tight">Tích hợp dịch vụ</h1>
+        </div>
+      </div>
 
-				{/* Categories Toolbar */}
-				<div className="px-6 pb-4 flex flex-col sm:flex-row items-center gap-3">
-					<div className="flex bg-slate-100 rounded-lg p-1 shrink-0">
-						{["all", "Social", "Website", "Payment", "Marketing"].map((cat) => (
-							<button
-								key={cat}
-								onClick={() => setFilter(cat)}
-								className={`px-4 py-1.5 text-[13px] rounded font-bold transition-all ${
-									filter === cat ?
-										"bg-white text-slate-900 shadow-sm"
-									:	"text-slate-500 hover:text-slate-700 hover:bg-slate-50"
-								}`}
-							>
-								{cat === "all" ? "Tất cả" : cat}
-							</button>
-						))}
-					</div>
-				</div>
-			</div>
+      {/* Main Content Areas */}
+      <div className="flex-1 overflow-auto p-5 lg:p-6 space-y-6">
+         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {INTEGRATIONS.map(int => (
+               <div key={int.id} className="bg-white rounded-xl border border-slate-200 p-6 flex flex-col shadow-sm hover:shadow-md transition-shadow">
+                  <div className="flex items-start justify-between mb-4">
+                     <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${int.bg}`}>
+                        <int.icon className={`w-6 h-6 ${int.color}`} />
+                     </div>
+                     <span className={`px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider rounded-md border ${
+                        int.connected 
+                           ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                           : 'bg-slate-50 text-slate-500 border-slate-200'
+                     }`}>
+                        {int.connected ? 'Đã kết nối' : 'Chưa kết nối'}
+                     </span>
+                  </div>
+                  <h3 className="text-[16px] font-bold text-slate-900 mb-2">{int.name}</h3>
+                  <p className="text-[13px] text-slate-500 mb-6 flex-1 leading-relaxed">{int.description}</p>
+                  
+                  <button 
+                     onClick={() => setSelectedIntegration(int.id)}
+                     className={`w-full py-2.5 rounded-lg text-[13px] font-bold transition-colors ${
+                        int.connected 
+                           ? 'bg-slate-100 text-slate-700 hover:bg-slate-200' 
+                           : 'bg-brand-primary text-slate-900 hover:bg-[#f59e0b] shadow-sm'
+                     }`}
+                  >
+                     {int.connected ? 'Cấu hình' : 'Kết nối ngay'}
+                  </button>
+               </div>
+            ))}
+         </div>
+      </div>
 
-			<div className="flex-1 overflow-auto bg-[#f8f9fa] p-5 lg:p-6 flex flex-col gap-6">
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-					{MOCK_INTEGRATIONS.filter((i) => filter === "all" || i.category === filter).map(
-						(item, idx) => (
-							<motion.div
-								key={item.id}
-								initial={{ opacity: 0, y: 15 }}
-								animate={{ opacity: 1, y: 0 }}
-								transition={{ delay: idx * 0.05 }}
-								className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-slate-300 transition-all flex flex-col group"
-							>
-								<div className="flex items-start justify-between mb-4">
-									<div
-										className={`w-14 h-14 ${item.bg} rounded-2xl border border-slate-100 shadow-sm flex items-center justify-center transition-transform group-hover:scale-110 duration-300`}
-									>
-										<item.icon className={`w-6 h-6 ${item.color}`} />
-									</div>
-									<div
-										className={`flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold tracking-wider ${item.status === "connected" ? "bg-emerald-50 text-emerald-700" : "bg-slate-50 text-slate-500"}`}
-									>
-										{item.status === "connected" ?
-											<>
-												<CheckCircle2 className="w-3 h-3" />
-												Đã kết nối
-											</>
-										:	<>
-												<AlertCircle className="w-3 h-3" />
-												Chưa kết nối
-											</>
-										}
-									</div>
-								</div>
-								<div>
-									<h3 className="text-[15px] font-bold text-slate-900 group-hover:text-amber-600 transition-colors">
-										{item.name}
-									</h3>
-									<p className="text-[11px] border border-slate-200 px-2 py-0.5 rounded w-fit font-bold uppercase text-slate-500 tracking-widest mt-2">
-										{item.category}
-									</p>
-								</div>
-								<p className="text-[13px] text-slate-500 font-medium leading-relaxed mt-3 flex-1">
-									Kết nối hệ thống Smartos với {item.name} để đồng bộ hoá dữ liệu và tự động hoá quy
-									trình làm việc của bạn.
-								</p>
-								<div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
-									<button className="text-[13px] font-bold text-blue-600 hover:underline flex items-center gap-1 transition-colors">
-										<ExternalLink className="w-3.5 h-3.5" />
-										Tài liệu SDK
-									</button>
-									<button
-										className={`px-4 py-2 rounded-lg text-[13px] font-bold transition-all shadow-sm cursor-pointer ${
-											item.status === "connected" ?
-												"bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200"
-											:	"bg-slate-900 text-white hover:bg-slate-800"
-										}`}
-									>
-										{item.status === "connected" ? "Cấu hình" : "Kết nối ngay"}
-									</button>
-								</div>
-							</motion.div>
-						),
-					)}
-				</div>
-			</div>
-		</div>
-	);
-};
+      {/* Configuration Modal */}
+      <Modal isOpen={!!selectedIntegration} onClose={() => setSelectedIntegration(null)} title="Cấu hình tích hợp" size="md">
+         <form 
+            onSubmit={(e) => { e.preventDefault(); setSelectedIntegration(null); }}
+            className="p-6"
+         >
+            {selectedIntegration === 'zns' ? (
+               <div className="space-y-5">
+                  <div className="flex items-center gap-3 p-4 bg-blue-50 border border-blue-100 rounded-lg mb-4">
+                     <MessageSquare className="w-6 h-6 text-blue-600" />
+                     <div>
+                        <h4 className="text-[14px] font-bold text-blue-900">Zalo Notification Service</h4>
+                        <p className="text-[12px] text-blue-700">Trạng thái: Đang hoạt động ổn định</p>
+                     </div>
+                  </div>
+                  <div>
+                     <label className="block text-[13px] font-bold text-slate-700 mb-1.5">OA ID (Zalo Official Account)</label>
+                     <input type="text" defaultValue="123456789098765" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 font-medium focus:outline-none focus:border-brand-primary" />
+                  </div>
+                  <div>
+                     <label className="block text-[13px] font-bold text-slate-700 mb-1.5">Refresh Token</label>
+                     <input type="password" defaultValue="abcdef123456" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 font-medium focus:outline-none focus:border-brand-primary" />
+                  </div>
+               </div>
+            ) : (
+               <div className="space-y-5">
+                  <p className="text-[14px] text-slate-600">Vui lòng cung cấp khóa API để kết nối dịch vụ.</p>
+                  <div>
+                     <label className="block text-[13px] font-bold text-slate-700 mb-1.5">App ID / Client ID</label>
+                     <input type="text" placeholder="Nhập Client ID cung cấp bởi đối tác" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 font-medium focus:outline-none focus:border-brand-primary" required />
+                  </div>
+                  <div>
+                     <label className="block text-[13px] font-bold text-slate-700 mb-1.5">App Secret / Client Secret</label>
+                     <input type="password" placeholder="Nhập Secret Key" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 font-medium focus:outline-none focus:border-brand-primary" required />
+                  </div>
+               </div>
+            )}
 
-export default IntegrationsPage;
+            <div className="flex justify-end gap-3 mt-8 pt-5 border-t border-slate-100">
+               <button type="button" onClick={() => setSelectedIntegration(null)} className="px-5 py-2.5 text-sm font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors">
+                  Hủy
+               </button>
+               <button type="submit" className="px-6 py-2.5 text-sm font-bold bg-brand-primary text-slate-900 hover:bg-[#f59e0b] rounded-lg shadow-sm transition-colors">
+                  Lưu cấu hình
+               </button>
+            </div>
+         </form>
+      </Modal>
+
+    </div>
+  );
+}
