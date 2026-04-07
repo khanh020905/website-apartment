@@ -22,6 +22,8 @@ import appointmentRoutes from "./routes/appointments";
 import invoiceRoutes from "./routes/invoices";
 import transactionRoutes from "./routes/transactions";
 import bankAccountRoutes from "./routes/bankAccounts";
+import incidentTypeRoutes from "./routes/incidentTypes";
+import incidentRoutes from "./routes/incidents";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -91,6 +93,8 @@ app.use("/api/visit-tours", appointmentRoutes);
 app.use("/api/invoices", invoiceRoutes);
 app.use("/api/transactions", transactionRoutes);
 app.use("/api/bank-accounts", bankAccountRoutes);
+app.use("/api/incident-types", incidentTypeRoutes);
+app.use("/api/incidents", incidentRoutes);
 
 // Health check route
 app.get("/api/health", (_req: Request, res: Response) => {
