@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Search, Settings2, X, ChevronLeft, ChevronRight, Calendar } from "lucide-react";
+import { Search, Settings2, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { api } from "../lib/api";
 import { useBuilding } from "../contexts/BuildingContext";
@@ -50,10 +50,7 @@ export default function BookingHistoryPage() {
     fetchHistory();
   }, [fetchHistory]);
 
-  const toggleArray = (arr: string[], val: string, setFn: (v: string[]) => void) => {
-    if (arr.includes(val)) setFn(arr.filter((x) => x !== val));
-    else setFn([...arr, val]);
-  };
+
 
   const getStatusLabel = (s: string) => {
     switch(s) {

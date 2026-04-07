@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Search, Plus, X, Check, ChevronDown } from "lucide-react";
+import { Search, Plus, Check } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -227,7 +227,7 @@ export default function RolesPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 bg-white">
-                 {MODULES.map((mod, gIdx) => (
+                 {MODULES.map((mod) => (
                     <React.Fragment key={mod.id}>
                        {/* Module Group Header */}
                        <tr className="bg-slate-50/80 group">

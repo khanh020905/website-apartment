@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/purity */
 import { useState } from "react";
-import { Download, RefreshCw, Maximize2, MoreHorizontal, ChevronDown, Filter, HelpCircle, Trash2, Settings, Search } from "lucide-react";
+import { Download, RefreshCw, Maximize2, ChevronDown, Filter, HelpCircle, Trash2, Settings, Search } from "lucide-react";
 import {
 	BarChart,
 	Bar,

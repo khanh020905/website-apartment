@@ -1,20 +1,15 @@
 import { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
 	ArrowLeftRight,
 	Plus,
 	Download,
-	Upload,
 	Search,
-	Settings2,
-	X,
 	ChevronLeft,
 	ChevronRight,
 	TrendingUp,
 	TrendingDown,
 	Wallet,
-	MoreHorizontal,
-	Settings,
 } from "lucide-react";
 import { api } from "../lib/api";
 import { useBuilding } from "../contexts/BuildingContext";
@@ -66,7 +61,6 @@ export default function TransactionsPage() {
 	const [page, setPage] = useState(1);
 	const [total, setTotal] = useState(0);
 	const [isModalOpen, setIsModalOpen] = useState(false);
-	const [isFilterOpen, setIsFilterOpen] = useState(false);
 
 	const fetchTransactions = useCallback(async () => {
 		setLoading(true);

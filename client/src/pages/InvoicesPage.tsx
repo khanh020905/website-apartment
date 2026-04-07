@@ -1,9 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
 	Plus,
-	Settings2,
-	X,
 	ChevronLeft,
 	ChevronRight,
 	Download,
@@ -12,7 +10,6 @@ import {
 	AlertCircle,
 	Receipt,
 	Search,
-	Calendar,
 	Settings,
 } from "lucide-react";
 import { useBuilding } from "../contexts/BuildingContext";
@@ -70,7 +67,6 @@ export default function InvoicesPage() {
 	const [page, setPage] = useState(1);
 	const [total, setTotal] = useState(0);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
 	const fetchInvoices = useCallback(async () => {
 		setLoading(true);

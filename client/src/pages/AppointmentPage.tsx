@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Search, Calendar, Settings2, X, ChevronLeft, ChevronRight, Settings } from "lucide-react";
+import { Search, Settings2, X, ChevronLeft, ChevronRight, Settings } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { api } from "../lib/api";
 import { useBuilding } from "../contexts/BuildingContext";

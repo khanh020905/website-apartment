@@ -5,7 +5,6 @@ import {
 	CreditCard,
 	Building2,
 	Trash2,
-	Edit3,
 	CheckCircle2,
 	ShieldCheck,
 	Globe,

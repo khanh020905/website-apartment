@@ -10,7 +10,7 @@ interface VehicleFormProps {
 
 const VehicleForm = ({ onSubmit, onCancel, initialData }: VehicleFormProps) => {
   const [customers, setCustomers] = useState<any[]>([]);
-  const [formData, setFormData] = useState(initialData || {
+  const [formData, setFormData] = useState<any>(initialData || {
     customer_id: "",
     room_id: "",
     building_id: "",
@@ -37,7 +37,7 @@ const VehicleForm = ({ onSubmit, onCancel, initialData }: VehicleFormProps) => {
     if (name === "customer_id") {
       const selectedCust = customers.find(c => c.id === value);
       if (selectedCust) {
-        setFormData(prev => ({
+        setFormData((prev: any) => ({
           ...prev,
           customer_id: value,
           room_id: selectedCust.room?.id || "",
@@ -46,7 +46,7 @@ const VehicleForm = ({ onSubmit, onCancel, initialData }: VehicleFormProps) => {
         return;
       }
     }
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev: any) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {

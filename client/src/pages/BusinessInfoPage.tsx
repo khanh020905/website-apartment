@@ -51,10 +51,10 @@ export default function BusinessInfoPage() {
   const [isEditRepOpen, setIsEditRepOpen] = useState(false);
   const [isEditSocialOpen, setIsEditSocialOpen] = useState(false);
   
-  const [businessExpanded, setBusinessExpanded] = useState(true);
+  // const [businessExpanded, setBusinessExpanded] = useState(true);
   const [repExpanded, setRepExpanded] = useState(true);
 
-  const [business, setBusiness] = useState<BusinessData>({
+  const [business] = useState<BusinessData>({
     brandName: "Trà My",
     taxCode: "0108427956",
     phone: "0886539201",
@@ -63,7 +63,7 @@ export default function BusinessInfoPage() {
     website: "",
   });
 
-  const [rep, setRep] = useState<RepData>({
+  const [rep] = useState<RepData>({
     business: "Công ty TNHH Smartos",
     name: "Trà My",
     email: "nguyenvinhthitramy@gmail.com",
@@ -74,8 +74,8 @@ export default function BusinessInfoPage() {
   });
 
   // Branding States
-  const [primaryColor, setPrimaryColor] = useState("#FFBA38");
-  const [textColor, setTextColor] = useState("#000000");
+  const [primaryColor] = useState("#FFBA38");
+  const [textColor] = useState("#000000");
 
   return (
     <div className="flex-1 flex flex-col h-full bg-[#f4f7f9] relative overflow-hidden font-['Plus_Jakarta_Sans',sans-serif]">

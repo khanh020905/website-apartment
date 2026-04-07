@@ -1,5 +1,4 @@
 import { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import {
 	Plus,
 	Search,
@@ -7,10 +6,7 @@ import {
 	ChevronRight,
 	Settings,
 	MoreHorizontal,
-	Settings2,
-	X,
 	FileSpreadsheet,
-	Trash2,
 } from "lucide-react";
 import { api } from "../lib/api";
 import { useBuilding } from "../contexts/BuildingContext";

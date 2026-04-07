@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, Plus, MoreHorizontal, Filter, X, Camera, Mail, Edit2, Trash2 } from "lucide-react";
+import { Search, Plus, Filter, X, Camera, Mail, Edit2, Trash2 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 
