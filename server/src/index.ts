@@ -17,6 +17,8 @@ import dashboardRoutes from "./routes/dashboard";
 import contractRoutes from "./routes/contracts";
 import customerRoutes from "./routes/customers";
 import vehicleRoutes from "./routes/vehicles";
+import reservationRoutes from "./routes/reservations";
+import appointmentRoutes from "./routes/appointments";
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -81,6 +83,8 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/contracts", contractRoutes);
 app.use("/api/customers", customerRoutes);
 app.use("/api/vehicles", vehicleRoutes);
+app.use("/api/reservations", reservationRoutes);
+app.use("/api/visit-tours", appointmentRoutes);
 
 // Health check route
 app.get("/api/health", (_req: Request, res: Response) => {
