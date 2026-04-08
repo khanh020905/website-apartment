@@ -165,4 +165,99 @@ router.get("/customer", authenticate, async (req: AuthRequest, res: Response) =>
   }
 });
 
+// GET /api/reports/occupancy
+router.get("/occupancy", authenticate, async (req: AuthRequest, res: Response) => {
+  if (!req.user) return res.status(401).json({ error: "Chưa xác thực" });
+
+  const supabase = getSupabase();
+  try {
+    const { data: rooms } = await supabase
+      .from("rooms")
+      .select("id, status, building_id, building:building_id(owner_id)")
+      .eq("building.owner_id", req.user.id);
+
+    let totalRooms = 0;
+    let occupiedRooms = 0;
+
+    if (rooms) {
+      // Because to filter by owner_id in join we might get null for unmatched
+      const validRooms = rooms.filter(r => r.building); 
+      totalRooms = validRooms.length;
+      occupiedRooms = validRooms.filter(r => r.status === 'rented').length;
+    }
+
+    const availableRooms = totalRooms - occupiedRooms;
+    const occupancyRate = totalRooms > 0 ? Math.round((occupiedRooms / totalRooms) * 100) : 0;
+
+    const chartData = Array.from({ length: 7 }).map((_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() - (6 - i));
+      return { 
+        name: `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth()+1).padStart(2, '0')}`,
+        value: occupancyRate // Mock historical data using current rate for now
+      };
+    });
+
+    res.json({
+      stats: {
+        rate: occupancyRate,
+        occupied: occupiedRooms,
+        total: totalRooms,
+        available: availableRooms,
+        new_checkins: 0
+      },
+      chart: chartData
+    });
+
+  } catch (err) {
+    res.status(500).json({ error: "Lỗi cấu trúc dữ liệu vận hành" });
+  }
+});
+
+// GET /api/reports/owner
+router.get("/owner", authenticate, async (req: AuthRequest, res: Response) => {
+  if (!req.user) return res.status(401).json({ error: "Chưa xác thực" });
+
+  const supabase = getSupabase();
+  try {
+    const { data: invoices } = await supabase
+      .from("invoices")
+      .select(`
+        id, amount, status, type, created_at,
+        contract:contract_id(room:room_id(room_number, building:building_id(name)))
+      `)
+      .eq("owner_id", req.user.id);
+
+    const ownerData = (invoices || []).map(inv => {
+      // Mock some detailed metrics based on invoice amount
+      // In a real system, these would come from invoice_items
+      const roomAmt = inv.type === 'rent' ? inv.amount : 0;
+      const depositAmt = inv.type === 'deposit' ? inv.amount : 0;
+      const utilityAmt = inv.type === 'utility' ? inv.amount : 0;
+      
+      const contract: any = Array.isArray(inv.contract) ? inv.contract[0] : inv.contract;
+      const p: any = Array.isArray(contract?.room) ? contract.room[0] : contract?.room;
+      const b: any = Array.isArray(p?.building) ? p.building[0] : p?.building;
+      return {
+        id: inv.id,
+        building: b?.name || 'Chưa rõ',
+        room: p?.room_number || 'Chưa rõ',
+        room_amount: roomAmt,
+        old_debt: 0,
+        deposit: depositAmt,
+        extras: utilityAmt,
+        discount: 0,
+        owner_payout: inv.status === 'paid' ? inv.amount : 0,
+        platform_collected: inv.status === 'paid' ? inv.amount : 0,
+        platform_pending: inv.status === 'pending' ? inv.amount : 0,
+        status: inv.status
+      };
+    });
+
+    res.json(ownerData);
+  } catch (err) {
+    res.status(500).json({ error: "Lỗi báo cáo chủ nhà" });
+  }
+});
+
 export default router;

@@ -29,6 +29,7 @@ import contractTemplatesRouter from './routes/contractTemplates';
 import checkinsRouter from './routes/checkins';
 import apiKeysRouter from './routes/apiKeys';
 import reportsRouter from './routes/reports';
+import integrationsRouter from './routes/integrations';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -105,6 +106,7 @@ app.use('/api/contract-templates', contractTemplatesRouter);
 app.use('/api/checkins', checkinsRouter);
 app.use('/api/api-keys', apiKeysRouter);
 app.use('/api/reports', reportsRouter);
+app.use('/api/integrations', integrationsRouter);
 
 // Health check route
 app.get("/api/health", (_req: Request, res: Response) => {
