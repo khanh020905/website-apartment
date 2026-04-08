@@ -25,6 +25,7 @@ import bankAccountRoutes from "./routes/bankAccounts";
 import incidentTypeRoutes from "./routes/incidentTypes";
 import incidentRoutes from "./routes/incidents";
 import businessSettingsRoutes from "./routes/businessSettings";
+import contractTemplatesRouter from './routes/contractTemplates';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -97,6 +98,7 @@ app.use("/api/bank-accounts", bankAccountRoutes);
 app.use("/api/incident-types", incidentTypeRoutes);
 app.use("/api/incidents", incidentRoutes);
 app.use("/api/business-settings", businessSettingsRoutes);
+app.use('/api/contract-templates', contractTemplatesRouter);
 
 // Health check route
 app.get("/api/health", (_req: Request, res: Response) => {

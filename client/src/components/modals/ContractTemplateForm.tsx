@@ -3,16 +3,18 @@ import { FileText, Upload, Info } from "lucide-react";
 
 interface ContractTemplateFormProps {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	initialData?: any;
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	onSubmit: (data: any) => void;
 	onCancel: () => void;
 }
 
-export default function ContractTemplateForm({ onSubmit, onCancel }: ContractTemplateFormProps) {
+export default function ContractTemplateForm({ initialData, onSubmit, onCancel }: ContractTemplateFormProps) {
 	const [formData, setFormData] = useState({
-		name: "",
-		short_name: "",
-		prefix_code: "",
-		reminder_days: 30,
+		name: initialData?.name || "",
+		short_name: initialData?.short_name || "",
+		prefix_code: initialData?.prefix_code || "",
+		reminder_days: initialData?.reminder_days ?? 30,
 		file: null as File | null,
 	});
 
