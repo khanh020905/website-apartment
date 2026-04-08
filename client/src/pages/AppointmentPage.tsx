@@ -62,6 +62,7 @@ export default function AppointmentPage() {
       appointment_date: formData.date,
       appointment_time: formData.time,
       building_id: formData.buildingId === 'all' ? selectedBuildingId : formData.buildingId,
+      room_id: formData.room || undefined,
       message: formData.message
     };
 

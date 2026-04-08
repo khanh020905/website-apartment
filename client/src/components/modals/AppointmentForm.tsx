@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useBuilding } from "../../contexts/BuildingContext";
+import { api } from "../../lib/api";
 import {
 	User,
 	Mail,
@@ -17,17 +19,33 @@ interface AppointmentFormProps {
 }
 
 const AppointmentForm = ({ onSubmit, onCancel }: AppointmentFormProps) => {
+	const { buildings, selectedBuildingId } = useBuilding();
+	const [rooms, setRooms] = useState<{ id: string; room_number: string }[]>([]);
 	const [formData, setFormData] = useState({
 		customerName: "",
 		email: "",
 		phone: "",
 		date: "",
 		time: "09:00",
-		buildingId: "all",
+		buildingId: selectedBuildingId ?? "all",
 		room: "",
 		assignedTo: "Lê Trần Bảo Phúc",
 		message: "",
 	});
+
+	useEffect(() => {
+		if (formData.buildingId && formData.buildingId !== "all") {
+			api.get<{ rooms: { id: string; room_number: string }[] }>(`/api/rooms?building_id=${formData.buildingId}`)
+				.then(({ data }) => {
+					if (data?.rooms) {
+						setRooms(data.rooms);
+					}
+				})
+				.catch(console.error);
+		} else {
+			setRooms([]);
+		}
+	}, [formData.buildingId]);
 
 	const handleChange = (
 		e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
@@ -140,8 +158,11 @@ const AppointmentForm = ({ onSubmit, onCancel }: AppointmentFormProps) => {
 							className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-amber-400 transition-all outline-none appearance-none"
 						>
 							<option value="all">Tất cả tòa nhà</option>
-							<option value="b1">Vinhomes Central Park</option>
-							<option value="b2">Masteri Thảo Điền</option>
+							{buildings.map((b) => (
+								<option key={b.id} value={b.id}>
+									{b.name}
+								</option>
+							))}
 						</select>
 					</div>
 					<div className="relative">
@@ -153,8 +174,11 @@ const AppointmentForm = ({ onSubmit, onCancel }: AppointmentFormProps) => {
 							className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-amber-400 transition-all outline-none appearance-none"
 						>
 							<option value="">Phòng (Không bắt buộc)</option>
-							<option value="P101">P101</option>
-							<option value="P102">P102</option>
+							{rooms.map((r) => (
+								<option key={r.id} value={r.id}>
+									{r.room_number}
+								</option>
+							))}
 						</select>
 					</div>
 				</div>

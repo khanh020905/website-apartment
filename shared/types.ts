@@ -96,6 +96,10 @@ export interface Building {
   floors: number;
   description: string | null;
   images: string[];
+  phone: string | null;
+  status: 'active' | 'inactive';
+  services: string[];
+  website: string | null;
   created_at: string;
   updated_at: string;
 }

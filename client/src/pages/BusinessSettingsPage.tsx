@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
 	Settings,
@@ -22,6 +22,7 @@ import {
 	ChevronRight,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { api } from "../lib/api";
 
 const tabs = [
 	{ label: "Chung", path: "/business-information", icon: Info },
@@ -81,7 +82,17 @@ export default function BusinessSettingsPage() {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const activeTab = location.pathname;
-	const [primaryColor] = useState("#FFBA38");
+	const [settings, setSettings] = useState<any>({});
+
+	useEffect(() => {
+		api.get<{ settings: any }>("/api/business-settings")
+			.then((res) => {
+				if (res.data?.settings) setSettings(res.data.settings);
+			})
+			.catch(console.error);
+	}, []);
+
+	const primaryColor = settings?.primary_color || "#FFBA38";
 
 	return (
 		<div className="p-6 lg:p-8 space-y-6 bg-linear-to-br from-slate-50 to-slate-100/50 min-h-full">
@@ -98,11 +109,10 @@ export default function BusinessSettingsPage() {
 						<button
 							key={tab.path}
 							onClick={() => navigate(tab.path)}
-							className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0 ${
-								activeTab === tab.path ?
+							className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all cursor-pointer whitespace-nowrap shrink-0 ${activeTab === tab.path ?
 									"bg-slate-900 text-white shadow-sm"
-								:	"text-slate-500 hover:text-slate-700 hover:bg-slate-50"
-							}`}
+									: "text-slate-500 hover:text-slate-700 hover:bg-slate-50"
+								}`}
 						>
 							<tab.icon className="w-4 h-4" />
 							{tab.label}
@@ -123,22 +133,22 @@ export default function BusinessSettingsPage() {
 								<InfoRow
 									icon={Building2}
 									label="Tên doanh nghiệp"
-									value="Trà My"
+									value={settings?.brand_name || "Chưa thiết lập"}
 								/>
 								<InfoRow
 									icon={Mail}
 									label="Email"
-									value="nguyenvinhthitramy@gmail.com"
+									value={settings?.email || "Chưa thiết lập"}
 								/>
 								<InfoRow
 									icon={Phone}
 									label="Điện thoại"
-									value="0886539201"
+									value={settings?.phone || "Chưa thiết lập"}
 								/>
 								<InfoRow
 									icon={MapPin}
 									label="Địa chỉ"
-									value="123 Nguyen Van Linh, Hai Chau, Da Nang"
+									value={settings?.address || "Chưa thiết lập"}
 								/>
 							</SectionCard>
 						</motion.div>
@@ -277,10 +287,10 @@ export default function BusinessSettingsPage() {
 							<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 								<div className="space-y-3">
 									{[
-										{ label: "Cách tính tròn tháng", value: "Chu kỳ lịch", icon: CreditCard },
+										{ label: "Cách tính tròn tháng", value: settings?.payment_cycle === 'actual_days' ? "Theo lịch thực tế" : "Chu kỳ (30 ngày)", icon: CreditCard },
 										{
 											label: "Cách tính đơn giá ngày lẻ",
-											value: "Theo 30 ngày cố định",
+											value: settings?.odd_day_calc === 'actual_days' ? "Số ngày thực tế" : "Theo 30 ngày cố định",
 											icon: CreditCard,
 										},
 									].map((s, i) => (

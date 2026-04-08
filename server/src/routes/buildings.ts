@@ -37,7 +37,7 @@ router.get('/:id', async (req: AuthRequest, res: Response) => {
 router.post('/', authenticate, requireRole('landlord', 'broker', 'admin'), async (req: AuthRequest, res: Response) => {
   if (!req.user) { res.status(401).json({ error: 'Chưa xác thực' }); return; }
 
-  const { name, address, ward, district, city, lat, lng, floors, description, images } = req.body;
+  const { name, address, ward, district, city, lat, lng, floors, description, images, phone, status, services, website } = req.body;
 
   if (!name || !address) {
     res.status(400).json({ error: 'Tên và địa chỉ tòa nhà là bắt buộc' });
@@ -58,6 +58,10 @@ router.post('/', authenticate, requireRole('landlord', 'broker', 'admin'), async
       floors: floors || 1,
       description: description || null,
       images: images || [],
+      phone: phone || null,
+      status: status || 'active',
+      services: services || [],
+      website: website || null,
     })
     .select()
     .single();
@@ -83,7 +87,7 @@ router.put('/:id', authenticate, async (req: AuthRequest, res: Response) => {
     return;
   }
 
-  const { name, address, ward, district, city, lat, lng, floors, description, images } = req.body;
+  const { name, address, ward, district, city, lat, lng, floors, description, images, phone, status, services, website } = req.body;
   const updates: Record<string, unknown> = {};
   if (name !== undefined) updates.name = name;
   if (address !== undefined) updates.address = address;
@@ -95,6 +99,10 @@ router.put('/:id', authenticate, async (req: AuthRequest, res: Response) => {
   if (floors !== undefined) updates.floors = floors;
   if (description !== undefined) updates.description = description;
   if (images !== undefined) updates.images = images;
+  if (phone !== undefined) updates.phone = phone;
+  if (status !== undefined) updates.status = status;
+  if (services !== undefined) updates.services = services;
+  if (website !== undefined) updates.website = website;
 
   const { data, error } = await getSupabase()
     .from('buildings')
