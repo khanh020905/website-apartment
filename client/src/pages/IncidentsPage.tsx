@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { api } from "../lib/api";
 import { motion, AnimatePresence } from "framer-motion";
 import {
 	Plus,
@@ -21,10 +22,10 @@ interface Incident {
 	location: string;
 	status: string;
 	reportedBy: string;
-	assignee: string;
+	assignee?: string;
+	created_at?: string;
+	room?: { room_number: string };
 }
-
-const MOCK_INCIDENTS: Incident[] = [];
 
 export default function IncidentsPage() {
 	const [search, setSearch] = useState("");
@@ -32,18 +33,43 @@ export default function IncidentsPage() {
 	const [priorityFilter, setPriorityFilter] = useState("");
 	const [isFilterOpen, setIsFilterOpen] = useState(false);
 	const [isModalOpen, setIsModalOpen] = useState(false);
+	const [loading, setLoading] = useState(true);
+	const [incidents, setIncidents] = useState<Incident[]>([]);
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const handleCreateIncident = (data: any) => {
-		console.log("Creating:", data);
-		setIsModalOpen(false);
+	const fetchIncidents = async () => {
+		try {
+			setLoading(true);
+			const { data } = await api.get("/api/incidents");
+			if (data) setIncidents(data as Incident[]);
+		} catch (error) {
+			console.error(error);
+		} finally {
+			setLoading(false);
+		}
 	};
 
-	const filteredData = MOCK_INCIDENTS.filter((t) => {
+	useEffect(() => {
+		fetchIncidents();
+	}, []);
+
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const handleCreateIncident = async (data: any) => {
+		try {
+			await api.post("/api/incidents", data);
+			fetchIncidents();
+			setIsModalOpen(false);
+		} catch (error) {
+			console.error(error);
+			alert("Lỗi tạo sự cố");
+		}
+	};
+
+	const filteredData = incidents.filter((t) => {
 		if (
 			search &&
-			!t.location.toLowerCase().includes(search.toLowerCase()) &&
-			!t.reportedBy.toLowerCase().includes(search.toLowerCase())
+			!t.location?.toLowerCase().includes(search.toLowerCase()) &&
+			!t.reportedBy?.toLowerCase().includes(search.toLowerCase()) &&
+			!t.room?.room_number?.toLowerCase().includes(search.toLowerCase())
 		)
 			return false;
 		if (typeFilter && t.type !== typeFilter) return false;
@@ -147,7 +173,9 @@ export default function IncidentsPage() {
 								</tr>
 							</thead>
 							<tbody className="divide-y divide-slate-100">
-								{filteredData.length === 0 ?
+								{loading ? (
+									<tr><td colSpan={7} className="px-6 py-28 text-center text-slate-500">Đang tải biểu đồ...</td></tr>
+								) : filteredData.length === 0 ?
 									<tr>
 										<td
 											colSpan={7}
@@ -182,7 +210,7 @@ export default function IncidentsPage() {
 											</td>
 											<td className="px-5 py-3.5">
 												<span className="text-[13px] font-medium text-slate-600">
-													{row.location}
+													{row.room?.room_number || row.location || "—"}
 												</span>
 											</td>
 											<td className="px-5 py-3.5">
@@ -198,12 +226,12 @@ export default function IncidentsPage() {
 											</td>
 											<td className="px-5 py-3.5">
 												<span className="text-[13px] font-medium text-slate-600">
-													{row.reportedBy}
+													{row.reportedBy || "Hệ thống"}
 												</span>
 											</td>
 											<td className="px-5 py-3.5">
 												<span className="text-[13px] font-medium text-slate-600">
-													{row.assignee}
+													{row.assignee || "Chưa giao"}
 												</span>
 											</td>
 											<td className="px-5 py-3.5 text-right">
