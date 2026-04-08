@@ -78,11 +78,12 @@ const AppSidebar = () => {
 			label: "Đặt phòng",
 			path: "/reservations",
 			show: canPost,
-			matchPaths: ["/reservations", "/reservation-history", "/visitTours"],
+			matchPaths: ["/reservations", "/reservation-history", "/visitTours", "/check-ins"],
 			subItems: [
 				{ icon: CalendarDays, label: "Đặt phòng", path: "/reservations" },
 				{ icon: History, label: "Lịch sử đặt phòng", path: "/reservation-history" },
 				{ icon: CalendarSearch, label: "Lịch hẹn xem phòng", path: "/visitTours" },
+				{ icon: CheckSquare, label: "Nhận / Trả phòng", path: "/check-ins" },
 			],
 		},
 		{

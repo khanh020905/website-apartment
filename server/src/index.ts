@@ -26,6 +26,8 @@ import incidentTypeRoutes from "./routes/incidentTypes";
 import incidentRoutes from "./routes/incidents";
 import businessSettingsRoutes from "./routes/businessSettings";
 import contractTemplatesRouter from './routes/contractTemplates';
+import checkinsRouter from './routes/checkins';
+import apiKeysRouter from './routes/apiKeys';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -99,6 +101,8 @@ app.use("/api/incident-types", incidentTypeRoutes);
 app.use("/api/incidents", incidentRoutes);
 app.use("/api/business-settings", businessSettingsRoutes);
 app.use('/api/contract-templates', contractTemplatesRouter);
+app.use('/api/checkins', checkinsRouter);
+app.use('/api/api-keys', apiKeysRouter);
 
 // Health check route
 app.get("/api/health", (_req: Request, res: Response) => {

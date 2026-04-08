@@ -38,6 +38,8 @@ import ContractTemplatesPage from "./pages/ContractTemplatesPage";
 
 import IncidentsPage from "./pages/IncidentsPage";
 import IncidentTypesPage from "./pages/IncidentTypesPage";
+import CheckInsPage from "./pages/CheckInsPage";
+import EventsPage from "./pages/EventsPage";
 
 // Reports
 import OccupancyReportPage from "./pages/OccupancyReportPage";
@@ -359,6 +361,22 @@ function App() {
 														element={
 															<ProtectedRoute roles={["landlord", "broker", "admin"]}>
 																<IncidentTypesPage />
+															</ProtectedRoute>
+														}
+													/>
+													<Route
+														path="/check-ins"
+														element={
+															<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+																<CheckInsPage />
+															</ProtectedRoute>
+														}
+													/>
+													<Route
+														path="/events"
+														element={
+															<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+																<EventsPage />
 															</ProtectedRoute>
 														}
 													/>
