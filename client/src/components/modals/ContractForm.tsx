@@ -275,9 +275,10 @@ const ContractForm = ({ onSubmit, onCancel }: ContractFormProps) => {
 				</button>
 				<button
 					type="submit"
-					className="px-8 py-2.5 bg-[#fcd34d] text-slate-900 rounded-xl text-sm font-bold hover:bg-amber-400 shadow-lg shadow-amber-200/50 transition-all active:scale-95"
+					disabled={loading}
+					className={`px-8 py-2.5 bg-[#fcd34d] text-slate-900 rounded-xl text-sm font-bold hover:bg-amber-400 shadow-lg shadow-amber-200/50 transition-all active:scale-95 ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
 				>
-					Tạo hợp đồng
+					{loading ? "Đang tải..." : "Tạo hợp đồng"}
 				</button>
 			</div>
 		</form>

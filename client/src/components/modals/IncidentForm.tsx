@@ -230,9 +230,10 @@ export default function IncidentForm({ onSubmit, onCancel }: IncidentFormProps) 
 				</button>
 				<button
 					type="submit"
-					className="px-8 py-2.5 text-sm font-bold text-slate-900 bg-amber-400 hover:bg-amber-500 rounded-xl shadow-sm transition-all active:scale-[0.98]"
+					disabled={loading}
+					className={`px-8 py-2.5 text-sm font-bold text-slate-900 bg-amber-400 hover:bg-amber-500 rounded-xl shadow-sm transition-all active:scale-[0.98] ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
 				>
-					Tạo
+					{loading ? "Đang tải..." : "Tạo"}
 				</button>
 			</div>
 		</form>

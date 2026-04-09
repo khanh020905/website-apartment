@@ -180,9 +180,10 @@ const InvoiceForm = ({ onSubmit, onCancel }: InvoiceFormProps) => {
 				</button>
 				<button
 					type="submit"
-					className="px-8 py-2.5 bg-amber-400 text-slate-900 rounded-xl text-sm font-bold hover:bg-amber-500 shadow-lg shadow-amber-200/50 transition-all active:scale-95"
+					disabled={loading}
+					className={`px-8 py-2.5 bg-amber-400 text-slate-900 rounded-xl text-sm font-bold hover:bg-amber-500 shadow-lg shadow-amber-200/50 transition-all active:scale-95 ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
 				>
-					Xác nhận tạo
+					{loading ? "Đang xử lý..." : "Xác nhận tạo"}
 				</button>
 			</div>
 		</form>
