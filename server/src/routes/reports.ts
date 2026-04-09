@@ -14,11 +14,13 @@ router.get("/revenue", authenticate, async (req: AuthRequest, res: Response) => 
   try {
     const { data: txs } = await supabase
       .from("transactions")
-      .select("amount, transaction_date, category, flow, building_id");
+      .select("amount, transaction_date, category, flow, building_id, building!inner(owner_id)")
+      .eq("building.owner_id", req.user.id);
 
     const { data: invoices } = await supabase
       .from("invoices")
-      .select("status, total_amount, due_date");
+      .select("status, total_amount, due_date, building!inner(owner_id)")
+      .eq("building.owner_id", req.user.id);
 
     // 1. Revenue
     const monthlyData = Array.from({ length: 12 }).map((_, i) => ({
@@ -142,7 +144,8 @@ router.get("/customer", authenticate, async (req: AuthRequest, res: Response) =>
   try {
     const { data: invoices } = await supabase
       .from("invoices")
-      .select("*, room:room_id(room_number), building:building_id(name)");
+      .select("*, room:room_id(room_number), building!inner(name, owner_id)")
+      .eq("building.owner_id", req.user.id);
     
     let total = 0, paid = 0, pending = 0;
 
@@ -223,17 +226,18 @@ router.get("/owner", authenticate, async (req: AuthRequest, res: Response) => {
     const { data: invoices } = await supabase
       .from("invoices")
       .select(`
-        id, amount, status, type, created_at,
-        contract:contract_id(room:room_id(room_number, building:building_id(name)))
+        id, total_amount, status, created_at,
+        contract:contract_id(room:room_id(room_number, building:building_id(name))),
+        building!inner(owner_id)
       `)
-      .eq("owner_id", req.user.id);
+      .eq("building.owner_id", req.user.id);
 
     const ownerData = (invoices || []).map(inv => {
-      // Mock some detailed metrics based on invoice amount
-      // In a real system, these would come from invoice_items
-      const roomAmt = inv.type === 'rent' ? inv.amount : 0;
-      const depositAmt = inv.type === 'deposit' ? inv.amount : 0;
-      const utilityAmt = inv.type === 'utility' ? inv.amount : 0;
+      // Vì không có type trong bảng hoá đơn mới, giả định tạm thời gán tất cả vào doanh thu phòng
+      // Trong thực tế sẽ cần lấy từ invoice_items 
+      const roomAmt = inv.total_amount;
+      const depositAmt = 0;
+      const utilityAmt = 0;
       
       const contract: any = Array.isArray(inv.contract) ? inv.contract[0] : inv.contract;
       const p: any = Array.isArray(contract?.room) ? contract.room[0] : contract?.room;
@@ -247,9 +251,9 @@ router.get("/owner", authenticate, async (req: AuthRequest, res: Response) => {
         deposit: depositAmt,
         extras: utilityAmt,
         discount: 0,
-        owner_payout: inv.status === 'paid' ? inv.amount : 0,
-        platform_collected: inv.status === 'paid' ? inv.amount : 0,
-        platform_pending: inv.status === 'pending' ? inv.amount : 0,
+        owner_payout: inv.status === 'paid' ? inv.total_amount : 0,
+        platform_collected: inv.status === 'paid' ? inv.total_amount : 0,
+        platform_pending: inv.status === 'pending' ? inv.total_amount : 0,
         status: inv.status
       };
     });
