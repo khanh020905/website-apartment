@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Calendar, Upload } from "lucide-react";
+import { api } from "../../lib/api";
 
 interface IncidentFormProps {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -8,6 +9,11 @@ interface IncidentFormProps {
 }
 
 export default function IncidentForm({ onSubmit, onCancel }: IncidentFormProps) {
+	const [buildings, setBuildings] = useState<any[]>([]);
+	const [incidentTypes, setIncidentTypes] = useState<any[]>([]);
+	const [rooms, setRooms] = useState<any[]>([]);
+	const [loading, setLoading] = useState(false);
+
 	const [formData, setFormData] = useState({
 		locationId: "",
 		issueLocation: "",
@@ -19,6 +25,34 @@ export default function IncidentForm({ onSubmit, onCancel }: IncidentFormProps) 
 		dueDate: "",
 		assignee: "",
 	});
+
+	useEffect(() => {
+		const fetchData = async () => {
+			setLoading(true);
+			try {
+				const [bRes, tRes] = await Promise.all([
+					api.get<any>("/api/buildings"),
+					api.get<any>("/api/incident-types")
+				]);
+				setBuildings(bRes.data?.buildings || []);
+				setIncidentTypes(tRes.data || []);
+			} catch (err) {
+				console.error(err);
+			}
+			setLoading(false);
+		};
+		fetchData();
+	}, []);
+
+	useEffect(() => {
+		if (formData.locationId) {
+			api.get<any>(`/api/rooms?building_id=${formData.locationId}`)
+				.then(res => setRooms(res.data?.rooms || []))
+				.catch(console.error);
+		} else {
+			setRooms([]);
+		}
+	}, [formData.locationId]);
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
@@ -40,12 +74,13 @@ export default function IncidentForm({ onSubmit, onCancel }: IncidentFormProps) 
 						<select
 							required
 							value={formData.locationId}
-							onChange={(e) => setFormData({ ...formData, locationId: e.target.value })}
+							onChange={(e) => setFormData({ ...formData, locationId: e.target.value, issueLocation: "" })}
 							className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all font-medium text-slate-900 cursor-pointer appearance-none"
 						>
 							<option value="">Chọn toà nhà</option>
-							<option value="1">Trà My 1</option>
-							<option value="2">Trà My 2</option>
+							{buildings.map(b => (
+								<option key={b.id} value={b.id}>{b.name}</option>
+							))}
 						</select>
 					</div>
 
@@ -57,11 +92,14 @@ export default function IncidentForm({ onSubmit, onCancel }: IncidentFormProps) 
 							required
 							value={formData.issueLocation}
 							onChange={(e) => setFormData({ ...formData, issueLocation: e.target.value })}
-							className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all font-medium text-slate-900 cursor-pointer appearance-none"
+							disabled={!formData.locationId}
+							className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all font-medium text-slate-900 cursor-pointer appearance-none disabled:opacity-50"
 						>
 							<option value="">Chọn vị trí sự cố</option>
-							<option value="ROOM_101">Phòng 101</option>
-							<option value="HALLWAY">Hành lang</option>
+							<option value="COMMON">Khu vực chung</option>
+							{rooms.map(r => (
+								<option key={r.id} value={r.room_number}>Phòng {r.room_number}</option>
+							))}
 						</select>
 					</div>
 
@@ -100,9 +138,9 @@ export default function IncidentForm({ onSubmit, onCancel }: IncidentFormProps) 
 							className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all font-medium text-slate-900 cursor-pointer appearance-none"
 						>
 							<option value="">Chọn loại sự cố</option>
-							<option value="WATER">Điện nước</option>
-							<option value="WIFI">Internet / Wifi</option>
-							<option value="AC">Điều hòa</option>
+							{incidentTypes.map(t => (
+								<option key={t.id} value={t.id}>{t.name}</option>
+							))}
 						</select>
 					</div>
 

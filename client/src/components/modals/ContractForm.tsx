@@ -1,5 +1,7 @@
-import { useState } from "react";
 import { Calendar, User, Building2, Users, FileText, ClipboardList } from "lucide-react";
+import { useEffect, useState } from "react";
+import { api } from "../../lib/api";
+import { useBuilding } from "../../contexts/BuildingContext";
 
 interface ContractFormProps {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -8,8 +10,14 @@ interface ContractFormProps {
 }
 
 const ContractForm = ({ onSubmit, onCancel }: ContractFormProps) => {
+	const { selectedBuildingId } = useBuilding();
+	const [rooms, setRooms] = useState<any[]>([]);
+	const [customers, setCustomers] = useState<any[]>([]);
+	const [templates, setTemplates] = useState<any[]>([]);
+	const [loading, setLoading] = useState(false);
+
 	const [formData, setFormData] = useState({
-		contractTemplate: "Mẫu hợp đồng Smartos",
+		contractTemplateId: "",
 		contractName: "",
 		contractNumber:
 			"NTSMT" +
@@ -20,14 +28,34 @@ const ContractForm = ({ onSubmit, onCancel }: ContractFormProps) => {
 		effectiveDate: "",
 		startDate: "",
 		endDate: "",
-		room: "",
+		room_id: "",
 		guestCount: 1,
-		representativeGuest: "",
+		customer_id: "",
 		roommates: [],
 		notes: "",
 		isSigned: false,
 		manager: "Lê Trần Bảo Phúc",
 	});
+
+	useEffect(() => {
+		const fetchData = async () => {
+			setLoading(true);
+			try {
+				const [roomsRes, customersRes, templatesRes] = await Promise.all([
+					api.get<any>(`/api/rooms?building_id=${selectedBuildingId || ""}`),
+					api.get<any>(`/api/customers?building_id=${selectedBuildingId || ""}`),
+					api.get<any>("/api/contract-templates")
+				]);
+				setRooms(roomsRes.data?.rooms || []);
+				setCustomers(customersRes.data?.customers || []);
+				setTemplates(templatesRes.data || []);
+			} catch (err) {
+				console.error(err);
+			}
+			setLoading(false);
+		};
+		fetchData();
+	}, [selectedBuildingId]);
 
 	const handleChange = (
 		e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
@@ -58,15 +86,16 @@ const ContractForm = ({ onSubmit, onCancel }: ContractFormProps) => {
 						Mẫu hợp đồng <span className="text-rose-500">*</span>
 					</label>
 					<select
-						name="contractTemplate"
-						value={formData.contractTemplate}
+						name="contractTemplateId"
+						value={formData.contractTemplateId}
 						onChange={handleChange}
 						required
 						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-amber-400 transition-all outline-none"
 					>
-						<option>Mẫu hợp đồng Smartos</option>
-						<option>Hợp đồng thuê nhà dài hạn</option>
-						<option>Hợp đồng thuê văn phòng</option>
+						<option value="">Chọn mẫu hợp đồng</option>
+						{templates.map(t => (
+							<option key={t.id} value={t.id}>{t.name}</option>
+						))}
 					</select>
 				</div>
 
@@ -172,16 +201,16 @@ const ContractForm = ({ onSubmit, onCancel }: ContractFormProps) => {
 						Phòng <span className="text-rose-500">*</span>
 					</label>
 					<select
-						name="room"
-						value={formData.room}
+						name="room_id"
+						value={formData.room_id}
 						onChange={handleChange}
 						required
 						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-amber-400 transition-all outline-none"
 					>
 						<option value="">Chọn phòng</option>
-						<option value="P101">P101</option>
-						<option value="P102">P102</option>
-						<option value="P103">P103</option>
+						{rooms.map(r => (
+							<option key={r.id} value={r.id}>{r.room_number}</option>
+						))}
 					</select>
 				</div>
 
@@ -209,15 +238,16 @@ const ContractForm = ({ onSubmit, onCancel }: ContractFormProps) => {
 					Khách đại diện <span className="text-rose-500">*</span>
 				</label>
 				<select
-					name="representativeGuest"
-					value={formData.representativeGuest}
+					name="customer_id"
+					value={formData.customer_id}
 					onChange={handleChange}
 					required
 					className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-amber-400 transition-all outline-none"
 				>
 					<option value="">Chọn khách hàng</option>
-					<option value="Nguyễn Văn A">Nguyễn Văn A</option>
-					<option value="Trần Thị B">Trần Thị B</option>
+					{customers.map(c => (
+						<option key={c.id} value={c.id}>{c.tenant_name}</option>
+					))}
 				</select>
 			</div>
 

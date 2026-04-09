@@ -1,5 +1,7 @@
-import { useState } from "react";
 import { User, Building2, Calendar, Wallet, FileText } from "lucide-react";
+import { useEffect, useState } from "react";
+import { api } from "../../lib/api";
+import { useBuilding } from "../../contexts/BuildingContext";
 
 interface InvoiceFormProps {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -8,6 +10,11 @@ interface InvoiceFormProps {
 }
 
 const InvoiceForm = ({ onSubmit, onCancel }: InvoiceFormProps) => {
+	const { selectedBuildingId } = useBuilding();
+	const [rooms, setRooms] = useState<any[]>([]);
+	const [customers, setCustomers] = useState<any[]>([]);
+	const [loading, setLoading] = useState(false);
+
 	const [formData, setFormData] = useState({
 		roomNumber: "",
 		customerName: "",
@@ -18,6 +25,24 @@ const InvoiceForm = ({ onSubmit, onCancel }: InvoiceFormProps) => {
 		hasVat: false,
 		notes: "",
 	});
+
+	useEffect(() => {
+		const fetchData = async () => {
+			setLoading(true);
+			try {
+				const [roomsRes, customersRes] = await Promise.all([
+					api.get<any>(`/api/rooms?building_id=${selectedBuildingId || ""}`),
+					api.get<any>(`/api/customers?building_id=${selectedBuildingId || ""}`)
+				]);
+				setRooms(roomsRes.data?.rooms || []);
+				setCustomers(customersRes.data?.customers || []);
+			} catch (err) {
+				console.error(err);
+			}
+			setLoading(false);
+		};
+		fetchData();
+	}, [selectedBuildingId]);
 
 	const handleChange = (
 		e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
@@ -50,12 +75,13 @@ const InvoiceForm = ({ onSubmit, onCancel }: InvoiceFormProps) => {
 						value={formData.roomNumber}
 						onChange={handleChange}
 						required
+						disabled={loading}
 						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-amber-400 transition-all outline-none"
 					>
 						<option value="">Chọn phòng</option>
-						<option value="P101">P101</option>
-						<option value="P102">P102</option>
-						<option value="P103">P103</option>
+						{rooms.map(r => (
+							<option key={r.id} value={r.room_number}>{r.room_number}</option>
+						))}
 					</select>
 				</div>
 
@@ -69,11 +95,13 @@ const InvoiceForm = ({ onSubmit, onCancel }: InvoiceFormProps) => {
 						value={formData.customerName}
 						onChange={handleChange}
 						required
+						disabled={loading}
 						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-amber-400 transition-all outline-none"
 					>
 						<option value="">Chọn khách hàng</option>
-						<option value="Nguyễn Văn A">Nguyễn Văn A</option>
-						<option value="Trần Thị B">Trần Thị B</option>
+						{customers.map(c => (
+							<option key={c.id} value={c.tenant_name}>{c.tenant_name}</option>
+						))}
 					</select>
 				</div>
 			</div>

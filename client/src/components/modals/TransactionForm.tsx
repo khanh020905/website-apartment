@@ -1,5 +1,7 @@
-import { useState } from "react";
 import { Calendar, Building2, User, Wallet, FileText, Tag, CreditCard } from "lucide-react";
+import { useEffect, useState } from "react";
+import { api } from "../../lib/api";
+import { useBuilding } from "../../contexts/BuildingContext";
 
 interface TransactionFormProps {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -8,13 +10,18 @@ interface TransactionFormProps {
 }
 
 const TransactionForm = ({ onSubmit, onCancel }: TransactionFormProps) => {
+	const { selectedBuildingId } = useBuilding();
+	const [buildings, setBuildings] = useState<any[]>([]);
+	const [customers, setCustomers] = useState<any[]>([]);
+	const [loading, setLoading] = useState(false);
+
 	const [formData, setFormData] = useState({
 		// eslint-disable-next-line react-hooks/purity
 		code: `GD-${Math.floor(Math.random() * 10000)
 			.toString()
 			.padStart(4, "0")}`,
 		date: new Date().toISOString().split("T")[0],
-		building_id: "",
+		building_id: selectedBuildingId || "",
 		room_id: "",
 		customer_id: "",
 		type: "income", // income | expense
@@ -23,6 +30,24 @@ const TransactionForm = ({ onSubmit, onCancel }: TransactionFormProps) => {
 		amount: "",
 		note: "",
 	});
+
+	useEffect(() => {
+		const fetchData = async () => {
+			setLoading(true);
+			try {
+				const [bRes, cRes] = await Promise.all([
+					api.get<any>("/api/buildings"),
+					api.get<any>(`/api/customers?building_id=${formData.building_id || ""}`)
+				]);
+				setBuildings(bRes.data?.buildings || []);
+				setCustomers(cRes.data?.customers || []);
+			} catch (err) {
+				console.error(err);
+			}
+			setLoading(false);
+		};
+		fetchData();
+	}, [formData.building_id]);
 
 	const handleChange = (
 		e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
@@ -104,8 +129,9 @@ const TransactionForm = ({ onSubmit, onCancel }: TransactionFormProps) => {
 						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-amber-400 transition-all outline-none appearance-none"
 					>
 						<option value="">Tất cả toà nhà</option>
-						<option value="b1">Toà nhà A</option>
-						<option value="b2">Toà nhà B</option>
+						{buildings.map(b => (
+							<option key={b.id} value={b.id}>{b.name}</option>
+						))}
 					</select>
 				</div>
 
@@ -143,8 +169,9 @@ const TransactionForm = ({ onSubmit, onCancel }: TransactionFormProps) => {
 						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-amber-400 transition-all outline-none appearance-none"
 					>
 						<option value="">Chọn khách hàng (tuỳ chọn)</option>
-						<option value="c1">Nguyễn Văn A</option>
-						<option value="c2">Trần Thị B</option>
+						{customers.map(c => (
+							<option key={c.id} value={c.id}>{c.tenant_name}</option>
+						))}
 					</select>
 				</div>
 
