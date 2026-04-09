@@ -15,7 +15,7 @@ interface BuildingStatus {
 const STATUS_COLORS: Record<RoomStatus, { bg: string; text: string; label: string }> = {
   available: { bg: 'bg-emerald-100 border-emerald-300', text: 'text-emerald-700', label: 'Trống' },
   occupied: { bg: 'bg-red-100 border-red-300', text: 'text-red-700', label: 'Đã thuê' },
-  maintenance: { bg: 'bg-yellow-100 border-yellow-300', text: 'text-yellow-700', label: 'Bảo trì' },
+  maintenance: { bg: 'bg-brand-bg border-brand-primary/30', text: 'text-brand-ink', label: 'Bảo trì' },
 };
 
 export default function QRStatusPage() {

@@ -282,7 +282,7 @@ export default function CustomerPage() {
 									<th className="px-5 py-3.5 w-10">
 										<input
 											type="checkbox"
-											className="rounded border-slate-300 text-brand-primary focus:ring-amber-500 w-4 h-4"
+											className="rounded border-slate-300 text-brand-primary focus:ring-brand-primary/20 w-4 h-4"
 										/>
 									</th>
 									{[
@@ -313,7 +313,7 @@ export default function CustomerPage() {
 											colSpan={9}
 											className="px-6 py-28 text-center bg-white"
 										>
-											<div className="w-10 h-10 border-4 border-amber-200 border-t-amber-500 rounded-full animate-spin mx-auto mb-3" />
+											<div className="w-10 h-10 border-4 border-brand-primary/20 border-t-brand-primary rounded-full animate-spin mx-auto mb-3" />
 											<p className="text-sm font-bold text-slate-400">Đang tải dữ liệu...</p>
 										</td>
 									</tr>
@@ -348,7 +348,7 @@ export default function CustomerPage() {
 											<td className="px-5 py-3">
 												<input
 													type="checkbox"
-													className="rounded border-slate-300 text-brand-primary focus:ring-amber-500 w-4 h-4"
+													className="rounded border-slate-300 text-brand-primary focus:ring-brand-primary/20 w-4 h-4"
 												/>
 											</td>
 											<td className="px-5 py-3">

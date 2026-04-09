@@ -330,7 +330,7 @@ export default function BusinessInfoPage() {
             </div>
             <div className="flex justify-end gap-3 mt-8 pt-5 border-t border-slate-100">
                <button type="button" onClick={() => setIsEditSocialOpen(false)} className="px-5 py-2.5 text-sm font-bold text-slate-600 cursor-pointer">Hủy</button>
-               <button type="submit" className="px-6 py-2.5 text-sm font-bold bg-[#FFC015] text-slate-900 rounded-lg shadow-sm cursor-pointer">Lưu</button>
+               <button type="submit" className="px-6 py-2.5 text-sm font-bold bg-brand-primary text-white rounded-lg shadow-sm cursor-pointer">Lưu</button>
             </div>
          </form>
       </Modal>
@@ -367,7 +367,7 @@ export default function BusinessInfoPage() {
             </div>
             <div className="flex justify-end gap-3 mt-8 pt-5 border-t border-slate-100">
                <button type="button" onClick={() => setIsEditBusinessOpen(false)} className="px-5 py-2.5 text-sm font-bold text-slate-600 cursor-pointer">Hủy</button>
-               <button type="submit" className="px-6 py-2.5 text-sm font-bold bg-[#FFC015] text-slate-900 rounded-lg cursor-pointer">Lưu</button>
+               <button type="submit" className="px-6 py-2.5 text-sm font-bold bg-brand-primary text-white rounded-lg cursor-pointer">Lưu</button>
             </div>
          </form>
       </Modal>
@@ -409,7 +409,7 @@ export default function BusinessInfoPage() {
             </div>
             <div className="flex justify-end gap-3 mt-8 pt-5 border-t border-slate-100">
                <button type="button" onClick={() => setIsEditRepOpen(false)} className="px-5 py-2.5 font-bold cursor-pointer">Hủy</button>
-               <button type="submit" className="px-6 py-2.5 font-bold bg-[#FFC015] rounded-lg cursor-pointer">Lưu</button>
+               <button type="submit" className="px-6 py-2.5 font-bold bg-brand-primary text-white rounded-lg cursor-pointer">Lưu</button>
             </div>
          </form>
       </Modal>

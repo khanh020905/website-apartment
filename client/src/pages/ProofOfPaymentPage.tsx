@@ -59,7 +59,7 @@ export default function ProofOfPaymentPage() {
 	};
 
 	const STATUS_BADGES: Record<string, { label: string, classes: string }> = {
-		pending: { label: "Chờ duyệt", classes: "bg-brand-bg text-brand-dark border-amber-100" },
+		pending: { label: "Chờ duyệt", classes: "bg-brand-bg text-brand-dark border-brand-primary/20" },
 		approved: { label: "Đã duyệt", classes: "bg-emerald-50 text-emerald-600 border-emerald-100" },
 		rejected: { label: "Từ chối", classes: "bg-rose-50 text-rose-600 border-rose-100" }
 	};

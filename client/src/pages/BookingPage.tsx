@@ -213,7 +213,7 @@ const BookingPage = () => {
 
           {loading ?
             <div className="flex-1 flex flex-col items-center justify-center p-20 text-slate-400 gap-3">
-              <div className="w-10 h-10 border-4 border-amber-200 border-t-amber-500 rounded-full animate-spin" />
+              <div className="w-10 h-10 border-4 border-brand-primary/20 border-t-brand-primary rounded-full animate-spin" />
               <p className="text-sm font-bold">Đang tải sơ đồ...</p>
             </div>
           : !currentBuilding || sortedFloors.length === 0 ?
@@ -248,7 +248,7 @@ const BookingPage = () => {
                             <motion.div
                               key={room.id}
                               whileHover={{ y: -2 }}
-                              className="w-55 h-28 border border-slate-200 rounded-2xl bg-white flex overflow-hidden shadow-sm hover:shadow-xl hover:border-amber-300 transition-all cursor-default"
+                              className="w-55 h-28 border border-slate-200 rounded-2xl bg-white flex overflow-hidden shadow-sm hover:shadow-xl hover:border-brand-primary/30 transition-all cursor-default"
                             >
                               <div className={`w-1.5 shrink-0 ${cfg.colorClass}`} />
 

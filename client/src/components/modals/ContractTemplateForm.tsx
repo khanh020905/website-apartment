@@ -65,7 +65,7 @@ export default function ContractTemplateForm({ initialData, onSubmit, onCancel }
 								value={formData.name}
 								onChange={(e) => setFormData({ ...formData, name: e.target.value })}
 								placeholder="Nhập tên mẫu hợp đồng..."
-								className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all font-medium text-slate-900"
+								className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20/20 focus:border-brand-primary transition-all font-medium text-slate-900"
 							/>
 						</div>
 
@@ -77,7 +77,7 @@ export default function ContractTemplateForm({ initialData, onSubmit, onCancel }
 									value={formData.short_name}
 									onChange={(e) => setFormData({ ...formData, short_name: e.target.value })}
 									placeholder="Ví dụ: HD-STUDIO"
-									className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-slate-900 font-medium"
+									className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20/20 focus:border-brand-primary transition-all text-slate-900 font-medium"
 								/>
 							</div>
 							<div className="space-y-1.5">
@@ -87,7 +87,7 @@ export default function ContractTemplateForm({ initialData, onSubmit, onCancel }
 									value={formData.prefix_code}
 									onChange={(e) => setFormData({ ...formData, prefix_code: e.target.value })}
 									placeholder="Ví dụ: HD{YYYY}{MM}"
-									className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-slate-900 font-medium"
+									className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20/20 focus:border-brand-primary transition-all text-slate-900 font-medium"
 								/>
 							</div>
 						</div>
@@ -104,7 +104,7 @@ export default function ContractTemplateForm({ initialData, onSubmit, onCancel }
 								onChange={(e) =>
 									setFormData({ ...formData, reminder_days: parseInt(e.target.value) || 0 })
 								}
-								className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all text-slate-900 font-medium"
+								className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20/20 focus:border-brand-primary transition-all text-slate-900 font-medium"
 							/>
 							<p className="text-xs text-slate-500 flex items-center gap-1.5 mt-1">
 								<Info className="w-3.5 h-3.5" />
@@ -166,7 +166,7 @@ export default function ContractTemplateForm({ initialData, onSubmit, onCancel }
 							{TAGS.map((tag, idx) => (
 								<div
 									key={idx}
-									className="flex items-center gap-2 p-2 bg-white border border-slate-100 rounded-lg text-xs font-medium text-slate-700 hover:border-amber-200 transition-colors cursor-default"
+									className="flex items-center gap-2 p-2 bg-white border border-slate-100 rounded-lg text-xs font-medium text-slate-700 hover:border-brand-primary/20 transition-colors cursor-default"
 								>
 									<span className="w-1.5 h-1.5 rounded-full bg-brand-primary shrink-0"></span>
 									<code className="font-mono text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded text-[11px] font-bold">

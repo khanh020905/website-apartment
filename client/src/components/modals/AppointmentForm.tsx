@@ -84,7 +84,7 @@ const AppointmentForm = ({ onSubmit, onCancel }: AppointmentFormProps) => {
 							onChange={handleChange}
 							required
 							placeholder="Tên khách xem phòng"
-							className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-brand-primary transition-all outline-none"
+							className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary transition-all outline-none"
 						/>
 					</div>
 					<div className="relative">
@@ -96,7 +96,7 @@ const AppointmentForm = ({ onSubmit, onCancel }: AppointmentFormProps) => {
 							onChange={handleChange}
 							required
 							placeholder="Email khách"
-							className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-brand-primary transition-all outline-none"
+							className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary transition-all outline-none"
 						/>
 					</div>
 				</div>
@@ -109,7 +109,7 @@ const AppointmentForm = ({ onSubmit, onCancel }: AppointmentFormProps) => {
 						onChange={handleChange}
 						required
 						placeholder="Số điện thoại"
-						className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-brand-primary transition-all outline-none"
+						className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary transition-all outline-none"
 					/>
 				</div>
 			</div>
@@ -131,7 +131,7 @@ const AppointmentForm = ({ onSubmit, onCancel }: AppointmentFormProps) => {
 							value={formData.date}
 							onChange={handleChange}
 							required
-							className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-brand-primary transition-all outline-none"
+							className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary transition-all outline-none"
 						/>
 					</div>
 					<div className="relative">
@@ -142,7 +142,7 @@ const AppointmentForm = ({ onSubmit, onCancel }: AppointmentFormProps) => {
 							value={formData.time}
 							onChange={handleChange}
 							required
-							className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-brand-primary transition-all outline-none"
+							className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary transition-all outline-none"
 						/>
 					</div>
 				</div>
@@ -155,7 +155,7 @@ const AppointmentForm = ({ onSubmit, onCancel }: AppointmentFormProps) => {
 							value={formData.buildingId}
 							onChange={handleChange}
 							required
-							className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-brand-primary transition-all outline-none appearance-none"
+							className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary transition-all outline-none appearance-none"
 						>
 							<option value="all">Tất cả tòa nhà</option>
 							{buildings.map((b) => (
@@ -171,7 +171,7 @@ const AppointmentForm = ({ onSubmit, onCancel }: AppointmentFormProps) => {
 							name="room"
 							value={formData.room}
 							onChange={handleChange}
-							className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-brand-primary transition-all outline-none appearance-none"
+							className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary transition-all outline-none appearance-none"
 						>
 							<option value="">Phòng (Không bắt buộc)</option>
 							{rooms.map((r) => (
@@ -189,7 +189,7 @@ const AppointmentForm = ({ onSubmit, onCancel }: AppointmentFormProps) => {
 						name="assignedTo"
 						value={formData.assignedTo}
 						onChange={handleChange}
-						className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-brand-primary transition-all outline-none appearance-none"
+						className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary transition-all outline-none appearance-none"
 					>
 						<option value="Lê Trần Bảo Phúc">Người dẫn khách: Lê Trần Bảo Phúc</option>
 						<option value="admin">Người dẫn khách: Admin</option>
@@ -204,7 +204,7 @@ const AppointmentForm = ({ onSubmit, onCancel }: AppointmentFormProps) => {
 						onChange={handleChange}
 						rows={3}
 						placeholder="Lời nhắn cho khách hàng hoặc nhân viên..."
-						className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-3xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-brand-primary transition-all outline-none resize-none"
+						className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-3xl text-sm font-bold focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary transition-all outline-none resize-none"
 					/>
 				</div>
 			</div>

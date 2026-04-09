@@ -75,7 +75,7 @@ export default function IncidentForm({ onSubmit, onCancel }: IncidentFormProps) 
 							required
 							value={formData.locationId}
 							onChange={(e) => setFormData({ ...formData, locationId: e.target.value, issueLocation: "" })}
-							className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all font-medium text-slate-900 cursor-pointer appearance-none"
+							className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20/20 focus:border-brand-primary transition-all font-medium text-slate-900 cursor-pointer appearance-none"
 						>
 							<option value="">Chọn toà nhà</option>
 							{buildings.map(b => (
@@ -93,7 +93,7 @@ export default function IncidentForm({ onSubmit, onCancel }: IncidentFormProps) 
 							value={formData.issueLocation}
 							onChange={(e) => setFormData({ ...formData, issueLocation: e.target.value })}
 							disabled={!formData.locationId}
-							className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all font-medium text-slate-900 cursor-pointer appearance-none disabled:opacity-50"
+							className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20/20 focus:border-brand-primary transition-all font-medium text-slate-900 cursor-pointer appearance-none disabled:opacity-50"
 						>
 							<option value="">Chọn vị trí sự cố</option>
 							<option value="COMMON">Khu vực chung</option>
@@ -123,7 +123,7 @@ export default function IncidentForm({ onSubmit, onCancel }: IncidentFormProps) 
 							value={formData.contactPhone}
 							onChange={(e) => setFormData({ ...formData, contactPhone: e.target.value })}
 							placeholder="Số liên hệ"
-							className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all font-medium text-slate-900"
+							className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20/20 focus:border-brand-primary transition-all font-medium text-slate-900"
 						/>
 					</div>
 
@@ -135,7 +135,7 @@ export default function IncidentForm({ onSubmit, onCancel }: IncidentFormProps) 
 							required
 							value={formData.incidentType}
 							onChange={(e) => setFormData({ ...formData, incidentType: e.target.value })}
-							className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all font-medium text-slate-900 cursor-pointer appearance-none"
+							className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20/20 focus:border-brand-primary transition-all font-medium text-slate-900 cursor-pointer appearance-none"
 						>
 							<option value="">Chọn loại sự cố</option>
 							{incidentTypes.map(t => (
@@ -149,7 +149,7 @@ export default function IncidentForm({ onSubmit, onCancel }: IncidentFormProps) 
 						<select
 							value={formData.priority}
 							onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
-							className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all font-medium text-slate-900 cursor-pointer appearance-none"
+							className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20/20 focus:border-brand-primary transition-all font-medium text-slate-900 cursor-pointer appearance-none"
 						>
 							<option value="Thấp">Thấp</option>
 							<option value="Trung bình">Trung bình</option>
@@ -169,7 +169,7 @@ export default function IncidentForm({ onSubmit, onCancel }: IncidentFormProps) 
 							value={formData.description}
 							onChange={(e) => setFormData({ ...formData, description: e.target.value })}
 							placeholder="Mô tả chi tiết sự cố..."
-							className="w-full h-24 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all font-medium text-slate-900 resize-none"
+							className="w-full h-24 px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20/20 focus:border-brand-primary transition-all font-medium text-slate-900 resize-none"
 							maxLength={255}
 						/>
 						<div className="absolute bottom-3 right-3 text-[11px] font-semibold text-slate-400">
@@ -200,7 +200,7 @@ export default function IncidentForm({ onSubmit, onCancel }: IncidentFormProps) 
 								type="date"
 								value={formData.dueDate}
 								onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
-								className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all font-medium text-slate-900 cursor-pointer"
+								className="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20/20 focus:border-brand-primary transition-all font-medium text-slate-900 cursor-pointer"
 							/>
 						</div>
 					</div>

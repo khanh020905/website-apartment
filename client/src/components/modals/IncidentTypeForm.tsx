@@ -58,7 +58,7 @@ export default function IncidentTypeForm({ onSubmit, onCancel }: IncidentTypeFor
 							value={formData.name}
 							onChange={(e) => setFormData({ ...formData, name: e.target.value })}
 							placeholder="Tên"
-							className="w-full px-4 py-2 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all font-medium text-slate-900"
+							className="w-full px-4 py-2 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20/20 focus:border-brand-primary transition-all font-medium text-slate-900"
 						/>
 					</div>
 					<div className="space-y-1.5">
@@ -71,7 +71,7 @@ export default function IncidentTypeForm({ onSubmit, onCancel }: IncidentTypeFor
 							value={formData.nameEn}
 							onChange={(e) => setFormData({ ...formData, nameEn: e.target.value })}
 							placeholder="Tên tiếng Anh"
-							className="w-full px-4 py-2 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all font-medium text-slate-900"
+							className="w-full px-4 py-2 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20/20 focus:border-brand-primary transition-all font-medium text-slate-900"
 						/>
 					</div>
 					<div className="space-y-1.5">
@@ -84,7 +84,7 @@ export default function IncidentTypeForm({ onSubmit, onCancel }: IncidentTypeFor
 							value={formData.nameVi}
 							onChange={(e) => setFormData({ ...formData, nameVi: e.target.value })}
 							placeholder="Tên tiếng Việt"
-							className="w-full px-4 py-2 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all font-medium text-slate-900"
+							className="w-full px-4 py-2 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20/20 focus:border-brand-primary transition-all font-medium text-slate-900"
 						/>
 					</div>
 				</div>
@@ -118,7 +118,7 @@ export default function IncidentTypeForm({ onSubmit, onCancel }: IncidentTypeFor
 							value={formData.description}
 							onChange={(e) => setFormData({ ...formData, description: e.target.value })}
 							placeholder="Mô tả"
-							className="w-full h-32 px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all font-medium text-slate-900 resize-none flex items-start"
+							className="w-full h-32 px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20/20 focus:border-brand-primary transition-all font-medium text-slate-900 resize-none flex items-start"
 							maxLength={255}
 						/>
 						<div className="absolute bottom-3 right-3 text-[11px] font-semibold text-slate-400">

@@ -41,7 +41,7 @@ const formatDate = (iso: string) => {
 
 const TX_STATUS: Record<string, { label: string; color: string }> = {
 	confirmed: { label: "Đã xác nhận", color: "bg-emerald-50 text-emerald-600 border-emerald-100" },
-	pending: { label: "Chờ xử lý", color: "bg-brand-bg text-brand-dark border-amber-100" },
+	pending: { label: "Chờ xử lý", color: "bg-brand-bg text-brand-dark border-brand-primary/20" },
 	cancelled: { label: "Đã huỷ", color: "bg-rose-50 text-rose-600 border-rose-100" },
 };
 
@@ -108,7 +108,7 @@ export default function TransactionsPage() {
 			label: "Số giao dịch",
 			value: total,
 			icon: ArrowLeftRight,
-			iconBg: "bg-amber-100",
+			iconBg: "bg-brand-bg",
 			iconColor: "text-brand-dark",
 			isCount: true,
 		},

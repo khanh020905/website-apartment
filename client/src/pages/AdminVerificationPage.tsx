@@ -82,7 +82,7 @@ const CHECKLIST_ITEMS: Array<{ key: keyof ListingReviewChecklist; label: string 
 
 const STATUS_STYLES: Record<ListingStatus, string> = {
 	draft: "bg-slate-100 text-slate-600",
-	pending: "bg-yellow-100 text-yellow-700",
+	pending: "bg-brand-bg text-brand-ink",
 	approved: "bg-emerald-100 text-emerald-700",
 	rejected: "bg-red-100 text-red-700",
 };
@@ -299,8 +299,8 @@ export default function AdminVerificationPage() {
 				</div>
 
 				<div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-					<div className="rounded-2xl p-4 border bg-yellow-50 border-yellow-200">
-						<p className="text-sm text-yellow-700 font-semibold">Chờ duyệt</p>
+					<div className="rounded-2xl p-4 border bg-brand-bg border-brand-primary/20">
+						<p className="text-sm text-brand-ink font-semibold">Chờ duyệt</p>
 						<p className="text-2xl font-extrabold text-slate-900">{stats?.pendingListings || 0}</p>
 					</div>
 					<div className="rounded-2xl p-4 border bg-blue-50 border-blue-200">
@@ -448,7 +448,7 @@ export default function AdminVerificationPage() {
 														<h3 className="font-bold text-slate-800 text-lg">{listing.title}</h3>
 														<p className="text-sm text-slate-500">{listing.address}</p>
 													</div>
-													<span className="px-3 py-1 bg-yellow-100 text-yellow-700 text-xs font-bold rounded-full">
+													<span className="px-3 py-1 bg-brand-bg text-brand-ink text-xs font-bold rounded-full">
 														Chờ duyệt
 													</span>
 												</div>

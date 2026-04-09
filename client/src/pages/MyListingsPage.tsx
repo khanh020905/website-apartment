@@ -7,7 +7,7 @@ import type { Listing, ListingStatus } from "../../../shared/types";
 
 const STATUS_STYLES: Record<ListingStatus, { bg: string; text: string; label: string }> = {
 	draft: { bg: "bg-slate-100", text: "text-slate-600", label: "Bản nháp" },
-	pending: { bg: "bg-yellow-100", text: "text-yellow-700", label: "Chờ duyệt" },
+	pending: { bg: "bg-brand-bg", text: "text-brand-ink", label: "Chờ duyệt" },
 	approved: { bg: "bg-teal-100", text: "text-teal-700", label: "Đã duyệt" },
 	rejected: { bg: "bg-red-100", text: "text-red-700", label: "Từ chối" },
 };

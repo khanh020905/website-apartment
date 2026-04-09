@@ -57,7 +57,7 @@ export default function RevenueReportPage() {
 			return (
 				<div className="flex h-full items-center justify-center">
 					<div className="flex flex-col items-center gap-3">
-						<div className="w-8 h-8 border-4 border-amber-200 border-t-amber-500 rounded-full animate-spin" />
+						<div className="w-8 h-8 border-4 border-brand-primary/20 border-t-brand-primary rounded-full animate-spin" />
 						<p className="text-sm font-medium text-slate-500">Đang tải biểu đồ...</p>
 					</div>
 				</div>
@@ -101,7 +101,7 @@ export default function RevenueReportPage() {
 								onClick={() => setActiveTab(tab.id)}
 								className={`text-[15px] font-black pb-3 border-b-2 whitespace-nowrap transition-colors outline-none px-1 ${
 									activeTab === tab.id ?
-										"text-brand-dark border-amber-500"
+										"text-brand-dark border-brand-primary"
 									:	"text-slate-400 border-transparent hover:text-slate-700 hover:border-slate-200"
 								}`}
 							>
@@ -171,7 +171,7 @@ const ServiceRevenueTab = ({ data }: { data: any }) => {
 								<Legend iconType="circle" wrapperStyle={{ fontSize: "12px", paddingTop: "10px" }} />
 								<Bar dataKey="room" name="Tiền phòng" stackId="a" fill="#3b82f6" barSize={30} />
 								<Bar dataKey="utility" name="Tiện ích" stackId="a" fill="#10b981" />
-								<Bar dataKey="service" name="Dịch vụ bổ sung" stackId="a" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+								<Bar dataKey="service" name="Dịch vụ bổ sung" stackId="a" fill="#0f9b9b" radius={[4, 4, 0, 0]} />
 							</BarChart>
 						</ResponsiveContainer>
 					</div>
@@ -244,15 +244,15 @@ const RentalRevenueTab = ({ data }: { data: any }) => {
 						<AreaChart data={data.monthly} margin={{ top: 10, right: 10, left: 10, bottom: 0 }}>
 							<defs>
 								<linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
-									<stop offset="5%" stopColor="#f59e0b" stopOpacity={0.1}/>
-									<stop offset="95%" stopColor="#f59e0b" stopOpacity={0}/>
+									<stop offset="5%" stopColor="#0f9b9b" stopOpacity={0.1}/>
+									<stop offset="95%" stopColor="#0f9b9b" stopOpacity={0}/>
 								</linearGradient>
 							</defs>
 							<CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
 							<XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "#64748b" }} />
 							<YAxis tickFormatter={(val) => numFormat.format(val)} axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "#64748b" }} />
 							<Tooltip formatter={(val: any) => [`${fullFormat.format(val)} ₫`, "Doanh thu"]} />
-							<Area type="monotone" dataKey="total" name="Tổng doanh thu" stroke="#f59e0b" strokeWidth={3} fillOpacity={1} fill="url(#colorTotal)" />
+							<Area type="monotone" dataKey="total" name="Tổng doanh thu" stroke="#0f9b9b" strokeWidth={3} fillOpacity={1} fill="url(#colorTotal)" />
 						</AreaChart>
 					</ResponsiveContainer>
 				</div>

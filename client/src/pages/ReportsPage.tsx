@@ -116,8 +116,8 @@ export default function ReportsPage() {
 			label: `Phòng đang sử dụng / Tổng`,
 			value: `${displayData.occupied_rooms}/${displayData.total_rooms}`,
 			icon: Home,
-			gradient: "from-amber-500 to-orange-500",
-			shadow: "shadow-amber-500/25",
+			gradient: "from-brand-dark to-brand-primary",
+			shadow: "shadow-brand-primary/20",
 		},
 		{
 			label: "Phòng trống / Tổng",
@@ -289,7 +289,7 @@ export default function ReportsPage() {
 												className="px-4 py-10 text-center"
 											>
 												<div className="flex justify-center">
-													<div className="w-8 h-8 border-4 border-amber-200 border-t-amber-500 rounded-full animate-spin" />
+													<div className="w-8 h-8 border-4 border-brand-primary/20 border-t-brand-primary rounded-full animate-spin" />
 												</div>
 											</td>
 										</tr>

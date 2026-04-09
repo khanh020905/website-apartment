@@ -95,7 +95,7 @@ const TransactionForm = ({ onSubmit, onCancel }: TransactionFormProps) => {
 						value={formData.date}
 						onChange={handleChange}
 						required
-						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-brand-primary transition-all outline-none"
+						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary transition-all outline-none"
 					/>
 				</div>
 
@@ -111,7 +111,7 @@ const TransactionForm = ({ onSubmit, onCancel }: TransactionFormProps) => {
 						onChange={handleChange}
 						required
 						placeholder="0"
-						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-brand-primary transition-all outline-none"
+						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary transition-all outline-none"
 					/>
 				</div>
 			</div>
@@ -126,7 +126,7 @@ const TransactionForm = ({ onSubmit, onCancel }: TransactionFormProps) => {
 						name="building_id"
 						value={formData.building_id}
 						onChange={handleChange}
-						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-brand-primary transition-all outline-none appearance-none"
+						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary transition-all outline-none appearance-none"
 					>
 						<option value="">Tất cả toà nhà</option>
 						{buildings.map(b => (
@@ -145,7 +145,7 @@ const TransactionForm = ({ onSubmit, onCancel }: TransactionFormProps) => {
 						value={formData.category}
 						onChange={handleChange}
 						required
-						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-brand-primary transition-all outline-none appearance-none"
+						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary transition-all outline-none appearance-none"
 					>
 						<option value="">Chọn nhóm giao dịch</option>
 						<option value="rent">Tiền thuê phòng</option>
@@ -166,7 +166,7 @@ const TransactionForm = ({ onSubmit, onCancel }: TransactionFormProps) => {
 						name="customer_id"
 						value={formData.customer_id}
 						onChange={handleChange}
-						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-brand-primary transition-all outline-none appearance-none"
+						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary transition-all outline-none appearance-none"
 					>
 						<option value="">Chọn khách hàng (tuỳ chọn)</option>
 						{customers.map(c => (
@@ -185,7 +185,7 @@ const TransactionForm = ({ onSubmit, onCancel }: TransactionFormProps) => {
 						value={formData.pay_type}
 						onChange={handleChange}
 						required
-						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-brand-primary transition-all outline-none appearance-none"
+						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary transition-all outline-none appearance-none"
 					>
 						<option value="transfer">Chuyển khoản</option>
 						<option value="cash">Tiền mặt</option>
@@ -205,7 +205,7 @@ const TransactionForm = ({ onSubmit, onCancel }: TransactionFormProps) => {
 					onChange={handleChange}
 					rows={3}
 					placeholder="Nội dung giao dịch..."
-					className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-brand-primary transition-all outline-none resize-none"
+					className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary transition-all outline-none resize-none"
 				/>
 			</div>
 

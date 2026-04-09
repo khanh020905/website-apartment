@@ -85,7 +85,7 @@ const OccupancyReportPage = () => {
 				</div>
 				<div className="px-6 flex items-center justify-between border-t border-slate-100 py-3">
 					<div className="flex gap-6">
-						<button className="text-[14px] font-bold text-brand-dark border-b-2 border-amber-500 pb-3 -mb-3 cursor-pointer">
+						<button className="text-[14px] font-bold text-brand-dark border-b-2 border-brand-primary pb-3 -mb-3 cursor-pointer">
 							Vận hành
 						</button>
 					</div>
@@ -159,7 +159,7 @@ const OccupancyReportPage = () => {
 								<XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: "#94a3b8", fontSize: 12, fontWeight: 500 }} dy={10} />
 								<YAxis axisLine={false} tickLine={false} tick={{ fill: "#94a3b8", fontSize: 12, fontWeight: 500 }} tickFormatter={(val) => `${val}%`} domain={[0, 100]} />
 								<Tooltip contentStyle={{ borderRadius: "12px", border: "none", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }} />
-								<Line type="monotone" dataKey="value" name="Tỷ lệ lấp đầy" stroke="#f59e0b" strokeWidth={3} dot={{ r: 4, fill: "#f59e0b", strokeWidth: 2, stroke: "#fff" }} activeDot={{ r: 6 }} />
+								<Line type="monotone" dataKey="value" name="Tỷ lệ lấp đầy" stroke="#0f9b9b" strokeWidth={3} dot={{ r: 4, fill: "#0f9b9b", strokeWidth: 2, stroke: "#fff" }} activeDot={{ r: 6 }} />
 							</LineChart>
 						</ResponsiveContainer>
 					</div>

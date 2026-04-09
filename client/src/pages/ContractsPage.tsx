@@ -39,7 +39,7 @@ const STATUS_MAP: Record<Contract["status"], { label: string; color: string; ico
 	active: { label: "Đang hiệu lực", color: "bg-emerald-100 text-emerald-700", icon: CheckCircle2 },
 	extended: { label: "Đã gia hạn", color: "bg-blue-100 text-blue-700", icon: RefreshCcw },
 	settled: { label: "Đã thanh lý", color: "bg-slate-100 text-slate-500", icon: LogOut },
-	pending: { label: "Chờ xác nhận", color: "bg-amber-100 text-brand-ink", icon: Clock },
+	pending: { label: "Chờ xác nhận", color: "bg-brand-bg text-brand-ink", icon: Clock },
 };
 
 export default function ContractsPage() {
@@ -222,7 +222,7 @@ export default function ContractsPage() {
 											colSpan={7}
 											className="px-6 py-28 text-center bg-white cursor-default"
 										>
-											<div className="w-8 h-8 border-4 border-amber-200 border-t-amber-500 rounded-full animate-spin mx-auto mb-3" />
+											<div className="w-8 h-8 border-4 border-brand-primary/20 border-t-brand-primary rounded-full animate-spin mx-auto mb-3" />
 											<p className="text-sm font-medium text-slate-500 uppercase tracking-widest">
 												Đang tải...
 											</p>
@@ -379,7 +379,7 @@ export default function ContractsPage() {
 											>
 												<input
 													type="checkbox"
-													className="rounded border-slate-300 text-brand-primary focus:ring-amber-500 w-4 h-4 cursor-pointer"
+													className="rounded border-slate-300 text-brand-primary focus:ring-brand-primary/20 w-4 h-4 cursor-pointer"
 												/>
 												<span className="text-[13px] font-medium text-slate-700">{st}</span>
 											</label>
@@ -407,7 +407,7 @@ export default function ContractsPage() {
 											>
 												<input
 													type="checkbox"
-													className="rounded border-slate-300 text-brand-primary focus:ring-amber-500 w-4 h-4 cursor-pointer"
+													className="rounded border-slate-300 text-brand-primary focus:ring-brand-primary/20 w-4 h-4 cursor-pointer"
 												/>
 												<span className="text-[13px] font-medium text-slate-700">{st}</span>
 											</label>

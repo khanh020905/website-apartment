@@ -163,7 +163,7 @@ export default function RolesPage() {
   const renderCheck = (hasPerm: boolean) => 
      hasPerm 
      ? <div className="w-5 h-5 bg-brand-primary rounded-md flex items-center justify-center text-white mx-auto shadow-sm"><Check className="w-3.5 h-3.5 stroke-[4px]" /></div> 
-     : <div className="w-5 h-5 border-2 border-slate-200 rounded-md mx-auto hover:border-amber-200 transition-colors"></div>;
+     : <div className="w-5 h-5 border-2 border-slate-200 rounded-md mx-auto hover:border-brand-primary/20 transition-colors"></div>;
 
   return (
     <div className="flex-1 flex flex-col h-full bg-[#f0f2f5] relative overflow-hidden font-['Plus_Jakarta_Sans',sans-serif]">
@@ -179,7 +179,7 @@ export default function RolesPage() {
                  key={tab.id}
                  to={tab.path}
                  className={`text-[15px] font-black pb-3 border-b-2 whitespace-nowrap transition-colors outline-none px-1 ${
-                   location.pathname === tab.path ? 'text-brand-primary border-amber-500' : 'text-slate-400 border-transparent hover:text-slate-600'
+                   location.pathname === tab.path ? 'text-brand-primary border-brand-primary' : 'text-slate-400 border-transparent hover:text-slate-600'
                  }`}
                >
                  {tab.label}

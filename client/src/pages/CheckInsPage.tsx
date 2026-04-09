@@ -36,7 +36,7 @@ interface CheckIn {
 const STATUS = {
 	checkedin: { label: "Đang ở", color: "bg-emerald-100 text-emerald-700" },
 	checkedout: { label: "Đã trả phòng", color: "bg-slate-100 text-slate-600" },
-	pending: { label: "Chờ nhận phòng", color: "bg-amber-100 text-brand-ink" },
+	pending: { label: "Chờ nhận phòng", color: "bg-brand-bg text-brand-ink" },
 };
 
 const formatDate = (iso: string | null) => {
@@ -174,8 +174,8 @@ export default function CheckInsPage() {
 			label: "Chờ nhận phòng",
 			value: stats.pending,
 			icon: Calendar,
-			gradient: "from-amber-500 to-orange-500",
-			shadow: "shadow-amber-500/25",
+			gradient: "from-brand-dark to-brand-primary",
+			shadow: "shadow-brand-primary/20",
 		},
 	];
 
@@ -191,7 +191,7 @@ export default function CheckInsPage() {
 				</div>
 				<button
 					onClick={() => { setEditingItem(null); setShowModal(true); }}
-					className="flex items-center gap-2 px-5 py-2.5 bg-linear-to-r from-amber-400 to-yellow-400 text-slate-900 rounded-xl text-sm font-bold transition-all hover:shadow-lg hover:shadow-amber-500/25 hover:scale-[1.02] cursor-pointer"
+					className="flex items-center gap-2 px-5 py-2.5 bg-linear-to-r from-brand-primary to-brand-dark text-slate-900 rounded-xl text-sm font-bold transition-all hover:shadow-lg hover:shadow-brand-primary/20 hover:scale-[1.02] cursor-pointer"
 				>
 					<Plus className="w-5 h-5" />
 					Nhận phòng mới
@@ -239,7 +239,7 @@ export default function CheckInsPage() {
 								value={search}
 								onChange={(e) => setSearch(e.target.value)}
 								placeholder="Tìm khách hàng, phòng, mã đặt phòng..."
-								className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
+								className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20/20 focus:border-brand-primary"
 							/>
 						</div>
 						<div className="flex items-center gap-2">
@@ -341,7 +341,7 @@ export default function CheckInsPage() {
 										</td>
 										<td className="px-4 py-3.5">
 											<div className="flex items-center gap-1 text-sm text-slate-600">
-												<Zap className="w-3.5 h-3.5 text-yellow-500" />
+												<Zap className="w-3.5 h-3.5 text-brand-primary" />
 												{c.electric_meter}
 											</div>
 										</td>
@@ -442,7 +442,7 @@ export default function CheckInsPage() {
 											name="booking_id"
 											defaultValue={editingItem?.booking_id || ""}
 											placeholder="Ví dụ: BK-001"
-											className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+											className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20/20"
 										/>
 									</div>
 									<div>
@@ -453,7 +453,7 @@ export default function CheckInsPage() {
 											name="location" 
 											defaultValue={editingItem?.location || ""} 
 											required
-											className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+											className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20/20"
 										>
 											<option value="">Chọn toà nhà</option>
 											{buildings.map(b => (
@@ -474,7 +474,7 @@ export default function CheckInsPage() {
 											defaultValue={editingItem?.room || ""}
 											required
 											placeholder="Tên hoặc mã phòng"
-											className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+											className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20/20"
 										/>
 									</div>
 									<div>
@@ -487,7 +487,7 @@ export default function CheckInsPage() {
 											defaultValue={editingItem?.customer || ""}
 											required
 											placeholder="Tên khách hàng"
-											className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+											className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20/20"
 										/>
 									</div>
 								</div>
@@ -501,7 +501,7 @@ export default function CheckInsPage() {
 											type="date"
 											name="checkin_date"
 											defaultValue={editingItem?.checkin_date || ""}
-											className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+											className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20/20"
 										/>
 									</div>
 									<div>
@@ -512,7 +512,7 @@ export default function CheckInsPage() {
 											type="date"
 											name="checkout_date"
 											defaultValue={editingItem?.checkout_date || ""}
-											className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+											className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20/20"
 										/>
 									</div>
 								</div>
@@ -527,7 +527,7 @@ export default function CheckInsPage() {
 											name="num_people"
 											defaultValue={editingItem?.num_people || 1}
 											min={1}
-											className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+											className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20/20"
 										/>
 									</div>
 									<div>
@@ -539,7 +539,7 @@ export default function CheckInsPage() {
 											name="electric_meter"
 											defaultValue={editingItem?.electric_meter || 0}
 											placeholder="kWh"
-											className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+											className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20/20"
 										/>
 									</div>
 									<div>
@@ -551,7 +551,7 @@ export default function CheckInsPage() {
 											name="water_meter"
 											defaultValue={editingItem?.water_meter || 0}
 											placeholder="m³"
-											className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+											className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20/20"
 										/>
 									</div>
 								</div>
@@ -560,7 +560,7 @@ export default function CheckInsPage() {
 									<label className="text-sm font-semibold text-slate-700 mb-1.5 block">
 										Trạng thái
 									</label>
-									<select name="status" defaultValue={editingItem?.status || "pending"} className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20">
+									<select name="status" defaultValue={editingItem?.status || "pending"} className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20/20">
 										<option value="checkedin">Đang ở (Checked In)</option>
 										<option value="pending">Chờ nhận phòng (Pending)</option>
 										<option value="checkedout">Đã trả phòng (Checked Out)</option>
@@ -576,7 +576,7 @@ export default function CheckInsPage() {
 								>
 									Huỷ
 								</button>
-								<button type="submit" className="flex-1 py-2.5 bg-linear-to-r from-amber-400 to-yellow-400 text-slate-900 text-sm font-bold rounded-xl hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer">
+								<button type="submit" className="flex-1 py-2.5 bg-linear-to-r from-brand-primary to-brand-dark text-slate-900 text-sm font-bold rounded-xl hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer">
 									<CheckCircle2 className="w-4 h-4" />
 									Lưu thông tin
 								</button>

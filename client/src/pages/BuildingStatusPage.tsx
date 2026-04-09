@@ -32,7 +32,7 @@ const PUBLIC_STATUS_CONFIG: Record<
 	maintenance: {
 		color: "text-brand-ink",
 		bg: "bg-brand-bg",
-		border: "border-amber-200",
+		border: "border-brand-primary/20",
 		dot: "bg-brand-bg0",
 	},
 };

@@ -115,7 +115,7 @@ export default function IntegrationsPage() {
       {/* Main Content Areas */}
       <div className="flex-1 overflow-auto p-5 lg:p-6 space-y-6">
         {loading ? (
-          <div className="flex justify-center p-10"><div className="w-8 h-8 border-4 border-amber-200 border-t-amber-500 rounded-full animate-spin"/></div>
+          <div className="flex justify-center p-10"><div className="w-8 h-8 border-4 border-brand-primary/20 border-t-brand-primary rounded-full animate-spin"/></div>
         ) : (
          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {INTEGRATION_TYPES.map(int => (

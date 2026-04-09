@@ -126,12 +126,12 @@ export const Overview = ({ stats }: OverviewProps) => {
 									>
 										<stop
 											offset="5%"
-											stopColor="#f59e0b"
+											stopColor="#0f9b9b"
 											stopOpacity={0.05}
 										/>
 										<stop
 											offset="95%"
-											stopColor="#f59e0b"
+											stopColor="#0f9b9b"
 											stopOpacity={0}
 										/>
 									</linearGradient>
@@ -164,10 +164,10 @@ export const Overview = ({ stats }: OverviewProps) => {
 								<Area
 									type="monotone"
 									dataKey="rate"
-									stroke="#f59e0b"
+									stroke="#0f9b9b"
 									strokeWidth={3}
 									fill="url(#colorO)"
-									dot={{ fill: "#f59e0b", stroke: "#fff", strokeWidth: 2, r: 4 }}
+									dot={{ fill: "#0f9b9b", stroke: "#fff", strokeWidth: 2, r: 4 }}
 									activeDot={{ r: 6, strokeWidth: 0 }}
 								/>
 							</AreaChart>

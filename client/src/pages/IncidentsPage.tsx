@@ -328,7 +328,7 @@ export default function IncidentsPage() {
 											>
 												<input
 													type="checkbox"
-													className="rounded border-slate-300 text-brand-primary focus:ring-amber-500 w-4 h-4 cursor-pointer"
+													className="rounded border-slate-300 text-brand-primary focus:ring-brand-primary/20 w-4 h-4 cursor-pointer"
 												/>
 												<span className="text-[13px] font-medium text-slate-700">{st}</span>
 											</label>
@@ -349,7 +349,7 @@ export default function IncidentsPage() {
 											>
 												<input
 													type="checkbox"
-													className="rounded border-slate-300 text-brand-primary focus:ring-amber-500 w-4 h-4 cursor-pointer"
+													className="rounded border-slate-300 text-brand-primary focus:ring-brand-primary/20 w-4 h-4 cursor-pointer"
 												/>
 												<span className="text-[13px] font-medium text-slate-700">{st}</span>
 											</label>

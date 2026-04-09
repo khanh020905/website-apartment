@@ -184,7 +184,7 @@ export default function VehiclePage() {
             <table className="w-full text-left">
               <thead className="bg-[#EDEDED] border-b border-slate-200 sticky top-0 z-10 font-['Plus_Jakarta_Sans',sans-serif]">
                 <tr>
-                  <th className="px-5 py-3.5 w-10"><input type="checkbox" className="rounded border-slate-300 text-brand-primary focus:ring-amber-500 w-4 h-4" /></th>
+                  <th className="px-5 py-3.5 w-10"><input type="checkbox" className="rounded border-slate-300 text-brand-primary focus:ring-brand-primary/20 w-4 h-4" /></th>
                   {["Khách hàng", "Phòng", "Toà nhà", "Loại xe", "Biển số", "Tên xe", "Màu sắc", "Trạng thái", ""].map((h, i) => (
                     <th key={i} className="px-5 py-3.5 text-[11px] font-black text-slate-700 uppercase tracking-wider whitespace-nowrap">{h} <span className="inline-block ml-1 opacity-50">↕</span></th>
                   ))}

@@ -148,7 +148,7 @@ export default function AppointmentPage() {
                     </td>
                     <td className="px-5 py-4">{t.room?.room_number ?? t.building?.name}</td>
                     <td className="px-5 py-4">
-                       <span className={`px-2 py-0.5 rounded text-[10px] uppercase border ${t.status === 'pending' ? 'bg-brand-bg text-brand-dark border-amber-100' : 'bg-emerald-50 text-emerald-600 border-emerald-100'}`}>
+                       <span className={`px-2 py-0.5 rounded text-[10px] uppercase border ${t.status === 'pending' ? 'bg-brand-bg text-brand-dark border-brand-primary/20' : 'bg-emerald-50 text-emerald-600 border-emerald-100'}`}>
                           {t.status === 'pending' ? 'Chờ xem' : 'Đã xem'}
                        </span>
                     </td>

@@ -33,7 +33,7 @@ const BankForm = ({ onSubmit, onCancel }: BankFormProps) => {
             type="text"
             required
             placeholder="Tên ngân hàng (VD: Vietcombank)"
-            className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-brand-primary transition-all outline-none"
+            className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary transition-all outline-none"
             value={formData.bank_name}
             onChange={e => setFormData({...formData, bank_name: e.target.value})}
           />
@@ -46,7 +46,7 @@ const BankForm = ({ onSubmit, onCancel }: BankFormProps) => {
               type="text"
               required
               placeholder="Chủ tài khoản"
-              className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-brand-primary transition-all outline-none"
+              className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary transition-all outline-none"
               value={formData.account_name}
               onChange={e => setFormData({...formData, account_name: e.target.value.toUpperCase()})}
             />
@@ -57,7 +57,7 @@ const BankForm = ({ onSubmit, onCancel }: BankFormProps) => {
               type="text"
               required
               placeholder="Số tài khoản"
-              className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-brand-primary transition-all outline-none font-mono"
+              className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary transition-all outline-none font-mono"
               value={formData.account_number}
               onChange={e => setFormData({...formData, account_number: e.target.value})}
             />
@@ -69,7 +69,7 @@ const BankForm = ({ onSubmit, onCancel }: BankFormProps) => {
           <input
             type="text"
             placeholder="Chi nhánh (Không bắt buộc)"
-            className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-brand-primary transition-all outline-none"
+            className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary transition-all outline-none"
             value={formData.branch}
             onChange={e => setFormData({...formData, branch: e.target.value})}
           />

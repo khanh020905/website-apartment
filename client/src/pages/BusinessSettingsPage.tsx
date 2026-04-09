@@ -359,7 +359,7 @@ export default function BusinessSettingsPage() {
 									Vui lòng cung cấp thông tin cụ thể về đại diện doanh nghiệp để hỗ trợ việc thực
 									hiện hợp đồng.
 								</p>
-								<button className="flex items-center gap-2 px-5 py-2.5 bg-linear-to-r from-amber-400 to-yellow-400 text-slate-900 rounded-xl text-sm font-bold transition-all hover:shadow-lg hover:shadow-amber-500/25">
+								<button className="flex items-center gap-2 px-5 py-2.5 bg-linear-to-r from-brand-primary to-brand-dark text-slate-900 rounded-xl text-sm font-bold transition-all hover:shadow-lg hover:shadow-brand-primary/20">
 									<Plus className="w-4 h-4" />
 									Thêm thông tin người đại diện
 								</button>

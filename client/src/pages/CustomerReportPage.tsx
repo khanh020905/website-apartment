@@ -47,7 +47,7 @@ const CustomerReportPage = () => {
 				</div>
 				<div className="px-6 flex items-center justify-between border-t border-slate-100 py-3">
 					<div className="flex gap-6">
-						<button className="text-[14px] font-bold text-brand-dark border-b-2 border-amber-500 pb-3 -mb-3 cursor-pointer">
+						<button className="text-[14px] font-bold text-brand-dark border-b-2 border-brand-primary pb-3 -mb-3 cursor-pointer">
 							Quản lý nợ
 						</button>
 					</div>
@@ -174,7 +174,7 @@ const CustomerReportPage = () => {
 								{loading ? (
 									<tr>
 										<td colSpan={7} className="text-center py-12">
-											<div className="w-6 h-6 border-2 border-amber-300 border-t-amber-500 rounded-full animate-spin mx-auto"></div>
+											<div className="w-6 h-6 border-2 border-brand-primary/30 border-t-brand-primary rounded-full animate-spin mx-auto"></div>
 										</td>
 									</tr>
 								) : invoices.length === 0 ? (
@@ -198,7 +198,7 @@ const CustomerReportPage = () => {
 												<span className={`inline-flex px-2 py-0.5 rounded text-[11px] font-bold uppercase tracking-wide border
 													${inv.status === 'paid' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' 
 														: inv.status === 'overdue' ? 'bg-rose-50 text-rose-600 border-rose-200'
-														: 'bg-brand-bg text-brand-dark border-amber-200'}`}
+														: 'bg-brand-bg text-brand-dark border-brand-primary/20'}`}
 												>
 													{inv.status === 'paid' ? 'Đã thu' : inv.status === 'overdue' ? 'Quá hạn' : 'Chưa thu'}
 												</span>

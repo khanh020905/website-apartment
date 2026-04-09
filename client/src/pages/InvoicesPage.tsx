@@ -44,7 +44,7 @@ const STATUS_LABELS: Record<string, string> = {
 
 const STATUS_COLORS: Record<string, string> = {
 	paid: "bg-emerald-50 text-emerald-600 border-emerald-100",
-	pending: "bg-brand-bg text-brand-dark border-amber-100",
+	pending: "bg-brand-bg text-brand-dark border-brand-primary/20",
 	overdue: "bg-rose-50 text-rose-600 border-rose-100",
 	cancelled: "bg-slate-50 text-slate-500 border-slate-100",
 };
