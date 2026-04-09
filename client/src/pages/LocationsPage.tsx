@@ -58,8 +58,7 @@ export default function LocationsPage() {
       floors: parseInt(form.get("floors") as string, 10),
       website: form.get("website") as string,
       status: form.get("status") as string || 'active',
-      // Mocking images upload for now
-      images: [],
+      images: (form.get("images") as string || "").split(",").map(s => s.trim()).filter(Boolean),
       // services can be a comma separated list
       services: (form.get("services") as string || "").split(",").map(s => s.trim()).filter(Boolean)
     };
@@ -276,18 +275,31 @@ export default function LocationsPage() {
       <Modal isOpen={isModalOpen} onClose={() => { setIsModalOpen(false); setEditingBuilding(null); }} title={editingBuilding ? "Sửa thông tin toà nhà" : "Thêm toà nhà mới"} size="lg">
          <form onSubmit={handleCreateOrUpdate} className="p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
-               {/* Image Upload */}
+               {/* Image URL Input */}
                <div className="md:col-span-2">
-                  <span className="block text-[13px] font-bold text-slate-700 mb-1.5">Ảnh đại diện</span>
-                  <div className="w-full h-32 border-2 border-dashed border-slate-300 rounded-xl bg-slate-50 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-100 transition-colors">
-                     {editingBuilding?.images && editingBuilding.images.length > 0 ? (
-                       <img src={editingBuilding.images[0]} className="h-full object-contain" alt="" />
-                     ) : (
-                       <>
-                         <ImageIcon className="w-8 h-8 text-slate-400 mb-2" />
-                         <span className="text-[12px] font-medium text-slate-500">Nhấn để tải ảnh lên</span>
-                       </>
-                     )}
+                  <label className="block text-[13px] font-bold text-slate-700 mb-1.5">Ảnh đại diện (Link hình ảnh, phân cách bằng dấu phẩy)</label>
+                  <div className="flex flex-col gap-3">
+                     <input 
+                        type="text" 
+                        name="images" 
+                        defaultValue={editingBuilding?.images?.join(", ") || ""} 
+                        placeholder="Ví dụ: https://example.com/image1.jpg, https://example.com/image2.jpg" 
+                        className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm text-slate-900 font-medium focus:outline-none focus:border-amber-400" 
+                     />
+                     <div className="w-full h-32 border border-slate-200 rounded-xl bg-slate-50 flex items-center justify-center overflow-hidden">
+                        {editingBuilding?.images && editingBuilding.images.length > 0 ? (
+                           <div className="flex gap-2 p-2 overflow-x-auto">
+                              {editingBuilding.images.map((img, i) => (
+                                 <img key={i} src={img} className="h-24 w-32 object-cover rounded-lg shadow-sm" alt="" />
+                              ))}
+                           </div>
+                        ) : (
+                           <div className="flex flex-col items-center">
+                              <ImageIcon className="w-8 h-8 text-slate-300 mb-2" />
+                              <span className="text-[11px] font-medium text-slate-400">Chưa có hình ảnh để hiển thị</span>
+                           </div>
+                        )}
+                     </div>
                   </div>
                </div>
 

@@ -55,6 +55,7 @@ export default function CheckInsPage() {
 	
 	const [editingItem, setEditingItem] = useState<CheckIn | null>(null);
 	const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+	const [buildings, setBuildings] = useState<any[]>([]);
 
 	const fetchCheckins = async () => {
 		try {
@@ -67,8 +68,14 @@ export default function CheckInsPage() {
 		}
 	};
 
+	const fetchBuildings = async () => {
+		const res = await api.get<{ buildings: any[] }>("/api/buildings");
+		setBuildings(res.data?.buildings || []);
+	};
+
 	useEffect(() => {
 		fetchCheckins();
+		fetchBuildings();
 	}, []);
 
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -440,15 +447,19 @@ export default function CheckInsPage() {
 									</div>
 									<div>
 										<label className="text-sm font-semibold text-slate-700 mb-1.5 block">
-											Toà nhà (Location)
+											Toà nhà (Location) *
 										</label>
-										<input
-											type="text"
-											name="location"
-											defaultValue={editingItem?.location || ""}
-											placeholder="Ví dụ: Căn hộ số 1"
+										<select 
+											name="location" 
+											defaultValue={editingItem?.location || ""} 
+											required
 											className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/20"
-										/>
+										>
+											<option value="">Chọn toà nhà</option>
+											{buildings.map(b => (
+												<option key={b.id} value={b.name}>{b.name}</option>
+											))}
+										</select>
 									</div>
 								</div>
 								

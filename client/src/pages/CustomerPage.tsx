@@ -65,6 +65,7 @@ export default function CustomerPage() {
 	const { selectedBuildingId } = useBuilding();
 	const [loading, setLoading] = useState(true);
 	const [customers, setCustomers] = useState<Customer[]>([]);
+	const [rooms, setRooms] = useState<any[]>([]);
 	const [search, setSearch] = useState("");
 	const [debouncedSearch, setDebouncedSearch] = useState("");
 	const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -83,6 +84,13 @@ export default function CustomerPage() {
 	const [filterGender, setFilterGender] = useState("");
 
 	const [, setSubmitting] = useState(false);
+
+	useEffect(() => {
+		if (!selectedBuildingId) return;
+		api.get<{rooms: any[]}>(`/api/rooms?building_id=${selectedBuildingId}`)
+			.then(res => setRooms(res.data?.rooms || []))
+			.catch(console.error);
+	}, [selectedBuildingId]);
 
 	useEffect(() => {
 		const timer = setTimeout(() => setDebouncedSearch(search), 300);
@@ -226,9 +234,9 @@ export default function CustomerPage() {
 							className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 bg-white focus:outline-none focus:border-amber-400 hover:border-slate-300 transition-all cursor-pointer appearance-none"
 						>
 							<option value="">Tất cả phòng</option>
-							{/* Dummy options for layout */}
-							<option value="101">P.101</option>
-							<option value="102">P.102</option>
+							{rooms.map(r => (
+								<option key={r.id} value={r.id}>{r.room_number}</option>
+							))}
 						</select>
 					</div>
 
