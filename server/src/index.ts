@@ -30,6 +30,7 @@ import checkinsRouter from './routes/checkins';
 import apiKeysRouter from './routes/apiKeys';
 import reportsRouter from './routes/reports';
 import integrationsRouter from './routes/integrations';
+import paymentProofsRouter from './routes/paymentProofs';
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -107,6 +108,7 @@ app.use('/api/checkins', checkinsRouter);
 app.use('/api/api-keys', apiKeysRouter);
 app.use('/api/reports', reportsRouter);
 app.use('/api/integrations', integrationsRouter);
+app.use('/api/payment-proofs', paymentProofsRouter);
 
 // Health check route
 app.get("/api/health", (_req: Request, res: Response) => {
