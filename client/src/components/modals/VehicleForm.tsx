@@ -66,7 +66,7 @@ const VehicleForm = ({ onSubmit, onCancel, initialData }: VehicleFormProps) => {
           name="customer_id"
           value={formData.customer_id}
           onChange={handleChange}
-          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:border-amber-400 outline-none appearance-none font-['Plus_Jakarta_Sans',sans-serif]"
+          className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:border-brand-primary outline-none appearance-none font-['Plus_Jakarta_Sans',sans-serif]"
         >
           <option value="">Chọn khách hàng</option>
           {customers.map(c => (
@@ -85,7 +85,7 @@ const VehicleForm = ({ onSubmit, onCancel, initialData }: VehicleFormProps) => {
             name="vehicle_type"
             value={formData.vehicle_type}
             onChange={handleChange}
-            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:border-amber-400 outline-none appearance-none font-['Plus_Jakarta_Sans',sans-serif]"
+            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:border-brand-primary outline-none appearance-none font-['Plus_Jakarta_Sans',sans-serif]"
           >
             <option value="xe_may">Xe máy</option>
             <option value="xe_hoi">Ô tô</option>
@@ -104,7 +104,7 @@ const VehicleForm = ({ onSubmit, onCancel, initialData }: VehicleFormProps) => {
             value={formData.license_plate}
             onChange={handleChange}
             placeholder="VD: 59-A1 123.45"
-            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:border-amber-400 outline-none font-['Plus_Jakarta_Sans',sans-serif]"
+            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:border-brand-primary outline-none font-['Plus_Jakarta_Sans',sans-serif]"
           />
         </div>
       </div>
@@ -121,7 +121,7 @@ const VehicleForm = ({ onSubmit, onCancel, initialData }: VehicleFormProps) => {
             value={formData.vehicle_name}
             onChange={handleChange}
             placeholder="VD: Honda Vision"
-            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:border-amber-400 outline-none font-['Plus_Jakarta_Sans',sans-serif]"
+            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:border-brand-primary outline-none font-['Plus_Jakarta_Sans',sans-serif]"
           />
         </div>
         <div className="space-y-1.5">
@@ -134,14 +134,14 @@ const VehicleForm = ({ onSubmit, onCancel, initialData }: VehicleFormProps) => {
             value={formData.color}
             onChange={handleChange}
             placeholder="VD: Trắng"
-            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:border-amber-400 outline-none font-['Plus_Jakarta_Sans',sans-serif]"
+            className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:border-brand-primary outline-none font-['Plus_Jakarta_Sans',sans-serif]"
           />
         </div>
       </div>
 
       <div className="flex items-center justify-end gap-3 pt-6">
         <button type="button" onClick={onCancel} className="px-8 py-3.5 bg-slate-100 text-slate-600 rounded-2xl text-sm font-black hover:bg-slate-200 transition-all font-['Plus_Jakarta_Sans',sans-serif]">Hủy</button>
-        <button type="submit" className="px-10 py-3.5 bg-amber-400 text-slate-900 rounded-2xl text-sm font-black hover:bg-amber-500 shadow-xl shadow-amber-200/50 transition-all active:scale-95 font-['Plus_Jakarta_Sans',sans-serif]">Xác nhận</button>
+        <button type="submit" className="px-10 py-3.5 bg-brand-primary text-white rounded-2xl text-sm font-black hover:bg-brand-dark shadow-xl shadow-brand-primary/20 transition-all active:scale-95 font-['Plus_Jakarta_Sans',sans-serif]">Xác nhận</button>
       </div>
     </form>
   );

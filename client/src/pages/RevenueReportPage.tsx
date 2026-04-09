@@ -101,7 +101,7 @@ export default function RevenueReportPage() {
 								onClick={() => setActiveTab(tab.id)}
 								className={`text-[15px] font-black pb-3 border-b-2 whitespace-nowrap transition-colors outline-none px-1 ${
 									activeTab === tab.id ?
-										"text-amber-600 border-amber-500"
+										"text-brand-dark border-amber-500"
 									:	"text-slate-400 border-transparent hover:text-slate-700 hover:border-slate-200"
 								}`}
 							>
@@ -112,11 +112,11 @@ export default function RevenueReportPage() {
 					<div className="flex items-center gap-4 pb-3">
 						<div className="flex items-center gap-2 text-[12px] font-bold text-slate-400 italic">
 							Cập nhật lần cuối lúc: {new Date().toLocaleTimeString("vi-VN").slice(0, 5)}
-							<button onClick={fetchReports} className="cursor-pointer border-0 bg-transparent p-1"><RefreshCw className={`w-3.5 h-3.5 hover:rotate-180 transition-transform duration-500 text-amber-500`} /></button>
+							<button onClick={fetchReports} className="cursor-pointer border-0 bg-transparent p-1"><RefreshCw className={`w-3.5 h-3.5 hover:rotate-180 transition-transform duration-500 text-brand-primary`} /></button>
 						</div>
 						<div className="w-48 relative group">
 							<Filter className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-							<select className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] font-bold text-slate-600 outline-none focus:border-amber-400 appearance-none">
+							<select className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-[13px] font-bold text-slate-600 outline-none focus:border-brand-primary appearance-none">
 								<option>Tất cả tòa nhà</option>
 							</select>
 						</div>
@@ -140,7 +140,7 @@ const ServiceRevenueTab = ({ data }: { data: any }) => {
 
 	const STATS = [
 		{ label: "Tiền phòng", value: fullFormat.format(data.stats?.room || 0), color: "text-blue-600" },
-		{ label: "Dịch vụ bổ sung", value: fullFormat.format(data.stats?.service || 0), color: "text-amber-600" },
+		{ label: "Dịch vụ bổ sung", value: fullFormat.format(data.stats?.service || 0), color: "text-brand-dark" },
 		{ label: "Tiện ích", value: fullFormat.format(data.stats?.utility || 0), color: "text-emerald-600" },
 		{ label: "Doanh thu khác", value: fullFormat.format(data.stats?.other || 0), color: "text-slate-600" },
 	];
@@ -203,7 +203,7 @@ const ServiceRevenueTab = ({ data }: { data: any }) => {
 							<tr className="bg-[#EDEDED]">
 								<th className="px-4 py-3 text-[11px] font-black uppercase text-slate-700 tracking-wider">Nhóm dịch vụ</th>
 								{Array.from({ length: 12 }).map((_, i) => <th key={i} className="px-4 py-3 text-[11px] font-black uppercase text-slate-700 text-right">T{i+1}</th>)}
-								<th className="px-4 py-3 text-[11px] font-black uppercase text-slate-700 text-right bg-amber-50/50">Tổng cộng</th>
+								<th className="px-4 py-3 text-[11px] font-black uppercase text-slate-700 text-right bg-brand-bg/50">Tổng cộng</th>
 							</tr>
 						</thead>
 						<tbody className="divide-y divide-slate-100">
@@ -215,7 +215,7 @@ const ServiceRevenueTab = ({ data }: { data: any }) => {
 									<tr key={idx} className="hover:bg-slate-50">
 										<td className="px-4 py-3 text-[13px] font-bold text-slate-900">{labels[key]}</td>
 										{data.monthly.map((m: any, i: number) => <td key={i} className="px-4 py-3 text-[12px] text-slate-600 text-right font-medium">{numFormat.format(m[key])}</td>)}
-										<td className="px-4 py-3 text-[13px] font-bold text-slate-900 text-right bg-amber-50/20">{fullFormat.format(totalRow)}</td>
+										<td className="px-4 py-3 text-[13px] font-bold text-slate-900 text-right bg-brand-bg/20">{fullFormat.format(totalRow)}</td>
 									</tr>
 								)
 							})}
@@ -269,7 +269,7 @@ const InvoicesTab = ({ data }: { data: any }) => {
 	const STATS = [
 		{ label: "Tổng tiền", value: numFormat.format(stats.total || 0), color: "text-slate-700", desc: "Tổng tiền hoá đơn" },
 		{ label: "Đã trả", value: numFormat.format(stats.paid || 0), color: "text-emerald-500", desc: "Tổng tiền đã trả" },
-		{ label: "Chưa trả", value: numFormat.format(stats.pending || 0), color: "text-amber-500", desc: "Tổng tiền chưa trả" },
+		{ label: "Chưa trả", value: numFormat.format(stats.pending || 0), color: "text-brand-primary", desc: "Tổng tiền chưa trả" },
 		{ label: "Quá hạn", value: numFormat.format(stats.overdue || 0), color: "text-rose-500", desc: "Tổng tiền quá hạn", count: `${stats.overdueCount || 0}/${stats.totalCount || 0}` }
 	];
 

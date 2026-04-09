@@ -370,7 +370,7 @@ export default function CreateListingPage() {
 														<span className="text-xs bg-emerald-100 text-emerald-700 font-bold px-1.5 py-0.5 rounded">
 															📸
 														</span>
-													:	<span className="text-[9px] bg-amber-100 text-amber-700 font-bold px-1.5 py-0.5 rounded uppercase">
+													:	<span className="text-[9px] bg-amber-100 text-brand-ink font-bold px-1.5 py-0.5 rounded uppercase">
 															Thiếu ảnh
 														</span>
 													}
@@ -565,7 +565,7 @@ export default function CreateListingPage() {
 										</span>
 									</div>
 								</div>
-							:	<div className="aspect-21/9 rounded-2xl bg-amber-50 text-amber-600 border border-amber-200 flex flex-col items-center justify-center font-bold">
+							:	<div className="aspect-21/9 rounded-2xl bg-brand-bg text-brand-dark border border-amber-200 flex flex-col items-center justify-center font-bold">
 									Phòng này chưa được gán hình ảnh trong hệ thống!
 								</div>
 							}

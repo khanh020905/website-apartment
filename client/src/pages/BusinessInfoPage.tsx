@@ -172,7 +172,7 @@ export default function BusinessInfoPage() {
         {/* Statistics Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
            <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4">
-              <div className="w-12 h-12 bg-amber-50 rounded-xl flex items-center justify-center text-amber-600">
+              <div className="w-12 h-12 bg-brand-bg rounded-xl flex items-center justify-center text-brand-dark">
                  <Plus className="w-6 h-6" />
               </div>
               <div>
@@ -268,11 +268,11 @@ export default function BusinessInfoPage() {
                  <h3 className="text-[14px] font-bold text-slate-700 uppercase tracking-wide">Cách tính tròn tháng</h3>
                  <div className="flex gap-6">
                     <label className="flex items-center gap-2.5 cursor-pointer">
-                      <input type="radio" checked={settings?.payment_cycle !== 'actual_days'} onChange={() => handlePaymentConfigChange('payment_cycle', '30_days')} className="w-4 h-4 text-amber-500" />
+                      <input type="radio" checked={settings?.payment_cycle !== 'actual_days'} onChange={() => handlePaymentConfigChange('payment_cycle', '30_days')} className="w-4 h-4 text-brand-primary" />
                       <span className="text-[14px]">Chu kỳ (30 ngày)</span>
                     </label>
                     <label className="flex items-center gap-2.5 cursor-pointer">
-                      <input type="radio" checked={settings?.payment_cycle === 'actual_days'} onChange={() => handlePaymentConfigChange('payment_cycle', 'actual_days')} className="w-4 h-4 text-amber-500" />
+                      <input type="radio" checked={settings?.payment_cycle === 'actual_days'} onChange={() => handlePaymentConfigChange('payment_cycle', 'actual_days')} className="w-4 h-4 text-brand-primary" />
                       <span className="text-[14px]">Theo lịch thực tế</span>
                     </label>
                  </div>
@@ -281,11 +281,11 @@ export default function BusinessInfoPage() {
                  <h3 className="text-[14px] font-bold text-slate-700 uppercase tracking-wide">Đơn giá ngày lẻ</h3>
                  <div className="flex gap-6">
                     <label className="flex items-center gap-2.5 cursor-pointer">
-                      <input type="radio" checked={settings?.odd_day_calc !== 'actual_days'} onChange={() => handlePaymentConfigChange('odd_day_calc', '30_days_fixed')} className="w-4 h-4 text-amber-500" />
+                      <input type="radio" checked={settings?.odd_day_calc !== 'actual_days'} onChange={() => handlePaymentConfigChange('odd_day_calc', '30_days_fixed')} className="w-4 h-4 text-brand-primary" />
                       <span className="text-[14px]">Theo 30 ngày cố định</span>
                     </label>
                     <label className="flex items-center gap-2.5 cursor-pointer">
-                      <input type="radio" checked={settings?.odd_day_calc === 'actual_days'} onChange={() => handlePaymentConfigChange('odd_day_calc', 'actual_days')} className="w-4 h-4 text-amber-500" />
+                      <input type="radio" checked={settings?.odd_day_calc === 'actual_days'} onChange={() => handlePaymentConfigChange('odd_day_calc', 'actual_days')} className="w-4 h-4 text-brand-primary" />
                       <span className="text-[14px]">Số ngày thực tế</span>
                     </label>
                  </div>
@@ -324,7 +324,7 @@ export default function BusinessInfoPage() {
                ].map((s, i) => (
                   <div key={i} className="flex flex-col gap-1.5">
                      <label className="text-[13px] font-bold text-slate-700 flex items-center gap-2"><s.Icon className="w-4 h-4 text-slate-400" /> {s.label}</label>
-                     <input type="text" name={s.name} defaultValue={s.val || ""} placeholder={s.placeholder} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:border-amber-400 outline-none" />
+                     <input type="text" name={s.name} defaultValue={s.val || ""} placeholder={s.placeholder} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:border-brand-primary outline-none" />
                   </div>
                ))}
             </div>

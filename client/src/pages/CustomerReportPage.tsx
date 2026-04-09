@@ -31,7 +31,7 @@ const CustomerReportPage = () => {
 	const invoices = reportData?.invoices || [];
 
 	const STATS = [
-		{ label: "Tổng tiền", value: numFormat.format(summary.total), color: "text-amber-500", bg: "bg-amber-50" },
+		{ label: "Tổng tiền", value: numFormat.format(summary.total), color: "text-brand-primary", bg: "bg-brand-bg" },
 		{ label: "Đã thu", value: numFormat.format(summary.paid), color: "text-emerald-500", bg: "bg-emerald-50" },
 		{ label: "Chưa thu", value: numFormat.format(summary.pending), color: "text-rose-500", bg: "bg-rose-50" },
 	];
@@ -47,12 +47,12 @@ const CustomerReportPage = () => {
 				</div>
 				<div className="px-6 flex items-center justify-between border-t border-slate-100 py-3">
 					<div className="flex gap-6">
-						<button className="text-[14px] font-bold text-amber-600 border-b-2 border-amber-500 pb-3 -mb-3 cursor-pointer">
+						<button className="text-[14px] font-bold text-brand-dark border-b-2 border-amber-500 pb-3 -mb-3 cursor-pointer">
 							Quản lý nợ
 						</button>
 					</div>
 					<div className="w-[300px]">
-						<select className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 bg-white focus:outline-none focus:border-amber-400 hover:border-slate-300 transition-all font-medium appearance-none cursor-pointer">
+						<select className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 bg-white focus:outline-none focus:border-brand-primary hover:border-slate-300 transition-all font-medium appearance-none cursor-pointer">
 							<option>Tất cả toà nhà</option>
 						</select>
 					</div>
@@ -138,7 +138,7 @@ const CustomerReportPage = () => {
 						<input
 							type="text"
 							placeholder="Tìm kiếm"
-							className="px-3 py-1.5 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-amber-400 w-64"
+							className="px-3 py-1.5 border border-slate-200 rounded-lg text-[13px] outline-none focus:border-brand-primary w-64"
 						/>
 						<select className="px-3 py-1.5 border border-slate-200 rounded-lg text-[13px] outline-none cursor-pointer">
 							<option>Kỳ hóa đơn</option>
@@ -198,7 +198,7 @@ const CustomerReportPage = () => {
 												<span className={`inline-flex px-2 py-0.5 rounded text-[11px] font-bold uppercase tracking-wide border
 													${inv.status === 'paid' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' 
 														: inv.status === 'overdue' ? 'bg-rose-50 text-rose-600 border-rose-200'
-														: 'bg-amber-50 text-amber-600 border-amber-200'}`}
+														: 'bg-brand-bg text-brand-dark border-amber-200'}`}
 												>
 													{inv.status === 'paid' ? 'Đã thu' : inv.status === 'overdue' ? 'Quá hạn' : 'Chưa thu'}
 												</span>

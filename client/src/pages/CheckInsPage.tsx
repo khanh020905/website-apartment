@@ -36,7 +36,7 @@ interface CheckIn {
 const STATUS = {
 	checkedin: { label: "Đang ở", color: "bg-emerald-100 text-emerald-700" },
 	checkedout: { label: "Đã trả phòng", color: "bg-slate-100 text-slate-600" },
-	pending: { label: "Chờ nhận phòng", color: "bg-amber-100 text-amber-700" },
+	pending: { label: "Chờ nhận phòng", color: "bg-amber-100 text-brand-ink" },
 };
 
 const formatDate = (iso: string | null) => {
@@ -317,7 +317,7 @@ export default function CheckInsPage() {
 										initial={{ opacity: 0, y: 8 }}
 										animate={{ opacity: 1, y: 0 }}
 										transition={{ delay: idx * 0.03 }}
-										className="hover:bg-amber-50/30 transition-colors group relative"
+										className="hover:bg-brand-bg/30 transition-colors group relative"
 									>
 										<td className="px-4 py-3.5">
 											<span className="font-mono text-sm font-semibold text-slate-700">
@@ -356,7 +356,7 @@ export default function CheckInsPage() {
 										<td className="px-4 py-3.5 relative">
 											<button 
 												onClick={() => setOpenDropdownId(openDropdownId === c.id ? null : c.id)}
-												className="cursor-pointer opacity-100 lg:opacity-0 lg:group-hover:opacity-100 p-1.5 hover:bg-slate-200 rounded-lg text-slate-400 hover:text-amber-600 transition-all"
+												className="cursor-pointer opacity-100 lg:opacity-0 lg:group-hover:opacity-100 p-1.5 hover:bg-slate-200 rounded-lg text-slate-400 hover:text-brand-dark transition-all"
 											>
 												<MoreHorizontal className="w-4 h-4" />
 											</button>
@@ -397,7 +397,7 @@ export default function CheckInsPage() {
 						>
 							<ChevronLeft className="w-4 h-4" />
 						</button>
-						<button className="w-8 h-8 rounded-lg text-sm font-medium bg-amber-500 text-white">
+						<button className="w-8 h-8 rounded-lg text-sm font-medium bg-brand-bg0 text-white">
 							{page}
 						</button>
 						<button

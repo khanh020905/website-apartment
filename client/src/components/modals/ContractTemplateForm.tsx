@@ -46,7 +46,7 @@ export default function ContractTemplateForm({ initialData, onSubmit, onCancel }
 				{/* Basic Information */}
 				<section className="space-y-4">
 					<div className="flex items-center gap-2 pb-2 border-b border-slate-100">
-						<div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+						<div className="w-8 h-8 rounded-lg bg-brand-bg text-brand-dark flex items-center justify-center">
 							<FileText className="w-4 h-4" />
 						</div>
 						<h3 className="text-sm font-bold text-slate-900 uppercase tracking-tight">
@@ -125,9 +125,9 @@ export default function ContractTemplateForm({ initialData, onSubmit, onCancel }
 						</h3>
 					</div>
 
-					<div className="border-2 border-dashed border-slate-200 rounded-2xl p-8 flex flex-col items-center justify-center text-center hover:bg-slate-50/50 hover:border-amber-400 transition-colors cursor-pointer group">
+					<div className="border-2 border-dashed border-slate-200 rounded-2xl p-8 flex flex-col items-center justify-center text-center hover:bg-slate-50/50 hover:border-brand-primary transition-colors cursor-pointer group">
 						<div className="w-12 h-12 bg-white border border-slate-200 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-							<FileText className="w-6 h-6 text-slate-400 group-hover:text-amber-500 transition-colors" />
+							<FileText className="w-6 h-6 text-slate-400 group-hover:text-brand-primary transition-colors" />
 						</div>
 						<p className="text-sm font-bold text-slate-700 mb-1">
 							Kéo thả tệp vào đây hoặc click để tải lên
@@ -137,7 +137,7 @@ export default function ContractTemplateForm({ initialData, onSubmit, onCancel }
 						</p>
 						<button
 							type="button"
-							className="mt-4 px-4 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-700 shadow-sm hover:border-amber-400 hover:text-amber-600 transition-all"
+							className="mt-4 px-4 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-700 shadow-sm hover:border-brand-primary hover:text-brand-dark transition-all"
 						>
 							Chọn tệp từ máy tính
 						</button>
@@ -168,7 +168,7 @@ export default function ContractTemplateForm({ initialData, onSubmit, onCancel }
 									key={idx}
 									className="flex items-center gap-2 p-2 bg-white border border-slate-100 rounded-lg text-xs font-medium text-slate-700 hover:border-amber-200 transition-colors cursor-default"
 								>
-									<span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0"></span>
+									<span className="w-1.5 h-1.5 rounded-full bg-brand-primary shrink-0"></span>
 									<code className="font-mono text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded text-[11px] font-bold">
 										{tag.split(" - ")[0]}
 									</code>
@@ -190,7 +190,7 @@ export default function ContractTemplateForm({ initialData, onSubmit, onCancel }
 				</button>
 				<button
 					type="submit"
-					className="px-8 py-2.5 text-sm font-bold text-slate-900 bg-amber-400 hover:bg-amber-500 rounded-xl shadow-sm transition-all active:scale-[0.98]"
+					className="px-8 py-2.5 text-sm font-bold text-white bg-brand-primary hover:bg-brand-dark rounded-xl shadow-sm transition-all active:scale-[0.98]"
 				>
 					Xác nhận
 				</button>

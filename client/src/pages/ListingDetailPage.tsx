@@ -290,7 +290,7 @@ export default function ListingDetailPage() {
 							className="bg-white rounded-4xl p-8 border border-slate-100 shadow-xl shadow-slate-200/50 sticky top-24"
 						>
 							<h3 className="text-lg font-black text-slate-900 mb-6 flex items-center gap-2">
-								<span className="w-1.5 h-6 bg-amber-500 rounded-full" />
+								<span className="w-1.5 h-6 bg-brand-bg0 rounded-full" />
 								Thông tin người đăng
 							</h3>
 
@@ -302,7 +302,7 @@ export default function ListingDetailPage() {
 									<p className="font-black text-slate-900 text-lg leading-none mb-1">
 										{listing.profiles?.full_name || "Người dùng HomeSpot"}
 									</p>
-									<p className="text-xs text-amber-600 font-bold uppercase tracking-widest">
+									<p className="text-xs text-brand-dark font-bold uppercase tracking-widest">
 										Chủ tin đăng tin
 									</p>
 								</div>

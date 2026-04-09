@@ -36,10 +36,10 @@ const BookingForm = ({ roomNumber, onSubmit, onCancel }: BookingFormProps) => {
 			onSubmit={handleSubmit}
 			className="space-y-6"
 		>
-			<div className="p-4 bg-amber-50 rounded-2xl border border-amber-100 flex items-center gap-3">
-				<Building2 className="w-5 h-5 text-amber-600" />
+			<div className="p-4 bg-brand-bg rounded-2xl border border-amber-100 flex items-center gap-3">
+				<Building2 className="w-5 h-5 text-brand-dark" />
 				<div>
-					<p className="text-[10px] font-black uppercase tracking-widest text-amber-600/60 leading-none mb-1">
+					<p className="text-[10px] font-black uppercase tracking-widest text-brand-dark/60 leading-none mb-1">
 						Đang đặt cho phòng
 					</p>
 					<p className="text-lg font-black text-amber-900 leading-none">{formData.roomNumber}</p>
@@ -59,7 +59,7 @@ const BookingForm = ({ roomNumber, onSubmit, onCancel }: BookingFormProps) => {
 						onChange={handleChange}
 						required
 						placeholder="VD: Nguyễn Văn A"
-						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-amber-400 transition-all outline-none"
+						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-brand-primary transition-all outline-none"
 					/>
 				</div>
 
@@ -75,7 +75,7 @@ const BookingForm = ({ roomNumber, onSubmit, onCancel }: BookingFormProps) => {
 						onChange={handleChange}
 						required
 						placeholder="09xx xxx xxx"
-						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-amber-400 transition-all outline-none"
+						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-brand-primary transition-all outline-none"
 					/>
 				</div>
 			</div>
@@ -92,7 +92,7 @@ const BookingForm = ({ roomNumber, onSubmit, onCancel }: BookingFormProps) => {
 						value={formData.checkInDate}
 						onChange={handleChange}
 						required
-						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-amber-400 transition-all outline-none"
+						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-brand-primary transition-all outline-none"
 					/>
 				</div>
 
@@ -108,7 +108,7 @@ const BookingForm = ({ roomNumber, onSubmit, onCancel }: BookingFormProps) => {
 						onChange={handleChange}
 						required
 						placeholder="0"
-						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-amber-400 transition-all outline-none"
+						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-brand-primary transition-all outline-none"
 					/>
 				</div>
 			</div>
@@ -124,7 +124,7 @@ const BookingForm = ({ roomNumber, onSubmit, onCancel }: BookingFormProps) => {
 					onChange={handleChange}
 					rows={3}
 					placeholder="Nhập thông tin bổ sung..."
-					className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-amber-400 transition-all outline-none resize-none"
+					className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-brand-primary transition-all outline-none resize-none"
 				/>
 			</div>
 
@@ -138,7 +138,7 @@ const BookingForm = ({ roomNumber, onSubmit, onCancel }: BookingFormProps) => {
 				</button>
 				<button
 					type="submit"
-					className="px-8 py-2.5 bg-amber-400 text-slate-900 rounded-xl text-sm font-bold hover:bg-amber-500 shadow-lg shadow-amber-200/50 transition-all active:scale-95"
+					className="px-8 py-2.5 bg-brand-primary text-white rounded-xl text-sm font-bold hover:bg-brand-dark shadow-lg shadow-brand-primary/20 transition-all active:scale-95"
 				>
 					Xác nhận đặt phòng
 				</button>

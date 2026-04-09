@@ -131,7 +131,7 @@ export default function VehiclePage() {
               placeholder="Tìm kiếm theo phòng, khách hàng, biển số..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm font-bold text-slate-700 bg-white focus:outline-none focus:border-amber-400 hover:border-slate-300 transition-all font-['Plus_Jakarta_Sans',sans-serif]"
+              className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm font-bold text-slate-700 bg-white focus:outline-none focus:border-brand-primary hover:border-slate-300 transition-all font-['Plus_Jakarta_Sans',sans-serif]"
             />
           </div>
 
@@ -139,7 +139,7 @@ export default function VehiclePage() {
             <select
               value={vehicleType}
               onChange={(e) => setVehicleType(e.target.value)}
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm font-bold text-slate-600 bg-white focus:outline-none focus:border-amber-400 hover:border-slate-300 transition-all cursor-pointer appearance-none"
+              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm font-bold text-slate-600 bg-white focus:outline-none focus:border-brand-primary hover:border-slate-300 transition-all cursor-pointer appearance-none"
             >
               <option value="">Loại phương tiện</option>
               <option value="xe_may">Xe máy</option>
@@ -153,7 +153,7 @@ export default function VehiclePage() {
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value)}
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm font-bold text-slate-600 bg-white focus:outline-none focus:border-amber-400 hover:border-slate-300 transition-all cursor-pointer appearance-none"
+              className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm font-bold text-slate-600 bg-white focus:outline-none focus:border-brand-primary hover:border-slate-300 transition-all cursor-pointer appearance-none"
             >
               <option value="">Trạng thái</option>
               <option value="active">Hoạt động</option>
@@ -170,7 +170,7 @@ export default function VehiclePage() {
 
           <button 
              onClick={() => { setEditingVehicle(null); setIsAddModalOpen(true); }}
-             className="flex items-center gap-2 px-5 py-2 bg-amber-400 text-slate-900 rounded-lg text-sm font-black transition-colors hover:bg-amber-500 shadow-sm ml-auto cursor-pointer"
+             className="flex items-center gap-2 px-5 py-2 bg-brand-primary text-white rounded-lg text-sm font-black transition-colors hover:bg-brand-dark shadow-sm ml-auto cursor-pointer"
           >
             + Phương tiện
           </button>
@@ -184,7 +184,7 @@ export default function VehiclePage() {
             <table className="w-full text-left">
               <thead className="bg-[#EDEDED] border-b border-slate-200 sticky top-0 z-10 font-['Plus_Jakarta_Sans',sans-serif]">
                 <tr>
-                  <th className="px-5 py-3.5 w-10"><input type="checkbox" className="rounded border-slate-300 text-amber-500 focus:ring-amber-500 w-4 h-4" /></th>
+                  <th className="px-5 py-3.5 w-10"><input type="checkbox" className="rounded border-slate-300 text-brand-primary focus:ring-amber-500 w-4 h-4" /></th>
                   {["Khách hàng", "Phòng", "Toà nhà", "Loại xe", "Biển số", "Tên xe", "Màu sắc", "Trạng thái", ""].map((h, i) => (
                     <th key={i} className="px-5 py-3.5 text-[11px] font-black text-slate-700 uppercase tracking-wider whitespace-nowrap">{h} <span className="inline-block ml-1 opacity-50">↕</span></th>
                   ))}
@@ -199,8 +199,8 @@ export default function VehiclePage() {
                 ) : vehicles.length === 0 ? (
                   <tr><td colSpan={11} className="px-6 py-28 text-center text-slate-400 font-bold">Không có dữ liệu</td></tr>
                 ) : vehicles.map((v) => (
-                  <tr key={v.id} className="hover:bg-amber-50/20 group transition-colors border-b border-slate-50">
-                    <td className="px-5 py-4"><input type="checkbox" className="rounded border-slate-300 text-amber-500 w-4 h-4" /></td>
+                  <tr key={v.id} className="hover:bg-brand-bg/20 group transition-colors border-b border-slate-50">
+                    <td className="px-5 py-4"><input type="checkbox" className="rounded border-slate-300 text-brand-primary w-4 h-4" /></td>
                     <td className="px-5 py-4">
                       <div className="flex flex-col">
                         <span className="text-[13px] font-black text-slate-900">{v.customer?.tenant_name}</span>
@@ -214,7 +214,7 @@ export default function VehiclePage() {
                           {v.vehicle_type === 'xe_may' ? 'Xe máy' : v.vehicle_type === 'xe_hoi' ? 'Ô tô' : v.vehicle_type === 'xe_dap' ? 'Xe đạp' : 'Xe điện'}
                        </span>
                     </td>
-                    <td className="px-5 py-4 text-[13px] font-black text-amber-600">{v.license_plate}</td>
+                    <td className="px-5 py-4 text-[13px] font-black text-brand-dark">{v.license_plate}</td>
                     <td className="px-5 py-4 text-[13px] font-bold text-slate-600">{v.vehicle_name || '-'}</td>
                     <td className="px-5 py-4 text-[13px] font-bold text-slate-600">{v.color || '-'}</td>
                     <td className="px-5 py-4">
@@ -226,7 +226,7 @@ export default function VehiclePage() {
                        <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button 
                              onClick={() => { setEditingVehicle(v); setIsAddModalOpen(true); }}
-                             className="p-1.5 hover:bg-slate-100 rounded text-slate-400 hover:text-amber-500"
+                             className="p-1.5 hover:bg-slate-100 rounded text-slate-400 hover:text-brand-primary"
                           >
                              <Edit2 className="w-4 h-4" />
                           </button>
@@ -249,7 +249,7 @@ export default function VehiclePage() {
             <select
               value={limit}
               onChange={(e) => { setLimit(Number(e.target.value)); setPage(1); }}
-              className="px-2 py-1 border border-slate-200 rounded text-sm font-bold bg-white outline-none cursor-pointer hover:border-amber-400 transition-colors appearance-none"
+              className="px-2 py-1 border border-slate-200 rounded text-sm font-bold bg-white outline-none cursor-pointer hover:border-brand-primary transition-colors appearance-none"
             >
               <option value={20}>20 / trang</option>
               <option value={50}>50 / trang</option>
@@ -325,7 +325,7 @@ export default function VehiclePage() {
                 </button>
                 <button
                   onClick={() => setIsFilterOpen(false)}
-                  className="px-6 py-2.5 text-sm font-bold bg-amber-400 hover:bg-amber-500 text-slate-900 rounded-lg transition-colors shadow-sm cursor-pointer"
+                  className="px-6 py-2.5 text-sm font-bold bg-brand-primary hover:bg-brand-dark text-white rounded-lg transition-colors shadow-sm cursor-pointer"
                 >
                   Áp dụng
                 </button>

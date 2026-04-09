@@ -54,8 +54,8 @@ export const Overview = ({ stats }: OverviewProps) => {
 				/>
 				<SmartosStatCard
 					value="0"
-					icon={<Calendar className="w-5 h-5 text-amber-500" />}
-					iconBg="bg-amber-50"
+					icon={<Calendar className="w-5 h-5 text-brand-primary" />}
+					iconBg="bg-brand-bg"
 					subtitle="Phòng sắp bắt đầu"
 					badge={{ text: "Hôm nay", type: "amber" }}
 				/>

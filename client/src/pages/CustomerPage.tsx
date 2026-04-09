@@ -223,7 +223,7 @@ export default function CustomerPage() {
 							placeholder="Tìm kiếm bằng tên khách, số điện thoại..."
 							value={search}
 							onChange={(e) => setSearch(e.target.value)}
-							className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm text-slate-700 bg-white focus:outline-none focus:border-amber-400 hover:border-slate-300 transition-all"
+							className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm text-slate-700 bg-white focus:outline-none focus:border-brand-primary hover:border-slate-300 transition-all"
 						/>
 					</div>
 
@@ -231,7 +231,7 @@ export default function CustomerPage() {
 						<select
 							value={filterRoom}
 							onChange={(e) => setFilterRoom(e.target.value)}
-							className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 bg-white focus:outline-none focus:border-amber-400 hover:border-slate-300 transition-all cursor-pointer appearance-none"
+							className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 bg-white focus:outline-none focus:border-brand-primary hover:border-slate-300 transition-all cursor-pointer appearance-none"
 						>
 							<option value="">Tất cả phòng</option>
 							{rooms.map(r => (
@@ -244,7 +244,7 @@ export default function CustomerPage() {
 						<select
 							value={filterStatus}
 							onChange={(e) => setFilterStatus(e.target.value)}
-							className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 bg-white focus:outline-none focus:border-amber-400 hover:border-slate-300 transition-all cursor-pointer appearance-none"
+							className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 bg-white focus:outline-none focus:border-brand-primary hover:border-slate-300 transition-all cursor-pointer appearance-none"
 						>
 							<option value="">Trạng thái khách hàng</option>
 							<option value="active">Đang ở</option>
@@ -259,13 +259,13 @@ export default function CustomerPage() {
 						<Settings2 className="w-4 h-4" />
 						Bộ lọc
 						{(filterGender || filterResidency) && (
-							<span className="absolute top-1.5 right-1.5 w-2 h-2 bg-amber-500 rounded-full" />
+							<span className="absolute top-1.5 right-1.5 w-2 h-2 bg-brand-bg0 rounded-full" />
 						)}
 					</button>
 
 					<button
 						onClick={() => setIsAddModalOpen(true)}
-						className="flex items-center gap-2 px-5 py-2 bg-amber-400 text-slate-900 rounded-lg text-sm font-bold transition-colors hover:bg-amber-500 shadow-sm ml-auto cursor-pointer"
+						className="flex items-center gap-2 px-5 py-2 bg-brand-primary text-white rounded-lg text-sm font-bold transition-colors hover:bg-brand-dark shadow-sm ml-auto cursor-pointer"
 					>
 						+ Khách hàng
 					</button>
@@ -282,7 +282,7 @@ export default function CustomerPage() {
 									<th className="px-5 py-3.5 w-10">
 										<input
 											type="checkbox"
-											className="rounded border-slate-300 text-amber-500 focus:ring-amber-500 w-4 h-4"
+											className="rounded border-slate-300 text-brand-primary focus:ring-amber-500 w-4 h-4"
 										/>
 									</th>
 									{[
@@ -343,12 +343,12 @@ export default function CustomerPage() {
 											initial={{ opacity: 0, y: 8 }}
 											animate={{ opacity: 1, y: 0 }}
 											transition={{ delay: idx * 0.04 }}
-											className="hover:bg-amber-50/30 transition-colors group border-b border-slate-50 last:border-0"
+											className="hover:bg-brand-bg/30 transition-colors group border-b border-slate-50 last:border-0"
 										>
 											<td className="px-5 py-3">
 												<input
 													type="checkbox"
-													className="rounded border-slate-300 text-amber-500 focus:ring-amber-500 w-4 h-4"
+													className="rounded border-slate-300 text-brand-primary focus:ring-amber-500 w-4 h-4"
 												/>
 											</td>
 											<td className="px-5 py-3">
@@ -398,7 +398,7 @@ export default function CustomerPage() {
 													<span
 														className={`w-2 h-2 rounded-full ${
 															c.residence_status === "completed" ? "bg-emerald-500"
-															: c.residence_status === "pending" ? "bg-amber-500"
+															: c.residence_status === "pending" ? "bg-brand-bg0"
 															: "bg-slate-300"
 														}`}
 													/>
@@ -425,7 +425,7 @@ export default function CustomerPage() {
 											</td>
 											<td className="px-5 py-3 text-right">
 												<div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-													<button className="p-1.5 hover:bg-white rounded-lg text-slate-400 hover:text-amber-600 transition-colors shadow-sm">
+													<button className="p-1.5 hover:bg-white rounded-lg text-slate-400 hover:text-brand-dark transition-colors shadow-sm">
 														<Edit3 className="w-4 h-4" />
 													</button>
 												</div>
@@ -518,7 +518,7 @@ export default function CustomerPage() {
 												onClick={() => setFilterResidency(opt.value)}
 												className={`px-3 py-2 rounded-lg text-[13px] font-medium transition-all ${
 													filterResidency === opt.value ?
-														"bg-amber-400 text-slate-900 shadow-sm"
+														"bg-brand-primary text-white shadow-sm"
 													:	"bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200"
 												}`}
 											>
@@ -541,7 +541,7 @@ export default function CustomerPage() {
 												onClick={() => setFilterGender(opt.value)}
 												className={`px-3 py-2 rounded-lg text-[13px] font-medium transition-all ${
 													filterGender === opt.value ?
-														"bg-amber-400 text-slate-900 shadow-sm"
+														"bg-brand-primary text-white shadow-sm"
 													:	"bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200"
 												}`}
 											>
@@ -562,7 +562,7 @@ export default function CustomerPage() {
 								</button>
 								<button
 									onClick={() => setIsFilterOpen(false)}
-									className="px-6 py-2.5 text-sm font-bold bg-amber-400 hover:bg-amber-500 text-slate-900 rounded-lg transition-colors shadow-sm cursor-pointer"
+									className="px-6 py-2.5 text-sm font-bold bg-brand-primary hover:bg-brand-dark text-white rounded-lg transition-colors shadow-sm cursor-pointer"
 								>
 									Áp dụng
 								</button>

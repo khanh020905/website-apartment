@@ -140,7 +140,7 @@ export default function IntegrationsPage() {
                      className={`w-full py-2.5 rounded-lg text-[13px] font-bold transition-colors cursor-pointer ${
                         isConnected(int.id)
                            ? 'bg-slate-100 text-slate-700 hover:bg-slate-200' 
-                           : 'bg-amber-400 text-slate-900 hover:bg-amber-500 shadow-sm'
+                           : 'bg-brand-primary text-white hover:bg-brand-dark shadow-sm'
                      }`}
                   >
                      {isConnected(int.id) ? 'Cấu hình' : 'Kết nối ngay'}
@@ -172,7 +172,7 @@ export default function IntegrationsPage() {
                         type="text" 
                         value={configParams.oa_id || ''}
                         onChange={e => setConfigParams({...configParams, oa_id: e.target.value})}
-                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 font-medium focus:outline-none focus:border-amber-400" 
+                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 font-medium focus:outline-none focus:border-brand-primary" 
                         required 
                      />
                   </div>
@@ -182,7 +182,7 @@ export default function IntegrationsPage() {
                         type="password" 
                         value={configParams.refresh_token || ''}
                         onChange={e => setConfigParams({...configParams, refresh_token: e.target.value})}
-                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 font-medium focus:outline-none focus:border-amber-400" 
+                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 font-medium focus:outline-none focus:border-brand-primary" 
                         required 
                      />
                   </div>
@@ -197,7 +197,7 @@ export default function IntegrationsPage() {
                         value={configParams.client_id || ''}
                         onChange={e => setConfigParams({...configParams, client_id: e.target.value})}
                         placeholder="Nhập Client ID cung cấp bởi đối tác" 
-                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 font-medium focus:outline-none focus:border-amber-400" 
+                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 font-medium focus:outline-none focus:border-brand-primary" 
                         required 
                      />
                   </div>
@@ -208,7 +208,7 @@ export default function IntegrationsPage() {
                         value={configParams.client_secret || ''}
                         onChange={e => setConfigParams({...configParams, client_secret: e.target.value})}
                         placeholder="Nhập Secret Key" 
-                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 font-medium focus:outline-none focus:border-amber-400" 
+                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 font-medium focus:outline-none focus:border-brand-primary" 
                         required 
                      />
                   </div>
@@ -227,7 +227,7 @@ export default function IntegrationsPage() {
                  <button type="button" onClick={() => setSelectedIntegration(null)} className="px-5 py-2.5 text-sm font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors cursor-pointer">
                     Hủy
                  </button>
-                 <button type="submit" className="px-6 py-2.5 text-sm font-bold bg-amber-400 text-slate-900 hover:bg-amber-500 rounded-lg shadow-sm transition-colors cursor-pointer">
+                 <button type="submit" className="px-6 py-2.5 text-sm font-bold bg-brand-primary text-white hover:bg-brand-dark rounded-lg shadow-sm transition-colors cursor-pointer">
                     Lưu cấu hình
                  </button>
                </div>

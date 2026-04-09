@@ -94,7 +94,7 @@ export default function IncidentsPage() {
 							placeholder="Tìm kiếm sự cố theo khách hàng, vị trí sự cố"
 							value={search}
 							onChange={(e) => setSearch(e.target.value)}
-							className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-[13px] text-slate-700 bg-white focus:outline-none focus:border-amber-400 hover:border-slate-300 transition-all font-medium"
+							className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-[13px] text-slate-700 bg-white focus:outline-none focus:border-brand-primary hover:border-slate-300 transition-all font-medium"
 						/>
 					</div>
 
@@ -102,7 +102,7 @@ export default function IncidentsPage() {
 						<select
 							value={typeFilter}
 							onChange={(e) => setTypeFilter(e.target.value)}
-							className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 bg-white focus:outline-none focus:border-amber-400 hover:border-slate-300 transition-all cursor-pointer appearance-none font-medium text-[13px]"
+							className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 bg-white focus:outline-none focus:border-brand-primary hover:border-slate-300 transition-all cursor-pointer appearance-none font-medium text-[13px]"
 						>
 							<option value="">Loại sự cố</option>
 							<option value="DienNuoc">Điện nước</option>
@@ -114,7 +114,7 @@ export default function IncidentsPage() {
 						<select
 							value={priorityFilter}
 							onChange={(e) => setPriorityFilter(e.target.value)}
-							className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 bg-white focus:outline-none focus:border-amber-400 hover:border-slate-300 transition-all cursor-pointer appearance-none font-medium text-[13px]"
+							className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 bg-white focus:outline-none focus:border-brand-primary hover:border-slate-300 transition-all cursor-pointer appearance-none font-medium text-[13px]"
 						>
 							<option value="">Ưu tiên</option>
 							<option value="Thap">Thấp</option>
@@ -136,7 +136,7 @@ export default function IncidentsPage() {
 						</button>
 						<button
 							onClick={() => setIsModalOpen(true)}
-							className="flex items-center gap-1.5 px-4 py-2 bg-amber-400 text-slate-900 rounded-lg text-[13px] font-bold transition-colors hover:bg-amber-500 shadow-sm cursor-pointer"
+							className="flex items-center gap-1.5 px-4 py-2 bg-brand-primary text-white rounded-lg text-[13px] font-bold transition-colors hover:bg-brand-dark shadow-sm cursor-pointer"
 						>
 							<Plus className="w-4 h-4 font-bold" /> Tạo
 						</button>
@@ -198,7 +198,7 @@ export default function IncidentsPage() {
 								:	filteredData.map((row: Incident) => (
 										<tr
 											key={row.id}
-											className="hover:bg-amber-50/20 transition-colors group"
+											className="hover:bg-brand-bg/20 transition-colors group"
 										>
 											<td className="px-5 py-3.5">
 												<span className="text-[13px] font-bold text-slate-700">{row.type}</span>
@@ -235,7 +235,7 @@ export default function IncidentsPage() {
 												</span>
 											</td>
 											<td className="px-5 py-3.5 text-right">
-												<button className="opacity-0 group-hover:opacity-100 p-1 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-amber-600 transition-all">
+												<button className="opacity-0 group-hover:opacity-100 p-1 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-brand-dark transition-all">
 													<MoreHorizontal className="w-4 h-4" />
 												</button>
 											</td>
@@ -307,7 +307,7 @@ export default function IncidentsPage() {
 								{/* Loại sự cố */}
 								<div>
 									<h3 className="text-[13px] font-bold text-slate-900 mb-3">Loại sự cố</h3>
-									<select className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-900 focus:outline-none focus:border-amber-400 appearance-none bg-white cursor-pointer">
+									<select className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-900 focus:outline-none focus:border-brand-primary appearance-none bg-white cursor-pointer">
 										<option value="">Chọn loại sự cố</option>
 										<option value="diennuoc">Điện nước</option>
 										<option value="wifi">Internet/Wifi</option>
@@ -328,7 +328,7 @@ export default function IncidentsPage() {
 											>
 												<input
 													type="checkbox"
-													className="rounded border-slate-300 text-amber-500 focus:ring-amber-500 w-4 h-4 cursor-pointer"
+													className="rounded border-slate-300 text-brand-primary focus:ring-amber-500 w-4 h-4 cursor-pointer"
 												/>
 												<span className="text-[13px] font-medium text-slate-700">{st}</span>
 											</label>
@@ -349,7 +349,7 @@ export default function IncidentsPage() {
 											>
 												<input
 													type="checkbox"
-													className="rounded border-slate-300 text-amber-500 focus:ring-amber-500 w-4 h-4 cursor-pointer"
+													className="rounded border-slate-300 text-brand-primary focus:ring-amber-500 w-4 h-4 cursor-pointer"
 												/>
 												<span className="text-[13px] font-medium text-slate-700">{st}</span>
 											</label>
@@ -362,7 +362,7 @@ export default function IncidentsPage() {
 								{/* Người đảm nhận */}
 								<div>
 									<h3 className="text-[13px] font-bold text-slate-900 mb-3">Người đảm nhận</h3>
-									<select className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-900 focus:outline-none focus:border-amber-400 appearance-none bg-white cursor-pointer">
+									<select className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-900 focus:outline-none focus:border-brand-primary appearance-none bg-white cursor-pointer">
 										<option value="">Chọn người đảm nhận</option>
 										<option value="1">Kỹ thuật viên 1</option>
 										<option value="2">Kỹ thuật viên 2</option>
@@ -377,12 +377,12 @@ export default function IncidentsPage() {
 									<div className="flex items-center gap-2">
 										<input
 											type="date"
-											className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-900 focus:outline-none focus:border-amber-400"
+											className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-900 focus:outline-none focus:border-brand-primary"
 										/>
 										<span className="text-slate-400">-</span>
 										<input
 											type="date"
-											className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-900 focus:outline-none focus:border-amber-400"
+											className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-900 focus:outline-none focus:border-brand-primary"
 										/>
 									</div>
 								</div>
@@ -402,7 +402,7 @@ export default function IncidentsPage() {
 								</button>
 								<button
 									onClick={() => setIsFilterOpen(false)}
-									className="px-6 py-2.5 text-[13px] font-bold bg-amber-400 hover:bg-amber-500 text-slate-900 rounded-lg transition-colors shadow-sm cursor-pointer"
+									className="px-6 py-2.5 text-[13px] font-bold bg-brand-primary hover:bg-brand-dark text-white rounded-lg transition-colors shadow-sm cursor-pointer"
 								>
 									Áp dụng
 								</button>

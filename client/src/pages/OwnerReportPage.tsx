@@ -37,12 +37,12 @@ export default function OwnerReportPage() {
 				<div className="px-6 flex flex-wrap items-center gap-3 border-t border-slate-100 py-3">
 					<div className="flex items-center gap-3 w-full sm:w-auto">
 						<div className="w-37.5">
-							<select className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 bg-white focus:outline-none focus:border-amber-400 hover:border-slate-300 transition-all font-medium appearance-none cursor-pointer">
+							<select className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 bg-white focus:outline-none focus:border-brand-primary hover:border-slate-300 transition-all font-medium appearance-none cursor-pointer">
 								<option>Tất cả các tháng</option>
 							</select>
 						</div>
 						<div className="w-50">
-							<select className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 bg-white focus:outline-none focus:border-amber-400 hover:border-slate-300 transition-all font-medium appearance-none cursor-pointer">
+							<select className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 bg-white focus:outline-none focus:border-brand-primary hover:border-slate-300 transition-all font-medium appearance-none cursor-pointer">
 								<option>Tất cả toà nhà</option>
 							</select>
 						</div>

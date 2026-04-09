@@ -78,7 +78,7 @@ export default function BookingHistoryPage() {
               placeholder="Tìm kiếm bằng mã đặt phòng..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm font-bold text-slate-700 bg-white focus:outline-none focus:border-amber-400 transition-all shadow-sm"
+              className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm font-bold text-slate-700 bg-white focus:outline-none focus:border-brand-primary transition-all shadow-sm"
             />
           </div>
 
@@ -118,7 +118,7 @@ export default function BookingHistoryPage() {
                     <td className="px-5 py-4 uppercase text-[10px]">{r.package_type === 'month' ? 'Tháng' : 'Ngày'}</td>
                     <td className="px-5 py-4">{r.customer_name}</td>
                     <td className="px-5 py-4">
-                      <span className={`px-2 py-0.5 rounded text-[10px] uppercase border ${r.status === 'confirmed' ? 'bg-amber-50 text-amber-600 border-amber-100' : 'bg-emerald-50 text-emerald-600 border-emerald-100'}`}>
+                      <span className={`px-2 py-0.5 rounded text-[10px] uppercase border ${r.status === 'confirmed' ? 'bg-brand-bg text-brand-dark border-amber-100' : 'bg-emerald-50 text-emerald-600 border-emerald-100'}`}>
                         {getStatusLabel(r.status)}
                       </span>
                     </td>
@@ -154,7 +154,7 @@ export default function BookingHistoryPage() {
                     <h3 className="text-sm font-semibold text-slate-800 mb-3">Trạng thái</h3>
                     {["Đã xác nhận", "Đang sử dụng", "Đã hoàn thành", "Đã huỷ"].map(item => (
                        <label key={item} className="flex items-center gap-3 cursor-pointer mb-2">
-                          <input type="checkbox" className="w-4 h-4 rounded border-slate-300 text-amber-500 focus:ring-amber-500" />
+                          <input type="checkbox" className="w-4 h-4 rounded border-slate-300 text-brand-primary focus:ring-amber-500" />
                           <span className="text-sm text-slate-600">{item}</span>
                        </label>
                     ))}
@@ -162,7 +162,7 @@ export default function BookingHistoryPage() {
               </div>
               <div className="p-5 border-t border-slate-100 bg-white flex items-center justify-end gap-3 shrink-0">
                 <button onClick={() => setStatus([])} className="px-5 py-2.5 text-sm font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors cursor-pointer">Đặt lại</button>
-                <button onClick={() => setIsFilterOpen(false)} className="px-6 py-2.5 text-sm font-bold bg-amber-400 hover:bg-amber-500 text-slate-900 rounded-lg transition-colors shadow-sm cursor-pointer">Áp dụng</button>
+                <button onClick={() => setIsFilterOpen(false)} className="px-6 py-2.5 text-sm font-bold bg-brand-primary hover:bg-brand-dark text-white rounded-lg transition-colors shadow-sm cursor-pointer">Áp dụng</button>
               </div>
             </motion.div>
           </>

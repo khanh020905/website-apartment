@@ -130,7 +130,7 @@ export default function ContractTemplatesPage() {
 							placeholder="Tìm kiếm mẫu hợp đồng..."
 							value={search}
 							onChange={(e) => setSearch(e.target.value)}
-							className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm text-slate-700 bg-white focus:outline-none focus:border-amber-400 hover:border-slate-300 transition-all"
+							className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm text-slate-700 bg-white focus:outline-none focus:border-brand-primary hover:border-slate-300 transition-all"
 						/>
 					</div>
 
@@ -138,7 +138,7 @@ export default function ContractTemplatesPage() {
 						<select
 							value={statusFilter}
 							onChange={(e) => setStatusFilter(e.target.value)}
-							className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 bg-white focus:outline-none focus:border-amber-400 hover:border-slate-300 transition-all cursor-pointer appearance-none"
+							className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 bg-white focus:outline-none focus:border-brand-primary hover:border-slate-300 transition-all cursor-pointer appearance-none"
 						>
 							<option value="">Trạng thái</option>
 							<option value="active">Hoạt động</option>
@@ -148,7 +148,7 @@ export default function ContractTemplatesPage() {
 
 					<button
 						onClick={() => { setEditingTemplate(null); setIsModalOpen(true); }}
-						className="flex items-center gap-2 px-5 py-2 bg-amber-400 text-slate-900 rounded-lg text-sm font-bold transition-colors hover:bg-amber-500 shadow-sm ml-auto cursor-pointer"
+						className="flex items-center gap-2 px-5 py-2 bg-brand-primary text-white rounded-lg text-sm font-bold transition-colors hover:bg-brand-dark shadow-sm ml-auto cursor-pointer"
 					>
 						+ Tạo mẫu hợp đồng
 					</button>
@@ -212,7 +212,7 @@ export default function ContractTemplatesPage() {
 								:	filteredData.map((row) => (
 										<tr
 											key={row.id}
-											className="hover:bg-amber-50/20 transition-colors group relative"
+											className="hover:bg-brand-bg/20 transition-colors group relative"
 										>
 											<td className="px-5 py-3.5">
 												<FileText className="w-4 h-4 text-slate-400" />
@@ -260,7 +260,7 @@ export default function ContractTemplatesPage() {
 											<td className="px-5 py-3.5 text-right relative">
 												<button 
 													onClick={() => setOpenDropdownId(openDropdownId === row.id ? null : row.id)}
-													className="cursor-pointer opacity-100 lg:opacity-0 lg:group-hover:opacity-100 p-1 hover:bg-slate-200 rounded-lg text-slate-400 hover:text-amber-600 transition-all"
+													className="cursor-pointer opacity-100 lg:opacity-0 lg:group-hover:opacity-100 p-1 hover:bg-slate-200 rounded-lg text-slate-400 hover:text-brand-dark transition-all"
 												>
 													<MoreHorizontal className="w-4 h-4" />
 												</button>

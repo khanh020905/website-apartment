@@ -60,7 +60,7 @@ const CustomerForm = ({ onSubmit, onCancel }: CustomerFormProps) => {
 					name="room_id"
 					value={formData.room_id}
 					onChange={handleChange}
-					className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-amber-400 transition-all outline-none appearance-none"
+					className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-brand-primary transition-all outline-none appearance-none"
 				>
 					<option value="">Chọn phòng trống</option>
 					{rooms
@@ -91,13 +91,13 @@ const CustomerForm = ({ onSubmit, onCancel }: CustomerFormProps) => {
 						value={formData.tenant_name}
 						onChange={handleChange}
 						placeholder="Họ và tên khách hàng"
-						className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-amber-400 transition-all outline-none"
+						className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-brand-primary transition-all outline-none"
 					/>
 					<select
 						name="tenant_gender"
 						value={formData.tenant_gender}
 						onChange={handleChange}
-						className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-amber-400 transition-all outline-none"
+						className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-brand-primary transition-all outline-none"
 					>
 						<option value="">Giới tính</option>
 						<option value="male">Nam</option>
@@ -114,7 +114,7 @@ const CustomerForm = ({ onSubmit, onCancel }: CustomerFormProps) => {
 							value={formData.tenant_phone}
 							onChange={handleChange}
 							placeholder="Số điện thoại"
-							className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-amber-400 transition-all outline-none"
+							className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-brand-primary transition-all outline-none"
 						/>
 					</div>
 					<div className="relative">
@@ -125,7 +125,7 @@ const CustomerForm = ({ onSubmit, onCancel }: CustomerFormProps) => {
 							value={formData.tenant_email}
 							onChange={handleChange}
 							placeholder="Địa chỉ Email"
-							className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-amber-400 transition-all outline-none"
+							className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-brand-primary transition-all outline-none"
 						/>
 					</div>
 				</div>
@@ -143,14 +143,14 @@ const CustomerForm = ({ onSubmit, onCancel }: CustomerFormProps) => {
 						name="start_date"
 						value={formData.start_date}
 						onChange={handleChange}
-						className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-amber-400 transition-all outline-none"
+						className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-brand-primary transition-all outline-none"
 					/>
 					<input
 						type="date"
 						name="end_date"
 						value={formData.end_date}
 						onChange={handleChange}
-						className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-amber-400 transition-all outline-none"
+						className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-brand-primary transition-all outline-none"
 					/>
 				</div>
 			</div>
@@ -168,7 +168,7 @@ const CustomerForm = ({ onSubmit, onCancel }: CustomerFormProps) => {
 						value={formData.rent_amount}
 						onChange={handleChange}
 						placeholder="Giá thuê (VNĐ)"
-						className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-amber-400 transition-all outline-none"
+						className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-brand-primary transition-all outline-none"
 					/>
 					<input
 						type="number"
@@ -176,7 +176,7 @@ const CustomerForm = ({ onSubmit, onCancel }: CustomerFormProps) => {
 						value={formData.deposit_amount}
 						onChange={handleChange}
 						placeholder="Tiền đặt cọc (VNĐ)"
-						className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-amber-400 transition-all outline-none"
+						className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-brand-primary transition-all outline-none"
 					/>
 				</div>
 			</div>
@@ -192,7 +192,7 @@ const CustomerForm = ({ onSubmit, onCancel }: CustomerFormProps) => {
 					onChange={handleChange}
 					rows={3}
 					placeholder="Lưu ý về khách hàng hoặc hợp đồng..."
-					className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-3xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-amber-400 transition-all outline-none resize-none"
+					className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-3xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-brand-primary transition-all outline-none resize-none"
 				/>
 			</div>
 
@@ -206,7 +206,7 @@ const CustomerForm = ({ onSubmit, onCancel }: CustomerFormProps) => {
 				</button>
 				<button
 					type="submit"
-					className="px-10 py-3.5 bg-amber-400 text-slate-900 rounded-2xl text-sm font-bold hover:bg-amber-500 shadow-xl shadow-amber-200/50 transition-all active:scale-95"
+					className="px-10 py-3.5 bg-brand-primary text-white rounded-2xl text-sm font-bold hover:bg-brand-dark shadow-xl shadow-brand-primary/20 transition-all active:scale-95"
 				>
 					Xác nhận thêm
 				</button>

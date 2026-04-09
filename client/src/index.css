@@ -7,6 +7,18 @@
 	--color-brand-light: #78c9d3;
 	--color-brand-ink: #0f3f4a;
 	--color-brand-bg: #f2fbfc;
+
+	/* Global Theme Redirects - Mapping yellow/amber to the new blue/teal theme */
+	--color-amber-50: var(--color-brand-bg);
+	--color-amber-100: var(--color-brand-light);
+	--color-amber-200: #b2e2e7;
+	--color-amber-300: #49b5b5;
+	--color-amber-400: var(--color-brand-primary);
+	--color-amber-500: var(--color-brand-dark);
+	--color-amber-600: var(--color-brand-ink);
+	
+	/* Navbar specific yellow override */
+	--color-yellow-500: var(--color-brand-primary);
 }
 
 /* Base resets & typography */

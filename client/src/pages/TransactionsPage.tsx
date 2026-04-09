@@ -41,7 +41,7 @@ const formatDate = (iso: string) => {
 
 const TX_STATUS: Record<string, { label: string; color: string }> = {
 	confirmed: { label: "Đã xác nhận", color: "bg-emerald-50 text-emerald-600 border-emerald-100" },
-	pending: { label: "Chờ xử lý", color: "bg-amber-50 text-amber-600 border-amber-100" },
+	pending: { label: "Chờ xử lý", color: "bg-brand-bg text-brand-dark border-amber-100" },
 	cancelled: { label: "Đã huỷ", color: "bg-rose-50 text-rose-600 border-rose-100" },
 };
 
@@ -109,7 +109,7 @@ export default function TransactionsPage() {
 			value: total,
 			icon: ArrowLeftRight,
 			iconBg: "bg-amber-100",
-			iconColor: "text-amber-600",
+			iconColor: "text-brand-dark",
 			isCount: true,
 		},
 	];
@@ -144,7 +144,7 @@ export default function TransactionsPage() {
 							placeholder="Tìm mã GD, nội dung, khách hàng..."
 							value={search}
 							onChange={(e) => setSearch(e.target.value)}
-							className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-[13px] font-bold text-slate-700 bg-white focus:outline-none focus:border-amber-400 transition-all shadow-sm"
+							className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-[13px] font-bold text-slate-700 bg-white focus:outline-none focus:border-brand-primary transition-all shadow-sm"
 						/>
 					</div>
 
@@ -160,7 +160,7 @@ export default function TransactionsPage() {
 						</select>
 					</div>
 
-					<button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 px-4 py-2 bg-amber-400 text-slate-900 rounded-lg text-[13px] font-black transition-colors hover:bg-amber-500 shadow-sm ml-auto cursor-pointer">
+					<button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 px-4 py-2 bg-brand-primary text-white rounded-lg text-[13px] font-black transition-colors hover:bg-brand-dark shadow-sm ml-auto cursor-pointer">
 						<Plus className="w-4 h-4 font-bold" /> Giao dịch
 					</button>
 				</div>

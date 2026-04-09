@@ -22,8 +22,8 @@ const STATUS = {
   },
   occupied: {
     label: "Đang sử dụng",
-    colorClass: "bg-amber-400",
-    borderColorClass: "border-amber-400",
+    colorClass: "bg-brand-primary",
+    borderColorClass: "border-brand-primary",
   },
   maintenance: {
     label: "Đang bảo trì",
@@ -145,7 +145,7 @@ const BookingPage = () => {
       
       {/* Filters */}
       <div className="flex items-center px-6 py-3 gap-3 bg-slate-50/30">
-        <label className="relative flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-xl text-sm text-slate-600 bg-white min-w-[150px] cursor-pointer hover:border-amber-400 transition-all font-medium">
+        <label className="relative flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-xl text-sm text-slate-600 bg-white min-w-[150px] cursor-pointer hover:border-brand-primary transition-all font-medium">
           <span className="text-slate-800">{formatDate(selectedDate)}</span>
           <CalendarDays className="w-4 h-4 ml-auto text-slate-400" />
           <input
@@ -156,7 +156,7 @@ const BookingPage = () => {
           />
         </label>
 
-        <div className="relative border border-slate-200 rounded-xl bg-white min-w-[150px] hover:border-amber-400 transition-all">
+        <div className="relative border border-slate-200 rounded-xl bg-white min-w-[150px] hover:border-brand-primary transition-all">
           <select
             value={selectedFloor}
             onChange={(e) =>
@@ -174,7 +174,7 @@ const BookingPage = () => {
           <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
         </div>
 
-        <div className="relative border border-slate-200 rounded-xl bg-white min-w-[150px] hover:border-amber-400 transition-all">
+        <div className="relative border border-slate-200 rounded-xl bg-white min-w-[150px] hover:border-brand-primary transition-all">
           <select
             value={selectedRoom}
             onChange={(e) => setSelectedRoom(e.target.value)}
@@ -259,7 +259,7 @@ const BookingPage = () => {
                                   </span>
                                   <button
                                     onClick={() => handleOpenBooking(room)}
-                                    className="border border-slate-200 text-[11px] font-black uppercase tracking-wider px-3 py-1.5 rounded-xl text-slate-600 hover:bg-amber-400 hover:text-white hover:border-amber-400 bg-white transition-all active:scale-95 shadow-sm"
+                                    className="border border-slate-200 text-[11px] font-black uppercase tracking-wider px-3 py-1.5 rounded-xl text-slate-600 hover:bg-brand-primary hover:text-white hover:border-brand-primary bg-white transition-all active:scale-95 shadow-sm"
                                   >
                                     Đặt chỗ
                                   </button>

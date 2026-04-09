@@ -74,12 +74,12 @@ const Navbar = () => {
 					<button
 						onClick={() => setIsBuildingOpen(!isBuildingOpen)}
 						className={`flex items-center gap-3 px-3 py-1.5 bg-[#f8f9fa] border border-slate-200 rounded-lg text-sm font-semibold transition-all cursor-pointer min-w-40 ${
-							isBuildingOpen ? "border-amber-400 shadow-sm" : "hover:border-slate-300"
+							isBuildingOpen ? "border-brand-primary shadow-sm" : "hover:border-slate-300"
 						}`}
 					>
 						<span className="text-slate-700 truncate">{selectedBuildingName}</span>
 						<ChevronDown
-							className={`w-3.5 h-3.5 ml-auto text-slate-400 transition-transform ${isBuildingOpen ? "rotate-180 text-amber-500" : ""}`}
+							className={`w-3.5 h-3.5 ml-auto text-slate-400 transition-transform ${isBuildingOpen ? "rotate-180 text-brand-primary" : ""}`}
 						/>
 					</button>
 
@@ -110,7 +110,7 @@ const Navbar = () => {
 										}}
 										className={`w-full text-left px-4 py-2.5 text-sm font-bold transition-colors ${
 											selectedBuildingId === null ?
-												"bg-amber-50 text-amber-700"
+												"bg-brand-bg text-brand-primary"
 											:	"text-slate-600 hover:bg-slate-50"
 										}`}
 									>
@@ -125,7 +125,7 @@ const Navbar = () => {
 											}}
 											className={`w-full text-left px-4 py-2.5 text-sm font-bold transition-colors ${
 												selectedBuildingId === b.id ?
-													"bg-amber-50 text-amber-700"
+													"bg-brand-bg text-brand-primary"
 												:	"text-slate-600 hover:bg-slate-50"
 											}`}
 										>
@@ -158,7 +158,7 @@ const Navbar = () => {
 					<motion.button
 						whileHover={{ scale: 1.02 }}
 						whileTap={{ scale: 0.98 }}
-						className="flex items-center gap-1.5 px-3 py-1.5 bg-[#fcd34d] text-slate-900 rounded-lg text-xs font-bold transition-all cursor-pointer"
+						className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-primary text-white rounded-lg text-xs font-bold transition-all cursor-pointer"
 					>
 						<PlusCircle className="w-3.5 h-3.5" />
 						<span>Thu nhập</span>
@@ -166,7 +166,7 @@ const Navbar = () => {
 					<motion.button
 						whileHover={{ scale: 1.02 }}
 						whileTap={{ scale: 0.98 }}
-						className="flex items-center gap-1.5 px-3 py-1.5 bg-[#fcd34d] text-slate-900 rounded-lg text-xs font-bold transition-all cursor-pointer"
+						className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-primary text-white rounded-lg text-xs font-bold transition-all cursor-pointer"
 					>
 						<MinusCircle className="w-3.5 h-3.5" />
 						<span>Chi phí</span>

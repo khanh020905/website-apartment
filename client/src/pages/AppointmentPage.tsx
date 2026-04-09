@@ -91,7 +91,7 @@ export default function AppointmentPage() {
               placeholder="Tìm kiếm bằng mã xem phòng hoặc khách hàng..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm font-bold text-slate-700 bg-white focus:outline-none focus:border-amber-400 transition-all shadow-sm"
+              className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm font-bold text-slate-700 bg-white focus:outline-none focus:border-brand-primary transition-all shadow-sm"
             />
           </div>
 
@@ -104,7 +104,7 @@ export default function AppointmentPage() {
 
           <button
             onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-2 px-5 py-2 bg-amber-400 text-slate-900 rounded-lg text-sm font-black transition-colors hover:bg-amber-500 shadow-sm cursor-pointer"
+            className="flex items-center gap-2 px-5 py-2 bg-brand-primary text-white rounded-lg text-sm font-black transition-colors hover:bg-brand-dark shadow-sm cursor-pointer"
           >
             + Đặt lịch xem phòng
           </button>
@@ -118,7 +118,7 @@ export default function AppointmentPage() {
             <table className="w-full">
               <thead className="bg-[#EDEDED] border-b border-slate-200 sticky top-0 z-10 font-bold uppercase tracking-widest text-[10px] text-slate-500">
                 <tr>
-                  <th className="px-5 py-3.5 w-10"><input type="checkbox" className="rounded border-slate-300 text-amber-500 w-4 h-4" /></th>
+                  <th className="px-5 py-3.5 w-10"><input type="checkbox" className="rounded border-slate-300 text-brand-primary w-4 h-4" /></th>
                   <th className="px-5 py-3.5 text-left">Mã xem phòng</th>
                   <th className="px-5 py-3.5 text-left">Khách xem phòng</th>
                   <th className="px-5 py-3.5 text-left">Thời gian</th>
@@ -133,9 +133,9 @@ export default function AppointmentPage() {
                 ) : tours.length === 0 ? (
                   <tr><td colSpan={7} className="px-6 py-28 text-center text-slate-400">Chưa có lịch hẹn nào</td></tr>
                 ) : tours.map(t => (
-                  <tr key={t.id} className="hover:bg-amber-50/20 group transition-colors">
-                    <td className="px-5 py-4"><input type="checkbox" className="rounded border-slate-300 text-amber-500 w-4 h-4" /></td>
-                    <td className="px-5 py-4 text-amber-600 uppercase">{t.tour_code}</td>
+                  <tr key={t.id} className="hover:bg-brand-bg/20 group transition-colors">
+                    <td className="px-5 py-4"><input type="checkbox" className="rounded border-slate-300 text-brand-primary w-4 h-4" /></td>
+                    <td className="px-5 py-4 text-brand-dark uppercase">{t.tour_code}</td>
                     <td className="px-5 py-4">
                       <div className="flex flex-col">
                         <span>{t.customer_name}</span>
@@ -148,7 +148,7 @@ export default function AppointmentPage() {
                     </td>
                     <td className="px-5 py-4">{t.room?.room_number ?? t.building?.name}</td>
                     <td className="px-5 py-4">
-                       <span className={`px-2 py-0.5 rounded text-[10px] uppercase border ${t.status === 'pending' ? 'bg-amber-50 text-amber-600 border-amber-100' : 'bg-emerald-50 text-emerald-600 border-emerald-100'}`}>
+                       <span className={`px-2 py-0.5 rounded text-[10px] uppercase border ${t.status === 'pending' ? 'bg-brand-bg text-brand-dark border-amber-100' : 'bg-emerald-50 text-emerald-600 border-emerald-100'}`}>
                           {t.status === 'pending' ? 'Chờ xem' : 'Đã xem'}
                        </span>
                     </td>
@@ -186,7 +186,7 @@ export default function AppointmentPage() {
                  </div>
               </div>
               <div className="p-5 border-t border-slate-100 bg-white flex items-center justify-end gap-3 shrink-0">
-                <button onClick={() => setIsFilterOpen(false)} className="px-6 py-2.5 text-sm font-bold bg-amber-400 hover:bg-amber-500 text-slate-900 rounded-lg transition-colors shadow-sm cursor-pointer">Xác nhận</button>
+                <button onClick={() => setIsFilterOpen(false)} className="px-6 py-2.5 text-sm font-bold bg-brand-primary hover:bg-brand-dark text-white rounded-lg transition-colors shadow-sm cursor-pointer">Xác nhận</button>
               </div>
             </motion.div>
           </>

@@ -344,7 +344,7 @@ const PricingPage = () => {
 													: val === "Han che" ?
 														<div className="flex justify-center">
 															<Minus
-																className="text-amber-500"
+																className="text-brand-primary"
 																size={20}
 																strokeWidth={3}
 															/>

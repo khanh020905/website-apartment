@@ -180,8 +180,8 @@ export default function IncidentForm({ onSubmit, onCancel }: IncidentFormProps) 
 
 				<div className="space-y-1.5">
 					<label className="text-[13px] font-semibold text-slate-700">Tệp đính kèm</label>
-					<div className="border-2 border-dashed border-slate-200 rounded-2xl p-6 flex flex-col items-center justify-center hover:bg-slate-50 hover:border-amber-400 transition-colors cursor-pointer group">
-						<div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 mb-2 group-hover:text-amber-500 transition-colors">
+					<div className="border-2 border-dashed border-slate-200 rounded-2xl p-6 flex flex-col items-center justify-center hover:bg-slate-50 hover:border-brand-primary transition-colors cursor-pointer group">
+						<div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-400 mb-2 group-hover:text-brand-primary transition-colors">
 							<Upload className="w-5 h-5" />
 						</div>
 						<p className="text-[13px] font-medium text-slate-600 mb-1">
@@ -231,7 +231,7 @@ export default function IncidentForm({ onSubmit, onCancel }: IncidentFormProps) 
 				<button
 					type="submit"
 					disabled={loading}
-					className={`px-8 py-2.5 text-sm font-bold text-slate-900 bg-amber-400 hover:bg-amber-500 rounded-xl shadow-sm transition-all active:scale-[0.98] ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
+					className={`px-8 py-2.5 text-sm font-bold text-white bg-brand-primary hover:bg-brand-dark rounded-xl shadow-sm transition-all active:scale-[0.98] ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
 				>
 					{loading ? "Đang tải..." : "Tạo"}
 				</button>

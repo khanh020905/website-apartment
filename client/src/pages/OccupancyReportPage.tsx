@@ -50,8 +50,8 @@ const OccupancyReportPage = () => {
 			label: "Tỷ lệ lấp đầy",
 			value: `${stats.rate}%`,
 			icon: Percent,
-			color: "text-amber-500",
-			bg: "bg-amber-50",
+			color: "text-brand-primary",
+			bg: "bg-brand-bg",
 		},
 		{
 			label: "Phòng đang sử dụng / Tổng phòng",
@@ -85,12 +85,12 @@ const OccupancyReportPage = () => {
 				</div>
 				<div className="px-6 flex items-center justify-between border-t border-slate-100 py-3">
 					<div className="flex gap-6">
-						<button className="text-[14px] font-bold text-amber-600 border-b-2 border-amber-500 pb-3 -mb-3 cursor-pointer">
+						<button className="text-[14px] font-bold text-brand-dark border-b-2 border-amber-500 pb-3 -mb-3 cursor-pointer">
 							Vận hành
 						</button>
 					</div>
 					<div className="w-[300px]">
-						<select className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 bg-white focus:outline-none focus:border-amber-400 hover:border-slate-300 transition-all font-medium appearance-none cursor-pointer">
+						<select className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 bg-white focus:outline-none focus:border-brand-primary hover:border-slate-300 transition-all font-medium appearance-none cursor-pointer">
 							<option>Tất cả toà nhà</option>
 						</select>
 					</div>

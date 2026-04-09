@@ -107,7 +107,7 @@ export default function IncidentTypesPage() {
 			<div className="bg-white border-b border-slate-200">
 				<div className="px-6 py-4 flex items-center justify-between">
 					<h1 className="text-[20px] font-bold text-slate-900 tracking-tight">Cấu hình loại sự cố</h1>
-					<button onClick={() => openModal()} className="flex items-center gap-1.5 px-4 py-2 bg-amber-400 text-slate-900 rounded-lg text-[13px] font-bold transition-colors hover:bg-amber-500 shadow-sm cursor-pointer">
+					<button onClick={() => openModal()} className="flex items-center gap-1.5 px-4 py-2 bg-brand-primary text-white rounded-lg text-[13px] font-bold transition-colors hover:bg-brand-dark shadow-sm cursor-pointer">
 						<Plus className="w-4 h-4 font-bold" /> Thêm danh mục
 					</button>
 				</div>
@@ -120,7 +120,7 @@ export default function IncidentTypesPage() {
 							placeholder="Tìm kiếm loại sự cố..."
 							value={search}
 							onChange={(e) => setSearch(e.target.value)}
-							className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-[13px] font-bold text-slate-700 bg-white focus:outline-none focus:border-amber-400 transition-all shadow-sm"
+							className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-[13px] font-bold text-slate-700 bg-white focus:outline-none focus:border-brand-primary transition-all shadow-sm"
 						/>
 					</div>
 				</div>
@@ -148,7 +148,7 @@ export default function IncidentTypesPage() {
 								) : filteredData.map((row) => (
 									<tr key={row.id} className="hover:bg-slate-50 transition-colors group">
 										<td className="px-5 py-4 text-center">
-											<div className="w-8 h-8 rounded-lg bg-amber-50 mx-auto flex items-center justify-center text-lg shadow-sm">
+											<div className="w-8 h-8 rounded-lg bg-brand-bg mx-auto flex items-center justify-center text-lg shadow-sm">
 												{row.icon || "🛠️"}
 											</div>
 										</td>
@@ -181,7 +181,7 @@ export default function IncidentTypesPage() {
 
 											{openDropdownId === row.id && (
 												<div className="absolute right-10 top-10 w-44 bg-white rounded-lg shadow-xl border border-slate-100 py-1.5 z-50 text-left">
-													<button onClick={() => openModal(row)} className="w-full px-4 py-2 text-[13px] font-bold text-slate-700 hover:bg-slate-50 hover:text-amber-600 flex items-center gap-2 cursor-pointer transition-colors">
+													<button onClick={() => openModal(row)} className="w-full px-4 py-2 text-[13px] font-bold text-slate-700 hover:bg-slate-50 hover:text-brand-dark flex items-center gap-2 cursor-pointer transition-colors">
 														<Edit2 className="w-4 h-4" /> Chỉnh sửa
 													</button>
 													<button onClick={() => handleToggleStatus(row)} className="w-full px-4 py-2 text-[13px] font-bold text-slate-700 hover:bg-slate-50 flex items-center gap-2 cursor-pointer transition-colors">
@@ -207,15 +207,15 @@ export default function IncidentTypesPage() {
 				<form onSubmit={handleSave} className="p-6 space-y-5">
 					<div>
 						<label className="block text-[13px] font-bold text-slate-700 mb-1.5">Tên danh mục sự cố <span className="text-rose-500">*</span></label>
-						<input required type="text" value={name} onChange={e => setName(e.target.value)} placeholder="VD: Điện nổi, Điện lạnh, Rò rỉ nước..." className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm text-slate-900 font-medium focus:outline-none focus:border-amber-400 shadow-sm" />
+						<input required type="text" value={name} onChange={e => setName(e.target.value)} placeholder="VD: Điện nổi, Điện lạnh, Rò rỉ nước..." className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm text-slate-900 font-medium focus:outline-none focus:border-brand-primary shadow-sm" />
 					</div>
 					<div>
 						<label className="block text-[13px] font-bold text-slate-700 mb-1.5">Biểu tượng (Icon)</label>
-						<input type="text" value={icon} onChange={e => setIcon(e.target.value)} placeholder="Emoji (vd: ⚡, 💧, 🔑)" className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm text-slate-900 font-medium focus:outline-none focus:border-amber-400 shadow-sm" />
+						<input type="text" value={icon} onChange={e => setIcon(e.target.value)} placeholder="Emoji (vd: ⚡, 💧, 🔑)" className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm text-slate-900 font-medium focus:outline-none focus:border-brand-primary shadow-sm" />
 					</div>
 					<div>
 						<label className="block text-[13px] font-bold text-slate-700 mb-1.5">Tên người chịu trách nhiệm mặc định</label>
-						<input type="text" value={defaultAssignee} onChange={e => setDefaultAssignee(e.target.value)} placeholder="Nhập tên nhân sự..." className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm text-slate-900 font-medium focus:outline-none focus:border-amber-400 shadow-sm" />
+						<input type="text" value={defaultAssignee} onChange={e => setDefaultAssignee(e.target.value)} placeholder="Nhập tên nhân sự..." className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm text-slate-900 font-medium focus:outline-none focus:border-brand-primary shadow-sm" />
 						<p className="mt-1.5 text-[11px] text-slate-400 italic">Nếu để trống, sự cố tạo mới sẽ cần phân công tay.</p>
 					</div>
 
@@ -223,7 +223,7 @@ export default function IncidentTypesPage() {
 						<button type="button" onClick={handleCloseModal} className="px-5 py-2 text-[13px] font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors cursor-pointer">
 							Hủy bỏ
 						</button>
-						<button type="submit" className="px-6 py-2 text-[13px] font-bold bg-amber-400 text-slate-900 hover:bg-amber-500 rounded-lg shadow-sm transition-all cursor-pointer hover:scale-105 active:scale-95">
+						<button type="submit" className="px-6 py-2 text-[13px] font-bold bg-brand-primary text-white hover:bg-brand-dark rounded-lg shadow-sm transition-all cursor-pointer hover:scale-105 active:scale-95">
 							{editingType ? 'Lưu cập nhật' : 'Tạo mới'}
 						</button>
 					</div>

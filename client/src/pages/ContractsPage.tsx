@@ -39,7 +39,7 @@ const STATUS_MAP: Record<Contract["status"], { label: string; color: string; ico
 	active: { label: "Đang hiệu lực", color: "bg-emerald-100 text-emerald-700", icon: CheckCircle2 },
 	extended: { label: "Đã gia hạn", color: "bg-blue-100 text-blue-700", icon: RefreshCcw },
 	settled: { label: "Đã thanh lý", color: "bg-slate-100 text-slate-500", icon: LogOut },
-	pending: { label: "Chờ xác nhận", color: "bg-amber-100 text-amber-700", icon: Clock },
+	pending: { label: "Chờ xác nhận", color: "bg-amber-100 text-brand-ink", icon: Clock },
 };
 
 export default function ContractsPage() {
@@ -93,7 +93,7 @@ export default function ContractsPage() {
 			color: "text-emerald-500",
 			bg: "bg-emerald-50",
 		},
-		{ label: "Chờ xác nhận", value: 8, icon: Clock, color: "text-amber-500", bg: "bg-amber-50" },
+		{ label: "Chờ xác nhận", value: 8, icon: Clock, color: "text-brand-primary", bg: "bg-brand-bg" },
 		{ label: "Đã thanh lý", value: 45, icon: LogOut, color: "text-slate-400", bg: "bg-slate-50" },
 	];
 
@@ -114,19 +114,19 @@ export default function ContractsPage() {
 							placeholder="Tìm kiếm số hợp đồng, khách hàng theo tên, điện thoại..."
 							value={search}
 							onChange={(e) => setSearch(e.target.value)}
-							className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-[13px] text-slate-700 bg-white focus:outline-none focus:border-amber-400 hover:border-slate-300 transition-all font-medium"
+							className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-[13px] text-slate-700 bg-white focus:outline-none focus:border-brand-primary hover:border-slate-300 transition-all font-medium"
 						/>
 					</div>
 
 					<div className="flex items-center gap-2">
 						<input
 							type="date"
-							className="w-31.25 px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 bg-white focus:outline-none focus:border-amber-400 hover:border-slate-300 transition-all font-medium text-[13px] "
+							className="w-31.25 px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 bg-white focus:outline-none focus:border-brand-primary hover:border-slate-300 transition-all font-medium text-[13px] "
 						/>
 						<span className="text-slate-400">-</span>
 						<input
 							type="date"
-							className="w-31.25 px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 bg-white focus:outline-none focus:border-amber-400 hover:border-slate-300 transition-all font-medium text-[13px] "
+							className="w-31.25 px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 bg-white focus:outline-none focus:border-brand-primary hover:border-slate-300 transition-all font-medium text-[13px] "
 						/>
 					</div>
 
@@ -134,7 +134,7 @@ export default function ContractsPage() {
 						<select
 							value={filterStatus}
 							onChange={(e) => setFilterStatus(e.target.value)}
-							className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 bg-white focus:outline-none focus:border-amber-400 hover:border-slate-300 transition-all cursor-pointer appearance-none font-medium text-[13px]"
+							className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 bg-white focus:outline-none focus:border-brand-primary hover:border-slate-300 transition-all cursor-pointer appearance-none font-medium text-[13px]"
 						>
 							<option value="">Giai đoạn hợp đồng</option>
 							<option value="active">Hiệu lực</option>
@@ -159,7 +159,7 @@ export default function ContractsPage() {
 						</button>
 						<button
 							onClick={() => setIsModalOpen(true)}
-							className="flex items-center gap-1.5 px-4 py-2 bg-amber-400 text-slate-900 rounded-lg text-[13px] font-bold transition-colors hover:bg-amber-500 shadow-sm cursor-pointer"
+							className="flex items-center gap-1.5 px-4 py-2 bg-brand-primary text-white rounded-lg text-[13px] font-bold transition-colors hover:bg-brand-dark shadow-sm cursor-pointer"
 						>
 							<Plus className="w-4 h-4 font-bold" /> Tạo
 						</button>
@@ -231,7 +231,7 @@ export default function ContractsPage() {
 								:	contracts.map((c) => (
 										<tr
 											key={c.id}
-											className="hover:bg-amber-50/20 transition-colors group"
+											className="hover:bg-brand-bg/20 transition-colors group"
 										>
 											<td className="px-5 py-4 whitespace-nowrap">
 												<span className="text-[13px] font-bold text-blue-600 uppercase">
@@ -276,7 +276,7 @@ export default function ContractsPage() {
 												</span>
 											</td>
 											<td className="px-5 py-4 text-right">
-												<button className="opacity-0 group-hover:opacity-100 p-1 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-amber-600 transition-all">
+												<button className="opacity-0 group-hover:opacity-100 p-1 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-brand-dark transition-all">
 													<MoreHorizontal className="w-4 h-4" />
 												</button>
 											</td>
@@ -347,7 +347,7 @@ export default function ContractsPage() {
 								{/* Mẫu hợp đồng */}
 								<div>
 									<h3 className="text-[13px] font-bold text-slate-900 mb-3">Mẫu hợp đồng</h3>
-									<select className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-900 focus:outline-none focus:border-amber-400 appearance-none">
+									<select className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-900 focus:outline-none focus:border-brand-primary appearance-none">
 										<option value="">Tất cả mẫu</option>
 										<option value="1">Hợp đồng thuê căn hộ</option>
 										<option value="2">Hợp đồng thuê mặt bằng</option>
@@ -359,7 +359,7 @@ export default function ContractsPage() {
 								{/* Người đảm nhận */}
 								<div>
 									<h3 className="text-[13px] font-bold text-slate-900 mb-3">Người đảm nhận</h3>
-									<select className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-900 focus:outline-none focus:border-amber-400 appearance-none">
+									<select className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] font-medium text-slate-900 focus:outline-none focus:border-brand-primary appearance-none">
 										<option value="">Tất cả nhân viên</option>
 										<option value="1">Admin</option>
 										<option value="2">Nhân viên sale 1</option>
@@ -379,7 +379,7 @@ export default function ContractsPage() {
 											>
 												<input
 													type="checkbox"
-													className="rounded border-slate-300 text-amber-500 focus:ring-amber-500 w-4 h-4 cursor-pointer"
+													className="rounded border-slate-300 text-brand-primary focus:ring-amber-500 w-4 h-4 cursor-pointer"
 												/>
 												<span className="text-[13px] font-medium text-slate-700">{st}</span>
 											</label>
@@ -407,7 +407,7 @@ export default function ContractsPage() {
 											>
 												<input
 													type="checkbox"
-													className="rounded border-slate-300 text-amber-500 focus:ring-amber-500 w-4 h-4 cursor-pointer"
+													className="rounded border-slate-300 text-brand-primary focus:ring-amber-500 w-4 h-4 cursor-pointer"
 												/>
 												<span className="text-[13px] font-medium text-slate-700">{st}</span>
 											</label>
@@ -429,7 +429,7 @@ export default function ContractsPage() {
 								</button>
 								<button
 									onClick={() => setIsFilterOpen(false)}
-									className="px-6 py-2.5 text-sm font-bold bg-amber-400 hover:bg-amber-500 text-slate-900 rounded-lg transition-colors shadow-sm cursor-pointer"
+									className="px-6 py-2.5 text-sm font-bold bg-brand-primary hover:bg-brand-dark text-white rounded-lg transition-colors shadow-sm cursor-pointer"
 								>
 									Áp dụng
 								</button>

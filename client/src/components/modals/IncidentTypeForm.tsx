@@ -37,11 +37,11 @@ export default function IncidentTypeForm({ onSubmit, onCancel }: IncidentTypeFor
 							type="button"
 							className="w-13 h-13 border border-slate-200 border-dashed rounded-xl flex items-center justify-center hover:bg-slate-50 transition-colors"
 						>
-							<div className="w-5 h-5 rounded-full bg-amber-400 flex items-center justify-center text-white">
+							<div className="w-5 h-5 rounded-full bg-brand-primary flex items-center justify-center text-white">
 								<Plus className="w-3.5 h-3.5 font-bold" />
 							</div>
 						</button>
-						<span className="text-[13px] font-medium text-slate-500 cursor-pointer hover:text-amber-600 transition-colors">
+						<span className="text-[13px] font-medium text-slate-500 cursor-pointer hover:text-brand-dark transition-colors">
 							Cập nhật biểu tượng
 						</span>
 					</div>
@@ -95,10 +95,10 @@ export default function IncidentTypeForm({ onSubmit, onCancel }: IncidentTypeFor
 						type="button"
 						className="flex items-center gap-2 py-1 transition-colors group"
 					>
-						<div className="w-8 h-8 rounded-full border border-dashed border-slate-300 flex items-center justify-center text-slate-400 group-hover:border-amber-400 group-hover:text-amber-500">
+						<div className="w-8 h-8 rounded-full border border-dashed border-slate-300 flex items-center justify-center text-slate-400 group-hover:border-brand-primary group-hover:text-brand-primary">
 							<span className="text-[14px] font-bold">+</span>
 						</div>
-						<span className="font-medium text-[13px] text-slate-600 group-hover:text-amber-600">
+						<span className="font-medium text-[13px] text-slate-600 group-hover:text-brand-dark">
 							Thêm người đảm nhận
 						</span>
 					</button>
@@ -138,7 +138,7 @@ export default function IncidentTypeForm({ onSubmit, onCancel }: IncidentTypeFor
 				</button>
 				<button
 					type="submit"
-					className="bg-amber-400 text-white font-bold text-sm tracking-wide hover:bg-amber-500 transition-colors"
+					className="bg-brand-primary text-white font-bold text-sm tracking-wide hover:bg-brand-dark transition-colors"
 				>
 					TẠO
 				</button>

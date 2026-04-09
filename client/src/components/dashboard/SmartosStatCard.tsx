@@ -13,7 +13,7 @@ interface SmartosStatCardProps {
 
 const BADGE_COLORS = {
 	emerald: "text-emerald-600 bg-emerald-50",
-	amber: "text-amber-600 bg-amber-50",
+	amber: "text-brand-dark bg-brand-bg",
 	blue: "text-blue-600 bg-blue-50",
 	orange: "text-orange-600 bg-orange-50",
 	purple: "text-purple-600 bg-purple-50",

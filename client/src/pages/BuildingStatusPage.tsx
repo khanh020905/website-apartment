@@ -30,10 +30,10 @@ const PUBLIC_STATUS_CONFIG: Record<
 		dot: "bg-rose-500",
 	},
 	maintenance: {
-		color: "text-amber-700",
-		bg: "bg-amber-50",
+		color: "text-brand-ink",
+		bg: "bg-brand-bg",
 		border: "border-amber-200",
-		dot: "bg-amber-500",
+		dot: "bg-brand-bg0",
 	},
 };
 

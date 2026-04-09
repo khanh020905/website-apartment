@@ -125,7 +125,7 @@ export default function LocationsPage() {
               placeholder="Tìm kiếm tên toà nhà..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-[13px] text-slate-700 bg-white focus:outline-none focus:border-amber-400 hover:border-slate-300 transition-all font-medium"
+              className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-[13px] text-slate-700 bg-white focus:outline-none focus:border-brand-primary hover:border-slate-300 transition-all font-medium"
             />
           </div>
 
@@ -133,7 +133,7 @@ export default function LocationsPage() {
              <select 
                value={filterService} 
                onChange={(e) => setFilterService(e.target.value)}
-               className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] text-slate-700 bg-white focus:outline-none focus:border-amber-400 hover:border-slate-300 transition-all cursor-pointer appearance-none font-medium"
+               className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] text-slate-700 bg-white focus:outline-none focus:border-brand-primary hover:border-slate-300 transition-all cursor-pointer appearance-none font-medium"
              >
                <option value="">Chọn dịch vụ</option>
                <option value="sleep_box">Sleep box</option>
@@ -146,7 +146,7 @@ export default function LocationsPage() {
              <select 
                value={filterStatus} 
                onChange={(e) => setFilterStatus(e.target.value)}
-               className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] text-slate-700 bg-white focus:outline-none focus:border-amber-400 hover:border-slate-300 transition-all cursor-pointer appearance-none font-medium"
+               className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] text-slate-700 bg-white focus:outline-none focus:border-brand-primary hover:border-slate-300 transition-all cursor-pointer appearance-none font-medium"
              >
                <option value="">Tất cả trạng thái</option>
                <option value="active">Đang hoạt động</option>
@@ -157,7 +157,7 @@ export default function LocationsPage() {
           <div className="flex items-center gap-2 ml-auto">
              <button 
                onClick={openCreateModal}
-               className="flex items-center gap-1.5 px-4 py-2 bg-amber-400 text-slate-900 rounded-lg text-[13px] font-bold transition-colors hover:bg-amber-500 shadow-sm whitespace-nowrap cursor-pointer"
+               className="flex items-center gap-1.5 px-4 py-2 bg-brand-primary text-white rounded-lg text-[13px] font-bold transition-colors hover:bg-brand-dark shadow-sm whitespace-nowrap cursor-pointer"
              >
                <Plus className="w-4 h-4 font-bold" /> Thêm toà nhà
              </button>
@@ -189,7 +189,7 @@ export default function LocationsPage() {
               </thead>
               <tbody className="divide-y divide-slate-100">
                  {filteredLocations.map((loc) => (
-                    <tr key={loc.id} className="hover:bg-amber-50/20 transition-colors group relative">
+                    <tr key={loc.id} className="hover:bg-brand-bg/20 transition-colors group relative">
                        <td className="px-5 py-4">
                           <div className="flex items-center gap-3">
                              <div className="w-10 h-10 rounded bg-slate-100 flex items-center justify-center shrink-0">
@@ -284,7 +284,7 @@ export default function LocationsPage() {
                         name="images" 
                         defaultValue={editingBuilding?.images?.join(", ") || ""} 
                         placeholder="Ví dụ: https://example.com/image1.jpg, https://example.com/image2.jpg" 
-                        className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm text-slate-900 font-medium focus:outline-none focus:border-amber-400" 
+                        className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm text-slate-900 font-medium focus:outline-none focus:border-brand-primary" 
                      />
                      <div className="w-full h-32 border border-slate-200 rounded-xl bg-slate-50 flex items-center justify-center overflow-hidden">
                         {editingBuilding?.images && editingBuilding.images.length > 0 ? (
@@ -305,27 +305,27 @@ export default function LocationsPage() {
 
                <div>
                   <label className="block text-[13px] font-bold text-slate-700 mb-1.5">Tên toà nhà <span className="text-red-500">*</span></label>
-                  <input type="text" name="name" defaultValue={editingBuilding?.name || ""} placeholder="Nhập tên toà nhà" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 font-medium focus:outline-none focus:border-amber-400" required />
+                  <input type="text" name="name" defaultValue={editingBuilding?.name || ""} placeholder="Nhập tên toà nhà" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 font-medium focus:outline-none focus:border-brand-primary" required />
                </div>
                
                <div>
                   <label className="block text-[13px] font-bold text-slate-700 mb-1.5">Số điện thoại <span className="text-red-500">*</span></label>
-                  <input type="text" name="phone" defaultValue={editingBuilding?.phone || ""} placeholder="Nhập số điện thoại hotline" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 font-medium focus:outline-none focus:border-amber-400" required />
+                  <input type="text" name="phone" defaultValue={editingBuilding?.phone || ""} placeholder="Nhập số điện thoại hotline" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 font-medium focus:outline-none focus:border-brand-primary" required />
                </div>
 
                <div className="md:col-span-2">
                   <label className="block text-[13px] font-bold text-slate-700 mb-1.5">Địa chỉ <span className="text-red-500">*</span></label>
-                  <input type="text" name="address" defaultValue={editingBuilding?.address || ""} placeholder="Nhập địa chỉ chi tiết" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 font-medium focus:outline-none focus:border-amber-400" required />
+                  <input type="text" name="address" defaultValue={editingBuilding?.address || ""} placeholder="Nhập địa chỉ chi tiết" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 font-medium focus:outline-none focus:border-brand-primary" required />
                </div>
 
                <div>
                   <label className="block text-[13px] font-bold text-slate-700 mb-1.5">Số tầng <span className="text-red-500">*</span></label>
-                  <input type="number" name="floors" defaultValue={editingBuilding?.floors || ""} min={1} placeholder="Ví dụ: 5" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 font-medium focus:outline-none focus:border-amber-400" required />
+                  <input type="number" name="floors" defaultValue={editingBuilding?.floors || ""} min={1} placeholder="Ví dụ: 5" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 font-medium focus:outline-none focus:border-brand-primary" required />
                </div>
                
                <div>
                   <label className="block text-[13px] font-bold text-slate-700 mb-1.5">Trạng thái</label>
-                  <select name="status" defaultValue={editingBuilding?.status || "active"} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 font-medium focus:outline-none focus:border-amber-400">
+                  <select name="status" defaultValue={editingBuilding?.status || "active"} className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 font-medium focus:outline-none focus:border-brand-primary">
                      <option value="active">Đang hoạt động</option>
                      <option value="inactive">Đã đóng cửa</option>
                   </select>
@@ -333,12 +333,12 @@ export default function LocationsPage() {
                
                <div>
                   <label className="block text-[13px] font-bold text-slate-700 mb-1.5">Dịch vụ (phân cách bằng dấu phẩy)</label>
-                  <input type="text" name="services" defaultValue={editingBuilding?.services?.join(", ") || ""} placeholder="VD: Sleep box, Studio, 1PN" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 font-medium focus:outline-none focus:border-amber-400" />
+                  <input type="text" name="services" defaultValue={editingBuilding?.services?.join(", ") || ""} placeholder="VD: Sleep box, Studio, 1PN" className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 font-medium focus:outline-none focus:border-brand-primary" />
                </div>
 
                <div>
                   <label className="block text-[13px] font-bold text-slate-700 mb-1.5">Website / Link liên kết</label>
-                  <input type="url" name="website" defaultValue={editingBuilding?.website || ""} placeholder="https://..." className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 font-medium focus:outline-none focus:border-amber-400" />
+                  <input type="url" name="website" defaultValue={editingBuilding?.website || ""} placeholder="https://..." className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 font-medium focus:outline-none focus:border-brand-primary" />
                </div>
             </div>
 
@@ -346,7 +346,7 @@ export default function LocationsPage() {
                <button type="button" onClick={() => { setIsModalOpen(false); setEditingBuilding(null); }} className="cursor-pointer px-5 py-2.5 text-sm font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors">
                   Hủy
                </button>
-               <button type="submit" className="cursor-pointer px-6 py-2.5 text-sm font-bold bg-amber-400 text-slate-900 hover:bg-amber-500 rounded-lg shadow-sm transition-colors">
+               <button type="submit" className="cursor-pointer px-6 py-2.5 text-sm font-bold bg-brand-primary text-white hover:bg-brand-dark rounded-lg shadow-sm transition-colors">
                   Lưu toà nhà
                </button>
             </div>

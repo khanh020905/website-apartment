@@ -65,10 +65,10 @@ const TransactionConfigPage = () => {
 			<div className="bg-white border-b border-slate-200">
 				<div className="px-6 py-4 flex items-center justify-between">
 					<h1 className="text-[20px] font-bold text-slate-900 tracking-tight flex items-center gap-2">
-						<Settings2 className="w-5 h-5 text-amber-500" />
+						<Settings2 className="w-5 h-5 text-brand-primary" />
 						Cấu hình giao dịch
 					</h1>
-					<button className="flex items-center gap-1.5 px-4 py-2 bg-amber-400 text-slate-900 rounded-lg text-[13px] font-bold transition-all hover:bg-amber-500 active:scale-[0.98] shadow-sm cursor-pointer ml-auto">
+					<button className="flex items-center gap-1.5 px-4 py-2 bg-brand-primary text-white rounded-lg text-[13px] font-bold transition-all hover:bg-brand-dark active:scale-[0.98] shadow-sm cursor-pointer ml-auto">
 						<Save className="w-4 h-4 font-bold" />
 						Lưu thay đổi
 					</button>

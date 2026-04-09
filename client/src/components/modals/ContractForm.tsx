@@ -90,7 +90,7 @@ const ContractForm = ({ onSubmit, onCancel }: ContractFormProps) => {
 						value={formData.contractTemplateId}
 						onChange={handleChange}
 						required
-						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-amber-400 transition-all outline-none"
+						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-brand-primary transition-all outline-none"
 					>
 						<option value="">Chọn mẫu hợp đồng</option>
 						{templates.map(t => (
@@ -111,7 +111,7 @@ const ContractForm = ({ onSubmit, onCancel }: ContractFormProps) => {
 						onChange={handleChange}
 						required
 						placeholder="VD: HĐ Thuê phòng P101 - Nguyễn Văn A"
-						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-amber-400 transition-all outline-none"
+						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-brand-primary transition-all outline-none"
 					/>
 				</div>
 
@@ -126,7 +126,7 @@ const ContractForm = ({ onSubmit, onCancel }: ContractFormProps) => {
 						value={formData.contractNumber}
 						onChange={handleChange}
 						required
-						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-amber-400 transition-all outline-none"
+						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-brand-primary transition-all outline-none"
 					/>
 				</div>
 
@@ -141,7 +141,7 @@ const ContractForm = ({ onSubmit, onCancel }: ContractFormProps) => {
 						value={formData.effectiveDate}
 						onChange={handleChange}
 						required
-						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-amber-400 transition-all outline-none"
+						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-brand-primary transition-all outline-none"
 					/>
 				</div>
 			</div>
@@ -153,7 +153,7 @@ const ContractForm = ({ onSubmit, onCancel }: ContractFormProps) => {
 					name="isSigned"
 					checked={formData.isSigned}
 					onChange={handleChange}
-					className="w-5 h-5 rounded border-slate-300 text-amber-500 focus:ring-amber-500"
+					className="w-5 h-5 rounded border-slate-300 text-brand-primary focus:ring-amber-500"
 				/>
 				<label
 					htmlFor="isSigned"
@@ -176,7 +176,7 @@ const ContractForm = ({ onSubmit, onCancel }: ContractFormProps) => {
 						value={formData.startDate}
 						onChange={handleChange}
 						required
-						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-amber-400 transition-all outline-none"
+						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-brand-primary transition-all outline-none"
 					/>
 				</div>
 
@@ -191,7 +191,7 @@ const ContractForm = ({ onSubmit, onCancel }: ContractFormProps) => {
 						value={formData.endDate}
 						onChange={handleChange}
 						required
-						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-amber-400 transition-all outline-none"
+						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-brand-primary transition-all outline-none"
 					/>
 				</div>
 
@@ -205,7 +205,7 @@ const ContractForm = ({ onSubmit, onCancel }: ContractFormProps) => {
 						value={formData.room_id}
 						onChange={handleChange}
 						required
-						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-amber-400 transition-all outline-none"
+						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-brand-primary transition-all outline-none"
 					>
 						<option value="">Chọn phòng</option>
 						{rooms.map(r => (
@@ -226,7 +226,7 @@ const ContractForm = ({ onSubmit, onCancel }: ContractFormProps) => {
 						value={formData.guestCount}
 						onChange={handleChange}
 						required
-						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-amber-400 transition-all outline-none"
+						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-brand-primary transition-all outline-none"
 					/>
 				</div>
 			</div>
@@ -242,7 +242,7 @@ const ContractForm = ({ onSubmit, onCancel }: ContractFormProps) => {
 					value={formData.customer_id}
 					onChange={handleChange}
 					required
-					className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-amber-400 transition-all outline-none"
+					className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-brand-primary transition-all outline-none"
 				>
 					<option value="">Chọn khách hàng</option>
 					{customers.map(c => (
@@ -261,7 +261,7 @@ const ContractForm = ({ onSubmit, onCancel }: ContractFormProps) => {
 					onChange={handleChange}
 					rows={3}
 					placeholder="Nhập ghi chú cho hợp đồng..."
-					className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-amber-400 transition-all outline-none resize-none"
+					className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-brand-primary transition-all outline-none resize-none"
 				/>
 			</div>
 
@@ -276,7 +276,7 @@ const ContractForm = ({ onSubmit, onCancel }: ContractFormProps) => {
 				<button
 					type="submit"
 					disabled={loading}
-					className={`px-8 py-2.5 bg-[#fcd34d] text-slate-900 rounded-xl text-sm font-bold hover:bg-amber-400 shadow-lg shadow-amber-200/50 transition-all active:scale-95 ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
+					className={`px-8 py-2.5 bg-brand-primary text-white rounded-xl text-sm font-bold hover:bg-brand-dark shadow-lg shadow-brand-primary/20 transition-all active:scale-95 ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
 				>
 					{loading ? "Đang tải..." : "Tạo hợp đồng"}
 				</button>

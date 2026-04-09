@@ -76,7 +76,7 @@ const InvoiceForm = ({ onSubmit, onCancel }: InvoiceFormProps) => {
 						onChange={handleChange}
 						required
 						disabled={loading}
-						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-amber-400 transition-all outline-none"
+						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-brand-primary transition-all outline-none"
 					>
 						<option value="">Chọn phòng</option>
 						{rooms.map(r => (
@@ -96,7 +96,7 @@ const InvoiceForm = ({ onSubmit, onCancel }: InvoiceFormProps) => {
 						onChange={handleChange}
 						required
 						disabled={loading}
-						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-amber-400 transition-all outline-none"
+						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-brand-primary transition-all outline-none"
 					>
 						<option value="">Chọn khách hàng</option>
 						{customers.map(c => (
@@ -118,7 +118,7 @@ const InvoiceForm = ({ onSubmit, onCancel }: InvoiceFormProps) => {
 						value={formData.dueDate}
 						onChange={handleChange}
 						required
-						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-amber-400 transition-all outline-none"
+						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-brand-primary transition-all outline-none"
 					/>
 				</div>
 
@@ -133,7 +133,7 @@ const InvoiceForm = ({ onSubmit, onCancel }: InvoiceFormProps) => {
 						value={formData.total}
 						onChange={handleChange}
 						required
-						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-amber-400 transition-all outline-none"
+						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-brand-primary transition-all outline-none"
 					/>
 				</div>
 			</div>
@@ -145,7 +145,7 @@ const InvoiceForm = ({ onSubmit, onCancel }: InvoiceFormProps) => {
 					name="hasVat"
 					checked={formData.hasVat}
 					onChange={handleChange}
-					className="w-5 h-5 rounded border-slate-300 text-amber-500 focus:ring-amber-500"
+					className="w-5 h-5 rounded border-slate-300 text-brand-primary focus:ring-amber-500"
 				/>
 				<label
 					htmlFor="hasVat"
@@ -166,7 +166,7 @@ const InvoiceForm = ({ onSubmit, onCancel }: InvoiceFormProps) => {
 					onChange={handleChange}
 					rows={3}
 					placeholder="Nhập ghi chú cho hoá đơn..."
-					className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-amber-400 transition-all outline-none resize-none"
+					className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-amber-400/10 focus:border-brand-primary transition-all outline-none resize-none"
 				/>
 			</div>
 
@@ -181,7 +181,7 @@ const InvoiceForm = ({ onSubmit, onCancel }: InvoiceFormProps) => {
 				<button
 					type="submit"
 					disabled={loading}
-					className={`px-8 py-2.5 bg-amber-400 text-slate-900 rounded-xl text-sm font-bold hover:bg-amber-500 shadow-lg shadow-amber-200/50 transition-all active:scale-95 ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
+					className={`px-8 py-2.5 bg-brand-primary text-white rounded-xl text-sm font-bold hover:bg-brand-dark shadow-lg shadow-brand-primary/20 transition-all active:scale-95 ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
 				>
 					{loading ? "Đang xử lý..." : "Xác nhận tạo"}
 				</button>

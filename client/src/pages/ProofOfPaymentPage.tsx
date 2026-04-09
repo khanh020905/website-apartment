@@ -59,7 +59,7 @@ export default function ProofOfPaymentPage() {
 	};
 
 	const STATUS_BADGES: Record<string, { label: string, classes: string }> = {
-		pending: { label: "Chờ duyệt", classes: "bg-amber-50 text-amber-600 border-amber-100" },
+		pending: { label: "Chờ duyệt", classes: "bg-brand-bg text-brand-dark border-amber-100" },
 		approved: { label: "Đã duyệt", classes: "bg-emerald-50 text-emerald-600 border-emerald-100" },
 		rejected: { label: "Từ chối", classes: "bg-rose-50 text-rose-600 border-rose-100" }
 	};
@@ -87,7 +87,7 @@ export default function ProofOfPaymentPage() {
 							placeholder="Tìm theo khách hàng..."
 							value={search}
 							onChange={(e) => setSearch(e.target.value)}
-							className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm text-slate-700 bg-white focus:outline-none focus:border-amber-400 hover:border-slate-300 transition-all font-medium shadow-sm"
+							className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm text-slate-700 bg-white focus:outline-none focus:border-brand-primary hover:border-slate-300 transition-all font-medium shadow-sm"
 						/>
 					</div>
 
@@ -95,7 +95,7 @@ export default function ProofOfPaymentPage() {
 						<select
 							value={status}
 							onChange={(e) => setStatus(e.target.value)}
-							className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 font-medium bg-white focus:outline-none focus:border-amber-400 hover:border-slate-300 transition-all cursor-pointer shadow-sm appearance-none"
+							className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 font-medium bg-white focus:outline-none focus:border-brand-primary hover:border-slate-300 transition-all cursor-pointer shadow-sm appearance-none"
 						>
 							<option value="">Tất cả trạng thái</option>
 							<option value="pending">Chờ duyệt</option>
@@ -137,13 +137,13 @@ export default function ProofOfPaymentPage() {
 									</tr>
 								) : (
 									proofs.map(p => (
-										<tr key={p.id} className="hover:bg-amber-50/20 group transition-colors">
+										<tr key={p.id} className="hover:bg-brand-bg/20 group transition-colors">
 											<td className="px-5 py-4 text-center"><input type="checkbox" className="rounded border-slate-300" /></td>
 											<td className="px-5 py-4 font-bold text-slate-900">{p.customer_name}</td>
 											<td className="px-5 py-4 text-emerald-600 font-bold">{p.amount.toLocaleString()} ₫</td>
 											<td className="px-5 py-4 text-slate-600 uppercase text-xs font-mono">{p.invoice?.invoice_code || "KHÔNG RÕ"}</td>
 											<td className="px-5 py-4 text-center">
-												<a href={p.image_url} target="_blank" rel="noreferrer" className="inline-flex w-8 h-8 rounded bg-slate-100 items-center justify-center text-slate-400 hover:text-amber-500 hover:bg-amber-50 transition-colors">
+												<a href={p.image_url} target="_blank" rel="noreferrer" className="inline-flex w-8 h-8 rounded bg-slate-100 items-center justify-center text-slate-400 hover:text-brand-primary hover:bg-brand-bg transition-colors">
 													<ImageIcon className="w-4 h-4" />
 												</a>
 											</td>

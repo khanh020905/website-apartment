@@ -207,7 +207,7 @@ const AppSidebar = () => {
 			>
 				{/* Logo */}
 				<div className="h-16 flex items-center border-b border-white/5 px-4 shrink-0">
-					<div className="w-10 h-10 bg-[#fcd34d] rounded-xl flex items-center justify-center rotate-3 shadow-lg shadow-yellow-500/20 shrink-0">
+					<div className="w-10 h-10 bg-brand-primary rounded-xl flex items-center justify-center rotate-3 shadow-lg shadow-brand-primary/20 shrink-0">
 						<img
 							src="/logo.jpg"
 							alt="Logo"
@@ -245,13 +245,13 @@ const AppSidebar = () => {
 										onClick={() => setIsSubCollapsed(false)}
 										className={`flex items-center gap-3.5 px-3 py-2.5 rounded-xl text-[13px] font-bold transition-all duration-200 relative overflow-hidden whitespace-nowrap ${
 											isActive ?
-												"bg-[#fcd34d] text-slate-900 shadow-lg shadow-yellow-500/10"
+												"bg-brand-primary text-white shadow-lg shadow-brand-primary/10"
 											:	"text-slate-400 hover:text-white hover:bg-white/5"
 										}`}
 									>
 										{/* Icon — fixed width so label doesn't jump */}
 										<item.icon
-											className={`w-5 h-5 shrink-0 transition-colors ${isActive ? "text-black" : "text-slate-400"}`}
+											className={`w-5 h-5 shrink-0 transition-colors ${isActive ? "text-white" : "text-slate-400"}`}
 											strokeWidth={2.5}
 										/>
 
@@ -263,7 +263,7 @@ const AppSidebar = () => {
 													animate={{ opacity: 1, x: 0 }}
 													exit={{ opacity: 0, x: -6 }}
 													transition={{ duration: 0.18, delay: 0.04 }}
-													className={`tracking-wide truncate ${isActive ? "text-black" : ""}`}
+													className={`tracking-wide truncate ${isActive ? "text-white" : ""}`}
 												>
 													{item.label}
 												</motion.span>
@@ -274,7 +274,7 @@ const AppSidebar = () => {
 										{isActive && (
 											<motion.div
 												layoutId="active-pill"
-												className="absolute right-0 top-1/2 -translate-y-1/2 w-1.5 h-6 bg-black rounded-l-full"
+												className="absolute right-0 top-1/2 -translate-y-1/2 w-1.5 h-6 bg-white rounded-l-full"
 											/>
 										)}
 									</Link>
@@ -326,7 +326,7 @@ const AppSidebar = () => {
 										</Link>
 										<Link
 											to="/register"
-											className="flex items-center justify-center py-2.5 bg-[#fcd34d] text-black rounded-2xl text-xs font-bold transition-all"
+											className="flex items-center justify-center py-2.5 bg-brand-primary text-white rounded-2xl text-xs font-bold transition-all"
 										>
 											Đăng ký
 										</Link>

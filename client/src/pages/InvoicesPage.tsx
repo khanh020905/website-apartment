@@ -44,7 +44,7 @@ const STATUS_LABELS: Record<string, string> = {
 
 const STATUS_COLORS: Record<string, string> = {
 	paid: "bg-emerald-50 text-emerald-600 border-emerald-100",
-	pending: "bg-amber-50 text-amber-600 border-amber-100",
+	pending: "bg-brand-bg text-brand-dark border-amber-100",
 	overdue: "bg-rose-50 text-rose-600 border-rose-100",
 	cancelled: "bg-slate-50 text-slate-500 border-slate-100",
 };
@@ -111,7 +111,7 @@ export default function InvoicesPage() {
 							placeholder="Tìm mã hóa đơn, phòng, khách hàng..."
 							value={search}
 							onChange={(e) => setSearch(e.target.value)}
-							className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-[13px] font-bold text-slate-700 bg-white focus:outline-none focus:border-amber-400 transition-all shadow-sm"
+							className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-[13px] font-bold text-slate-700 bg-white focus:outline-none focus:border-brand-primary transition-all shadow-sm"
 						/>
 					</div>
 
@@ -128,7 +128,7 @@ export default function InvoicesPage() {
 						</select>
 					</div>
 
-					<button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 px-4 py-2 bg-amber-400 text-slate-900 rounded-lg text-[13px] font-black transition-colors hover:bg-amber-500 shadow-sm ml-auto cursor-pointer">
+					<button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 px-4 py-2 bg-brand-primary text-white rounded-lg text-[13px] font-black transition-colors hover:bg-brand-dark shadow-sm ml-auto cursor-pointer">
 						<Plus className="w-4 h-4 font-bold" /> Hóa đơn
 					</button>
 				</div>
@@ -152,7 +152,7 @@ export default function InvoicesPage() {
 						<table className="w-full text-left">
 							<thead className="bg-[#EDEDED] border-b border-slate-200 sticky top-0 z-10 font-bold uppercase tracking-widest text-[10px] text-slate-500">
 								<tr>
-									<th className="px-5 py-3.5 w-10"><input type="checkbox" className="rounded border-slate-300 text-amber-500 w-4 h-4" /></th>
+									<th className="px-5 py-3.5 w-10"><input type="checkbox" className="rounded border-slate-300 text-brand-primary w-4 h-4" /></th>
 									<th className="px-5 py-3.5">Mã hóa đơn</th>
 									<th className="px-5 py-3.5">Phòng</th>
 									<th className="px-5 py-3.5">Hạn thanh toán</th>
@@ -171,7 +171,7 @@ export default function InvoicesPage() {
 									<tr><td colSpan={10} className="px-6 py-28 text-center text-slate-400 font-bold">Chưa có hóa đơn nào</td></tr>
 								) : invoices.map(inv => (
 									<tr key={inv.id} className="hover:bg-slate-50 transition-colors group">
-										<td className="px-5 py-4"><input type="checkbox" className="rounded border-slate-300 text-amber-500 w-4 h-4" /></td>
+										<td className="px-5 py-4"><input type="checkbox" className="rounded border-slate-300 text-brand-primary w-4 h-4" /></td>
 										<td className="px-5 py-4 font-mono text-blue-600 uppercase">{inv.invoice_code}</td>
 										<td className="px-5 py-4">{inv.room_number}</td>
 										<td className="px-5 py-4 text-slate-400 font-medium">{formatDate(inv.due_date)}</td>
