@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { Building2, PieChart, AlertCircle, FileText } from "lucide-react";
+import { Building2, PieChart, AlertCircle } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { api } from "../lib/api";
 import type {
@@ -16,7 +16,7 @@ import type {
 import { Overview } from "../components/dashboard/Overview";
 import { BuildingList } from "../components/dashboard/BuildingList";
 import { BuildingModal } from "../components/dashboard/BuildingModal";
-import { ContractList } from "../components/dashboard/ContractList";
+
 import { ContractModal } from "../components/dashboard/ContractModal";
 
 type DashboardTab = "overview" | "buildings";
@@ -31,7 +31,6 @@ export default function DashboardPage() {
 	// Data
 	const [stats, setStats] = useState<DashboardStats | null>(null);
 	const [buildings, setBuildings] = useState<BuildingWithRooms[]>([]);
-	const [contracts, setContracts] = useState<ContractWithRoom[]>([]);
 
 	// Modals state
 	const [isBuildingModalOpen, setIsBuildingModalOpen] = useState(false);
@@ -49,15 +48,13 @@ export default function DashboardPage() {
 		setLoading(true);
 		setError(null);
 		try {
-			const [statsRes, buildingsRes, contractsRes] = await Promise.all([
+			const [statsRes, buildingsRes] = await Promise.all([
 				api.get<DashboardStats>("/api/dashboard/stats"),
 				api.get<{ buildings: BuildingWithRooms[] }>("/api/buildings"),
-				api.get<{ contracts: ContractWithRoom[] }>("/api/contracts"),
 			]);
 
 			if (statsRes.data) setStats(statsRes.data);
 			if (buildingsRes.data) setBuildings(buildingsRes.data.buildings);
-			if (contractsRes.data) setContracts(contractsRes.data.contracts);
 		} catch (err: any) {
 			setError("Không thể tải dữ liệu dashboard. Vui lòng thử lại sau.");
 			console.error(err);
@@ -106,12 +103,7 @@ export default function DashboardPage() {
 		}
 	};
 
-	const handleDeleteContract = async (id: string) => {
-		if (!confirm("Xác nhận kết thúc hợp đồng này? Phòng sẽ được chuyển sang trạng thái trống."))
-			return;
-		await api.delete(`/api/contracts/${id}`);
-		loadInitialData();
-	};
+
 
 	if (!canManageBuildings) {
 		return (

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Building2, Tag, User, Home, Wallet, CreditCard, Calendar, FileText, Upload, X } from "lucide-react";
+import { Building2, Tag, User, Home, Wallet, CreditCard, Calendar, FileText, Upload } from "lucide-react";
 import { api } from "../../lib/api";
 
 interface ExpenseFormProps {
@@ -26,7 +26,7 @@ const PAYMENT_METHODS = [
 ];
 
 export default function ExpenseForm({ onCancel, onSubmit }: ExpenseFormProps) {
-    const [loading, setLoading] = useState(false);
+    const [loading] = useState(false);
     const [buildings, setBuildings] = useState<any[]>([]);
     const [customers, setCustomers] = useState<any[]>([]);
     const [units, setUnits] = useState<any[]>([]);
@@ -57,9 +57,10 @@ export default function ExpenseForm({ onCancel, onSubmit }: ExpenseFormProps) {
     const fetchBuildings = async () => {
         try {
             const res = await api.get("/api/buildings");
-            setBuildings(res.data?.buildings || []);
-            if (res.data?.buildings?.length > 0) {
-                setFormData(prev => ({ ...prev, building_id: res.data.buildings[0].id }));
+            const data = res.data as { buildings?: any[] };
+            setBuildings(data?.buildings || []);
+            if (data?.buildings && data.buildings.length > 0) {
+                setFormData(prev => ({ ...prev, building_id: data.buildings![0].id }));
             }
         } catch (err) {
             console.error(err);
@@ -69,7 +70,8 @@ export default function ExpenseForm({ onCancel, onSubmit }: ExpenseFormProps) {
     const fetchCustomers = async (buildingId: string) => {
         try {
             const res = await api.get(`/api/customers?building_id=${buildingId}`);
-            setCustomers(res.data?.customers || []);
+            const data = res.data as { customers?: any[] };
+            setCustomers(data?.customers || []);
         } catch (err) {
             console.error(err);
         }
@@ -78,7 +80,8 @@ export default function ExpenseForm({ onCancel, onSubmit }: ExpenseFormProps) {
     const fetchUnits = async (building_id: string) => {
         try {
             const res = await api.get(`/api/rooms?building_id=${building_id}`);
-            setUnits(res.data?.rooms || []);
+            const data = res.data as { rooms?: any[] };
+            setUnits(data?.rooms || []);
         } catch (err) {
             console.error(err);
         }

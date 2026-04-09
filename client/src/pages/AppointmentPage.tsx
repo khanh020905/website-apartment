@@ -173,7 +173,7 @@ export default function AppointmentPage() {
        <AnimatePresence>
         {isFilterOpen && (
           <>
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsFilterOpen(false)} className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm z-40 transition-opacity" />
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsFilterOpen(false)} className="absolute inset-0 bg-slate-900/20 z-40 transition-opacity" />
             <motion.div initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ type: "spring", damping: 25, stiffness: 200 }} className="absolute top-0 right-0 w-100 h-full bg-white shadow-2xl z-50 flex flex-col border-l border-slate-200">
               <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-white shrink-0">
                 <h2 className="text-lg font-bold text-slate-900">Lọc nâng cao</h2>

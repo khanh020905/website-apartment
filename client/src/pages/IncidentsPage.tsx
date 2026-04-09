@@ -284,7 +284,7 @@ export default function IncidentsPage() {
 							animate={{ opacity: 1 }}
 							exit={{ opacity: 0 }}
 							onClick={() => setIsFilterOpen(false)}
-							className="absolute inset-0 bg-slate-900/20 backdrop-blur-sm z-40 transition-opacity"
+							className="absolute inset-0 bg-slate-900/20 z-40 transition-opacity"
 						/>
 						<motion.div
 							initial={{ x: "100%" }}

@@ -42,7 +42,7 @@ const Modal = ({ isOpen, onClose, title, children, footer, size = "md" }: ModalP
 		<AnimatePresence>
 			{isOpen && (
 				<div
-					className="fixed inset-0 z-60 flex items-center justify-center p-4 sm:p-6 overflow-y-auto bg-slate-900/40 backdrop-blur-[2px] transition-all"
+					className="fixed inset-0 z-60 flex items-center justify-center p-4 sm:p-6 overflow-y-auto bg-slate-900/40 transition-all"
 					onClick={handleBackdropClick}
 				>
 					<motion.div
