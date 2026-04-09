@@ -5,6 +5,9 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useBuilding } from "../contexts/BuildingContext";
 import { api } from "../lib/api";
+import IncomeForm from "./modals/IncomeForm";
+import ExpenseForm from "./modals/ExpenseForm";
+import Modal from "./modals/Modal";
 
 const Navbar = () => {
 	const { user, signOut, role } = useAuth();
@@ -14,6 +17,8 @@ const Navbar = () => {
 	const [notificationCount, setNotificationCount] = useState(0);
 	const [search, setSearch] = useState("");
 	const [isBuildingOpen, setIsBuildingOpen] = useState(false);
+	const [isIncomeModalOpen, setIsIncomeModalOpen] = useState(false);
+	const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
 
 	const dropdownRef = useRef<HTMLDivElement>(null);
 	const buildingRef = useRef<HTMLDivElement>(null);
@@ -174,6 +179,7 @@ const Navbar = () => {
 							<motion.button
 								whileHover={{ scale: 1.02 }}
 								whileTap={{ scale: 0.98 }}
+								onClick={() => setIsIncomeModalOpen(true)}
 								className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-primary text-white rounded-lg text-xs font-bold transition-all cursor-pointer"
 							>
 								<PlusCircle className="w-3.5 h-3.5" />
@@ -182,6 +188,7 @@ const Navbar = () => {
 							<motion.button
 								whileHover={{ scale: 1.02 }}
 								whileTap={{ scale: 0.98 }}
+								onClick={() => setIsExpenseModalOpen(true)}
 								className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-primary text-white rounded-lg text-xs font-bold transition-all cursor-pointer"
 							>
 								<MinusCircle className="w-3.5 h-3.5" />
@@ -263,6 +270,49 @@ const Navbar = () => {
 					</div>
 				)}
 			</div>
+
+			{/* Modals */}
+			<Modal
+				isOpen={isIncomeModalOpen}
+				onClose={() => setIsIncomeModalOpen(false)}
+				title="+ Thu nhập"
+				size="lg"
+			>
+				<IncomeForm
+					onCancel={() => setIsIncomeModalOpen(false)}
+					onSubmit={async (data) => {
+						try {
+							await api.post("/api/transactions", { ...data, type: "income" });
+							setIsIncomeModalOpen(false);
+							alert("Tạo phiếu thu thành công!");
+						} catch (err) {
+							console.error(err);
+							alert("Lỗi khi tạo phiếu thu");
+						}
+					}}
+				/>
+			</Modal>
+
+			<Modal
+				isOpen={isExpenseModalOpen}
+				onClose={() => setIsExpenseModalOpen(false)}
+				title="- Chi phí"
+				size="lg"
+			>
+				<ExpenseForm
+					onCancel={() => setIsExpenseModalOpen(false)}
+					onSubmit={async (data) => {
+						try {
+							await api.post("/api/transactions", { ...data, type: "expense" });
+							setIsExpenseModalOpen(false);
+							alert("Tạo phiếu chi thành công!");
+						} catch (err) {
+							console.error(err);
+							alert("Lỗi khi tạo phiếu chi");
+						}
+					}}
+				/>
+			</Modal>
 		</div>
 	);
 };
