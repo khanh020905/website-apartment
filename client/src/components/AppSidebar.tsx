@@ -212,7 +212,7 @@ const AppSidebar = () => {
 				className="h-full bg-[#1e2329] flex flex-col text-white z-20 relative overflow-hidden shrink-0 border-r border-[#2d3339]"
 			>
 				{/* Logo */}
-				<div className="h-16 flex items-center border-b border-white/5 px-4 shrink-0">
+				<Link to="/" className="h-16 flex items-center border-b border-white/5 px-4 shrink-0 hover:bg-white/5 transition-colors">
 					<div className="w-10 h-10 bg-brand-primary rounded-xl flex items-center justify-center rotate-3 shadow-lg shadow-brand-primary/20 shrink-0">
 						<img
 							src="/logo.jpg"
@@ -233,7 +233,7 @@ const AppSidebar = () => {
 							</motion.span>
 						)}
 					</AnimatePresence>
-				</div>
+				</Link>
 
 				{/* Navigation */}
 				<nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto overflow-x-hidden scrollbar-hide">

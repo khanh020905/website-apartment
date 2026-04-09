@@ -21,6 +21,13 @@ function FocusOnListing({ selectedListing, markerRef }: FocusOnListingProps) {
 	const map = useMap();
 
 	useEffect(() => {
+		// Fix for map not rendering correctly on initial load
+		setTimeout(() => {
+			map.invalidateSize();
+		}, 200);
+	}, [map]);
+
+	useEffect(() => {
 		if (!selectedListing || selectedListing.lat === null || selectedListing.lng === null) return;
 
 		map.flyTo([selectedListing.lat, selectedListing.lng], Math.max(map.getZoom(), 16), {
@@ -47,7 +54,7 @@ const MapView = ({ listings, selectedListingId = null, onSelectListing }: MapVie
 
 	return (
 		<div className="flex-1 h-full relative bg-[#e8f7f8]">
-			<div className="absolute top-4 left-4 z-500 bg-white/95 backdrop-blur border border-cyan-100 rounded-2xl px-4 py-3 shadow-lg shadow-cyan-900/10">
+			<div className="absolute top-4 left-4 z-[500] bg-white/95 backdrop-blur border border-cyan-100 rounded-2xl px-4 py-3 shadow-lg shadow-cyan-900/10">
 				<p className="text-xs font-bold uppercase tracking-wider text-brand-primary">
 					Bản đồ căn hộ
 				</p>
@@ -58,7 +65,7 @@ const MapView = ({ listings, selectedListingId = null, onSelectListing }: MapVie
 			<MapContainer
 				center={[10.79, 106.685]}
 				zoom={14}
-				className="w-full h-full z-0"
+				className="w-full h-full"
 				zoomControl={true}
 				scrollWheelZoom={true}
 				attributionControl={false}

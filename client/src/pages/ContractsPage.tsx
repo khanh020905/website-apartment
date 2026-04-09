@@ -30,7 +30,7 @@ interface Contract {
 	tenant_name: string;
 	start_date: string;
 	end_date: string;
-	status: "active" | "extended" | "settled" | "pending";
+	status: "active" | "expired" | "terminated" | "pending";
 	booking_code: string;
 }
 

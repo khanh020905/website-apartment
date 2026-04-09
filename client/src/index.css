@@ -92,6 +92,8 @@ body {
 /* Leaflet Map Overrides */
 .leaflet-container {
 	font-family: "Inter", sans-serif !important;
+	height: 100% !important;
+	width: 100% !important;
 }
 
 .leaflet-control-zoom {
