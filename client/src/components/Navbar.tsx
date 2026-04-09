@@ -67,110 +67,128 @@ const Navbar = () => {
 			{/* Building Switcher & Search Bar */}
 			<div className="flex-1 flex items-center gap-4 max-w-3xl">
 				{/* Building Switcher */}
-				<div
-					className="relative"
-					ref={buildingRef}
-				>
-					<button
-						onClick={() => setIsBuildingOpen(!isBuildingOpen)}
-						className={`flex items-center gap-3 px-3 py-1.5 bg-[#f8f9fa] border border-slate-200 rounded-lg text-sm font-semibold transition-all cursor-pointer min-w-40 ${
-							isBuildingOpen ? "border-brand-primary shadow-sm" : "hover:border-slate-300"
-						}`}
+				{role !== "user" && (
+					<div
+						className="relative"
+						ref={buildingRef}
 					>
-						<span className="text-slate-700 truncate">{selectedBuildingName}</span>
-						<ChevronDown
-							className={`w-3.5 h-3.5 ml-auto text-slate-400 transition-transform ${isBuildingOpen ? "rotate-180 text-brand-primary" : ""}`}
-						/>
-					</button>
+						<button
+							onClick={() => setIsBuildingOpen(!isBuildingOpen)}
+							className={`flex items-center gap-3 px-3 py-1.5 bg-[#f8f9fa] border border-slate-200 rounded-lg text-sm font-semibold transition-all cursor-pointer min-w-40 ${
+								isBuildingOpen ? "border-brand-primary shadow-sm" : "hover:border-slate-300"
+							}`}
+						>
+							<span className="text-slate-700 truncate">{selectedBuildingName}</span>
+							<ChevronDown
+								className={`w-3.5 h-3.5 ml-auto text-slate-400 transition-transform ${isBuildingOpen ? "rotate-180 text-brand-primary" : ""}`}
+							/>
+						</button>
 
-					<AnimatePresence>
-						{isBuildingOpen && (
-							<motion.div
-								initial={{ opacity: 0, y: 8, scale: 0.95 }}
-								animate={{ opacity: 1, y: 0, scale: 1 }}
-								exit={{ opacity: 0, y: 8, scale: 0.95 }}
-								transition={{ duration: 0.15 }}
-								className="absolute left-0 top-[calc(100%+8px)] w-65 bg-white rounded-2xl shadow-2xl shadow-black/10 border border-slate-100 overflow-hidden z-50 py-1"
-							>
-								<div className="px-3 py-2 border-b border-slate-50">
-									<div className="relative">
-										<input
-											type="text"
-											placeholder="Tìm kiếm tòa nhà..."
-											className="w-full pl-9 pr-3 py-1.5 bg-slate-50 border-none rounded-lg text-xs font-bold focus:ring-0"
-										/>
-										<Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+						<AnimatePresence>
+							{isBuildingOpen && (
+								<motion.div
+									initial={{ opacity: 0, y: 8, scale: 0.95 }}
+									animate={{ opacity: 1, y: 0, scale: 1 }}
+									exit={{ opacity: 0, y: 8, scale: 0.95 }}
+									transition={{ duration: 0.15 }}
+									className="absolute left-0 top-[calc(100%+8px)] w-65 bg-white rounded-2xl shadow-2xl shadow-black/10 border border-slate-100 overflow-hidden z-50 py-1"
+								>
+									<div className="px-3 py-2 border-b border-slate-50">
+										<div className="relative">
+											<input
+												type="text"
+												placeholder="Tìm kiếm tòa nhà..."
+												className="w-full pl-9 pr-3 py-1.5 bg-slate-50 border-none rounded-lg text-xs font-bold focus:ring-0"
+											/>
+											<Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+										</div>
 									</div>
-								</div>
-								<div className="max-h-75 overflow-y-auto py-1 scrollbar-hide">
-									<button
-										onClick={() => {
-											setSelectedBuildingId(null);
-											setIsBuildingOpen(false);
-										}}
-										className={`w-full text-left px-4 py-2.5 text-sm font-bold transition-colors ${
-											selectedBuildingId === null ?
-												"bg-brand-bg text-brand-primary"
-											:	"text-slate-600 hover:bg-slate-50"
-										}`}
-									>
-										Mọi toà nhà
-									</button>
-									{buildings.map((b) => (
+									<div className="max-h-75 overflow-y-auto py-1 scrollbar-hide">
 										<button
-											key={b.id}
 											onClick={() => {
-												setSelectedBuildingId(b.id);
+												setSelectedBuildingId(null);
 												setIsBuildingOpen(false);
 											}}
 											className={`w-full text-left px-4 py-2.5 text-sm font-bold transition-colors ${
-												selectedBuildingId === b.id ?
+												selectedBuildingId === null ?
 													"bg-brand-bg text-brand-primary"
 												:	"text-slate-600 hover:bg-slate-50"
 											}`}
 										>
-											{b.name}
+											Mọi toà nhà
 										</button>
-									))}
-								</div>
-							</motion.div>
-						)}
-					</AnimatePresence>
-				</div>
+										{buildings.map((b) => (
+											<button
+												key={b.id}
+												onClick={() => {
+													setSelectedBuildingId(b.id);
+													setIsBuildingOpen(false);
+												}}
+												className={`w-full text-left px-4 py-2.5 text-sm font-bold transition-colors ${
+													selectedBuildingId === b.id ?
+														"bg-brand-bg text-brand-primary"
+													:	"text-slate-600 hover:bg-slate-50"
+												}`}
+											>
+												{b.name}
+											</button>
+										))}
+									</div>
+								</motion.div>
+							)}
+						</AnimatePresence>
+					</div>
+				)}
 
 				{/* Search Bar */}
-				<div className="relative flex-1 group">
-					<input
-						type="text"
-						placeholder="Tìm kiếm khu vực, dự án, tên phòng..."
-						value={search}
-						onChange={(e) => setSearch(e.target.value)}
-						className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-teal-600/5 focus:border-teal-600/30 transition-all"
-					/>
-					<Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 group-focus-within:text-teal-600 transition-colors" />
-				</div>
+				{role !== "user" && (
+					<div className="relative flex-1 group">
+						<input
+							type="text"
+							placeholder="Tìm kiếm khu vực, dự án, tên phòng..."
+							value={search}
+							onChange={(e) => setSearch(e.target.value)}
+							className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-4 focus:ring-teal-600/5 focus:border-teal-600/30 transition-all"
+						/>
+						<Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 group-focus-within:text-teal-600 transition-colors" />
+					</div>
+				)}
 			</div>
 
 			{/* Right Actions */}
 			<div className="flex items-center gap-6">
-				{/* Income/Expense Buttons (Mock) */}
-				<div className="hidden md:flex items-center gap-2 pr-4 border-r border-slate-100">
-					<motion.button
-						whileHover={{ scale: 1.02 }}
-						whileTap={{ scale: 0.98 }}
-						className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-primary text-white rounded-lg text-xs font-bold transition-all cursor-pointer"
-					>
-						<PlusCircle className="w-3.5 h-3.5" />
-						<span>Thu nhập</span>
-					</motion.button>
-					<motion.button
-						whileHover={{ scale: 1.02 }}
-						whileTap={{ scale: 0.98 }}
-						className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-primary text-white rounded-lg text-xs font-bold transition-all cursor-pointer"
-					>
-						<MinusCircle className="w-3.5 h-3.5" />
-						<span>Chi phí</span>
-					</motion.button>
+				{/* Action Buttons */}
+				<div className="hidden lg:flex items-center gap-2 pr-4 border-r border-slate-100">
+					<Link to="/create-listing">
+						<motion.button
+							whileHover={{ scale: 1.05 }}
+							whileTap={{ scale: 0.95 }}
+							className="flex items-center gap-2 px-5 py-2.5 bg-brand-dark text-white rounded-xl text-sm font-black transition-all cursor-pointer shadow-lg shadow-brand-dark/20 hover:shadow-brand-dark/40"
+						>
+							<PlusCircle className="w-5 h-5" />
+							<span>Đăng tin</span>
+						</motion.button>
+					</Link>
+					{role !== "user" && (
+						<>
+							<motion.button
+								whileHover={{ scale: 1.02 }}
+								whileTap={{ scale: 0.98 }}
+								className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-primary text-white rounded-lg text-xs font-bold transition-all cursor-pointer"
+							>
+								<PlusCircle className="w-3.5 h-3.5" />
+								<span>Thu nhập</span>
+							</motion.button>
+							<motion.button
+								whileHover={{ scale: 1.02 }}
+								whileTap={{ scale: 0.98 }}
+								className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-primary text-white rounded-lg text-xs font-bold transition-all cursor-pointer"
+							>
+								<MinusCircle className="w-3.5 h-3.5" />
+								<span>Chi phí</span>
+							</motion.button>
+						</>
+					)}
 				</div>
 
 				{/* Icons */}

@@ -19,7 +19,7 @@ import { BuildingModal } from "../components/dashboard/BuildingModal";
 import { ContractList } from "../components/dashboard/ContractList";
 import { ContractModal } from "../components/dashboard/ContractModal";
 
-type DashboardTab = "overview" | "buildings" | "contracts";
+type DashboardTab = "overview" | "buildings";
 
 export default function DashboardPage() {
 	const navigate = useNavigate();
@@ -146,7 +146,7 @@ export default function DashboardPage() {
 					</div>
 
 					<div className="flex items-center gap-2 bg-white p-2 rounded-3xl shadow-sm border border-slate-100">
-						{(["overview", "buildings", "contracts"] as const).map((tab) => (
+						{(["overview", "buildings"] as const).map((tab) => (
 							<button
 								key={tab}
 								onClick={() => setActiveTab(tab)}
@@ -158,12 +158,9 @@ export default function DashboardPage() {
 							>
 								{tab === "overview" && <PieChart className="w-4 h-4" />}
 								{tab === "buildings" && <Building2 className="w-4 h-4" />}
-								{tab === "contracts" && <FileText className="w-4 h-4" />}
 								{tab === "overview" ?
 									"Tổng quan"
-								: tab === "buildings" ?
-									"Tòa nhà"
-								:	"Hợp đồng"}
+								:	"Tòa nhà"}
 							</button>
 						))}
 					</div>
@@ -207,16 +204,6 @@ export default function DashboardPage() {
 							/>
 						)}
 
-						{activeTab === "contracts" && (
-							<ContractList
-								contracts={contracts}
-								onEdit={(c) => {
-									setEditingContract(c);
-									setIsContractModalOpen(true);
-								}}
-								onDelete={handleDeleteContract}
-							/>
-						)}
 					</motion.div>
 				</AnimatePresence>
 
