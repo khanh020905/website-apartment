@@ -125,7 +125,7 @@ const PricingPage = () => {
 						animate={{ opacity: 1, y: 0 }}
 						className="text-4xl md:text-5xl font-black text-slate-900 mb-4 tracking-tight"
 					>
-						Bảng so sánh tính năng <span className="text-teal-600">HomeSpot</span>
+						Bảng so sánh tính năng <span className="text-brand-primary">HomeSpot</span>
 					</motion.h1>
 					<motion.p
 						initial={{ opacity: 0, y: -10 }}
@@ -163,10 +163,8 @@ const PricingPage = () => {
 								transition={{ delay: idx * 0.1 + 0.2 }}
 								className={`relative bg-white rounded-[40px] p-8 transition-all duration-300 flex flex-col ${
 									isCurrentPlan ?
-										plan.color === "teal" ?
-											"border-4 border-teal-600 shadow-2xl shadow-teal-900/10 scale-105 z-10"
-										: plan.color === "indigo" ?
-											"border-4 border-indigo-600 shadow-2xl shadow-indigo-900/10 scale-105 z-10"
+										plan.color === "teal" || plan.color === "indigo" ?
+											"border-4 border-brand-primary shadow-2xl shadow-brand-primary/10 scale-105 z-10"
 										:	"border-4 border-slate-900 shadow-2xl shadow-slate-900/10 scale-105 z-10"
 									:	"border-2 border-slate-100 hover:border-slate-300 hover:shadow-xl hover:shadow-slate-900/3"
 								}`}
@@ -213,7 +211,7 @@ const PricingPage = () => {
 												className="flex items-start gap-3"
 											>
 												<div
-													className={`mt-0.5 rounded-full p-0.5 ${val === "Khong" ? "text-slate-300" : "text-teal-600 bg-teal-50"}`}
+													className={`mt-0.5 rounded-full p-0.5 ${val === "Khong" ? "text-slate-300" : "text-brand-primary bg-brand-bg uppercase"}`}
 												>
 													{val === "Khong" ?
 														<X size={14} />
@@ -250,10 +248,8 @@ const PricingPage = () => {
 									className={`w-full py-4 rounded-2xl font-black text-sm transition-all duration-300 flex items-center justify-center gap-2 group ${
 										isCurrentPlan ?
 											"bg-slate-100 text-slate-400 border-2 border-slate-200 cursor-default"
-										: plan.color === "teal" ?
-											"bg-teal-600 text-white hover:bg-teal-700 shadow-xl shadow-teal-900/20 active:scale-95"
-										: plan.color === "indigo" ?
-											"bg-indigo-600 text-white hover:bg-indigo-700 shadow-xl shadow-indigo-900/20 active:scale-95"
+										: plan.color === "teal" || plan.color === "indigo" ?
+											"bg-brand-primary text-white hover:bg-brand-dark shadow-xl shadow-brand-primary/20 active:scale-95"
 										:	"bg-white text-slate-900 border-2 border-slate-200 hover:border-slate-300 active:scale-95"
 									}`}
 								>

@@ -163,6 +163,12 @@ const AppSidebar = () => {
 			path: "/contact",
 			matchPaths: ["/contact"],
 		},
+		{
+			icon: Shield,
+			label: "Gói dịch vụ",
+			path: "/pricing",
+			matchPaths: ["/pricing"],
+		},
 	];
 
 	const getIsActive = (item: MenuItem) => {

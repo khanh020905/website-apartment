@@ -13,7 +13,6 @@ import {
 	CheckCircle2,
 	Clock,
 	LogOut,
-	RefreshCcw,
 	Settings,
 	Settings2,
 	MoreHorizontal,
@@ -21,6 +20,7 @@ import {
 } from "lucide-react";
 import Modal from "../components/modals/Modal";
 import ContractForm from "../components/modals/ContractForm";
+import { api } from "../lib/api";
 
 interface Contract {
 	id: string;
@@ -37,8 +37,8 @@ interface Contract {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const STATUS_MAP: Record<Contract["status"], { label: string; color: string; icon: any }> = {
 	active: { label: "Đang hiệu lực", color: "bg-emerald-100 text-emerald-700", icon: CheckCircle2 },
-	extended: { label: "Đã gia hạn", color: "bg-blue-100 text-blue-700", icon: RefreshCcw },
-	settled: { label: "Đã thanh lý", color: "bg-slate-100 text-slate-500", icon: LogOut },
+	expired: { label: "Đã hết hạn", color: "bg-rose-100 text-rose-700", icon: Clock },
+	terminated: { label: "Đã thanh lý", color: "bg-slate-100 text-slate-500", icon: LogOut },
 	pending: { label: "Chờ xác nhận", color: "bg-brand-bg text-brand-ink", icon: Clock },
 };
 
@@ -46,55 +46,94 @@ export default function ContractsPage() {
 	const [loading, setLoading] = useState(true);
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [isFilterOpen, setIsFilterOpen] = useState(false);
-
-	const [contracts] = useState<Contract[]>([
-		{
-			id: "1",
-			contract_number: "HD-2024-001",
-			contract_name: "Hợp đồng thuê phòng 201",
-			room_number: "201",
-			tenant_name: "Nguyễn Văn An",
-			start_date: "2024-04-01",
-			end_date: "2025-04-01",
-			status: "active",
-			booking_code: "BK9921",
-		},
-		{
-			id: "2",
-			contract_number: "HD-2024-002",
-			contract_name: "Hợp đồng thuê phòng 305",
-			room_number: "305",
-			tenant_name: "Trần Thị Bình",
-			start_date: "2024-03-15",
-			end_date: "2024-09-15",
-			status: "extended",
-			booking_code: "BK8842",
-		},
-	]);
+	const [contracts, setContracts] = useState<Contract[]>([]);
+	const [customersForContract, setCustomersForContract] = useState<any[]>([]);
 	const [search, setSearch] = useState("");
 	const [filterStatus, setFilterStatus] = useState("");
 
+	const fetchContracts = async () => {
+		setLoading(true);
+		const [{ data: contractData }, { data: customerData }] = await Promise.all([
+			api.get<{ contracts: any[] }>("/api/contracts"),
+			api.get<{ customers: any[] }>("/api/customers")
+		]);
+
+		if (contractData) {
+			const formatted: Contract[] = contractData.contracts.map(c => ({
+				id: c.id,
+				contract_number: c.contract_number || `HD-${c.id.substring(0, 4)}`,
+				contract_name: c.contract_name || `HĐ Thuê phòng ${c.rooms?.room_number}`,
+				room_number: c.rooms?.room_number || "N/A",
+				tenant_name: c.tenant_name,
+				start_date: new Date(c.start_date).toLocaleDateString("vi-VN"),
+				end_date: c.end_date ? new Date(c.end_date).toLocaleDateString("vi-VN") : "Bền vững",
+				status: c.status,
+				booking_code: c.booking_code || "---"
+			}));
+			setContracts(formatted);
+		}
+		if (customerData) {
+			setCustomersForContract(customerData.customers);
+		}
+		setLoading(false);
+	};
+
 	useEffect(() => {
-		const timer = setTimeout(() => setLoading(false), 500);
-		return () => clearTimeout(timer);
+		fetchContracts();
 	}, []);
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const handleCreateContract = (data: any) => {
-		console.log("Creating contract:", data);
+	const handleCreateContract = async (formData: any) => {
+		setLoading(true);
+		
+		// If a customer was selected, we should ideally use their details.
+		// For now, if the form didn't capture name/phone/email separately, 
+		// we'll use defaults or the ones from the selected customer.
+		const selectedCustomer = customersForContract.find(c => c.id === formData.customer_id);
+
+		const { error } = await api.post("/api/contracts", {
+			room_id: formData.room_id,
+			tenant_name: selectedCustomer?.tenant_name || formData.contractName.split(' - ')[1] || "Khách mới", 
+			tenant_phone: selectedCustomer?.tenant_phone || "",
+			tenant_email: selectedCustomer?.tenant_email || "",
+			start_date: formData.startDate,
+			end_date: formData.endDate,
+			rent_amount: formData.rent_amount || 0,
+			deposit_amount: formData.deposit_amount || 0,
+			notes: formData.notes
+		});
+
+		if (error) {
+			alert("Lỗi: " + error);
+			setLoading(false);
+			return;
+		}
+
 		setIsModalOpen(false);
+		fetchContracts();
 	};
 
 	const STATS = [
 		{
 			label: "Đang hiệu lực",
-			value: 124,
+			value: contracts.filter(c => c.status === "active").length,
 			icon: CheckCircle2,
 			color: "text-emerald-500",
 			bg: "bg-emerald-50",
 		},
-		{ label: "Chờ xác nhận", value: 8, icon: Clock, color: "text-brand-primary", bg: "bg-brand-bg" },
-		{ label: "Đã thanh lý", value: 45, icon: LogOut, color: "text-slate-400", bg: "bg-slate-50" },
+		{ 
+			label: "Chờ xác nhận", 
+			value: contracts.filter(c => c.status === "pending").length, 
+			icon: Clock, 
+			color: "text-brand-primary", 
+			bg: "bg-brand-bg" 
+		},
+		{ 
+			label: "Đã thanh lý", 
+			value: contracts.filter(c => c.status === "terminated").length, 
+			icon: LogOut, 
+			color: "text-slate-400", 
+			bg: "bg-slate-50" 
+		},
 	];
 
 	return (

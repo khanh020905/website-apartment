@@ -35,6 +35,8 @@ const ContractForm = ({ onSubmit, onCancel }: ContractFormProps) => {
 		notes: "",
 		isSigned: false,
 		manager: "Lê Trần Bảo Phúc",
+		rent_amount: 0,
+		deposit_amount: 0,
 	});
 
 	useEffect(() => {
@@ -231,6 +233,7 @@ const ContractForm = ({ onSubmit, onCancel }: ContractFormProps) => {
 				</div>
 			</div>
 
+
 			{/* Customer Section */}
 			<div className="space-y-2">
 				<label className="text-[11px] font-black uppercase tracking-wider text-slate-400 flex items-center gap-2">
@@ -249,6 +252,35 @@ const ContractForm = ({ onSubmit, onCancel }: ContractFormProps) => {
 						<option key={c.id} value={c.id}>{c.tenant_name}</option>
 					))}
 				</select>
+			</div>
+
+			{/* Price Section */}
+			<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+				<div className="space-y-2">
+					<label className="text-[11px] font-black uppercase tracking-wider text-slate-400">
+						Giá thuê (VNĐ/Tháng) <span className="text-rose-500">*</span>
+					</label>
+					<input
+						type="number"
+						name="rent_amount"
+						value={formData.rent_amount}
+						onChange={handleChange}
+						required
+						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary transition-all outline-none"
+					/>
+				</div>
+				<div className="space-y-2">
+					<label className="text-[11px] font-black uppercase tracking-wider text-slate-400">
+						Tiền cọc (VNĐ)
+					</label>
+					<input
+						type="number"
+						name="deposit_amount"
+						value={formData.deposit_amount}
+						onChange={handleChange}
+						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary transition-all outline-none"
+					/>
+				</div>
 			</div>
 
 			<div className="space-y-2">
