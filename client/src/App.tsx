@@ -14,7 +14,6 @@ import ContactPage from "./pages/ContactPage";
 
 import ListingDetailPage from "./pages/ListingDetailPage";
 import CreateListingPage from "./pages/CreateListingPage";
-import CreateBuildingPage from "./pages/CreateBuildingPage";
 import MyListingsPage from "./pages/MyListingsPage";
 import DashboardPage from "./pages/DashboardPage";
 import CustomerPage from "./pages/CustomerPage";
@@ -240,14 +239,6 @@ function App() {
 													/>
 
 													{/* Authenticated routes */}
-													<Route
-														path="/create-building"
-														element={
-															<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-																<CreateBuildingPage />
-															</ProtectedRoute>
-														}
-													/>
 													<Route
 														path="/create-listing"
 														element={

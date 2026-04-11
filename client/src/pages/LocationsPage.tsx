@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Plus, Search, MapPin, Building2, Settings, Edit2, Trash2, X, Home, Map as MapIcon, Building, Bed, Briefcase, Zap, Droplet, Bike, ShieldCheck, Camera, Wind, Waves, User, Clock, Monitor, Heart, Shield, Trash, ChevronLeft, Navigation, Wifi, Car, Flame, ArrowUpCircle, Box, ChevronDown } from "lucide-react";
+import { Plus, Search, MapPin, Building2, Settings, Edit2, Trash2, X, Home, Map as MapIcon, Building, Bed, Briefcase, Zap, Droplet, Bike, ShieldCheck, Camera, Wind, Waves, User, Clock, Monitor, Heart, Shield, Trash, ChevronLeft, Navigation, Wifi, Car, Flame, ArrowUpCircle, Box, ChevronDown, QrCode } from "lucide-react";
+import { QRCodeCanvas } from "qrcode.react";
 import Modal from "../components/modals/Modal";
 import { api } from "../lib/api";
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from "react-leaflet";
@@ -244,6 +245,9 @@ export default function LocationsPage() {
   const [floorsList, setFloorsList] = useState<{ id: string; name: string; numRooms: number }[]>([]);
   const [roomsList, setRoomsList] = useState<{ id: string; name: string; floorId: string }[]>([]);
   const [isViewMode, setIsViewMode] = useState(false);
+  const [isQRModalOpen, setIsQRModalOpen] = useState(false);
+  const [currentQRCode, setCurrentQRCode] = useState<string | null>(null);
+  const [currentQRBuilding, setCurrentQRBuilding] = useState<any>(null);
 
   const rentalTypes = [
     { id: 'can_ho_dich_vu', label: 'Căn hộ dịch vụ', icon: Building2 },
@@ -489,6 +493,26 @@ export default function LocationsPage() {
       setIsRoomSetupModalOpen(true);
     } else {
       alert("Tòa nhà này chưa có dữ liệu sơ đồ phòng.");
+    }
+  };
+
+  const handleShowQR = async (b: any) => {
+    setCurrentQRBuilding(b);
+    try {
+      const { data, error } = await api.get<{ qr: any; url: string }>(`/api/qr/building/${b.id}`);
+      
+      if (error || !data.qr) {
+        // Generate new if not exists
+        const { data: genData, error: genError } = await api.post<{ qr: any; url: string }>("/api/qr/generate", { building_id: b.id });
+        if (genError) throw new Error(genError);
+        setCurrentQRCode(genData.qr.code);
+      } else {
+        setCurrentQRCode(data.qr.code);
+      }
+      setIsQRModalOpen(true);
+    } catch (err: any) {
+      console.error(err);
+      alert("Không thể tạo mã QR cho tòa nhà này.");
     }
   };
 
@@ -877,10 +901,17 @@ export default function LocationsPage() {
                         <div className="flex items-center justify-end gap-2">
                          <button 
                              onClick={() => handleViewDiagram(loc)}
-                             className="flex items-center justify-center gap-2 px-6 py-2 bg-brand-primary text-white rounded-xl text-[12px] font-bold uppercase tracking-wider hover:bg-brand-dark transition-all shadow-sm whitespace-nowrap min-w-[120px]"
+                             className="flex items-center justify-center gap-2 px-6 py-2 bg-brand-primary text-white rounded-xl text-[12px] font-bold uppercase tracking-wider hover:bg-brand-dark transition-all shadow-sm whitespace-nowrap"
                          >
                             <MapIcon className="w-3.5 h-3.5" />
                             Sơ đồ
+                         </button>
+                         <button 
+                             onClick={() => handleShowQR(loc)}
+                             className="p-2 text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all tooltip"
+                             title="Mã QR"
+                         >
+                            <QrCode className="w-5 h-5" />
                          </button>
                            <button 
                              onClick={() => openEditModal(loc)}
@@ -1843,6 +1874,60 @@ export default function LocationsPage() {
         </div>
       </Modal>
 
+      {/* QR Display Modal */}
+      <Modal
+        isOpen={isQRModalOpen}
+        onClose={() => setIsQRModalOpen(false)}
+        title="Mã QR Tòa nhà"
+        size="md"
+      >
+        <div className="flex flex-col items-center p-8 text-center space-y-6">
+          <div className="bg-white p-6 rounded-[40px] shadow-2xl shadow-indigo-100 border-4 border-slate-50 relative overflow-hidden">
+             <div className="absolute inset-0 bg-indigo-50/30 blur-2xl -z-10" />
+             <QRCodeCanvas 
+                value={`${window.location.origin}/qr/${currentQRCode}`}
+                size={220}
+                level="H"
+                includeMargin
+                imageSettings={{
+                  src: "/logo.jpg",
+                  x: undefined,
+                  y: undefined,
+                  height: 48,
+                  width: 48,
+                  excavate: true,
+                }}
+             />
+          </div>
+          
+          <div className="space-y-2">
+            <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">{currentQRBuilding?.name}</h3>
+            <p className="text-sm font-bold text-slate-400 max-w-xs">{currentQRBuilding?.address}</p>
+          </div>
+
+          <div className="w-full pt-4 space-y-3">
+             <div className="bg-emerald-50 text-emerald-700 px-6 py-4 rounded-3xl text-[13px] font-black uppercase tracking-widest border border-emerald-100 italic">
+                Khách quét mã này để xem trạng thái phòng trống thời gian thực
+             </div>
+
+             <button 
+                onClick={() => {
+                   const canvas = document.querySelector('canvas');
+                   if (canvas) {
+                      const url = canvas.toDataURL("image/png");
+                      const link = document.createElement('a');
+                      link.download = `QR_${currentQRBuilding?.name}.png`;
+                      link.href = url;
+                      link.click();
+                   }
+                }}
+                className="w-full py-4 bg-slate-900 text-white rounded-[20px] text-[16px] font-bold hover:bg-slate-800 transition-all shadow-lg cursor-pointer"
+             >
+                Tải mã QR
+             </button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }
