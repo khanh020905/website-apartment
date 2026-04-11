@@ -9,6 +9,8 @@ interface ModalProps {
 	children: ReactNode;
 	footer?: ReactNode;
 	size?: "sm" | "md" | "lg" | "xl" | "2xl";
+	hideHeader?: boolean;
+	noPadding?: boolean;
 }
 
 const sizeClasses = {
@@ -19,7 +21,7 @@ const sizeClasses = {
 	"2xl": "max-w-5xl",
 };
 
-const Modal = ({ isOpen, onClose, title, children, footer, size = "md" }: ModalProps) => {
+const Modal = ({ isOpen, onClose, title, children, footer, size = "md", hideHeader = false, noPadding = false }: ModalProps) => {
 	// Prevent scrolling when modal is open
 	useEffect(() => {
 		if (isOpen) {
@@ -53,18 +55,20 @@ const Modal = ({ isOpen, onClose, title, children, footer, size = "md" }: ModalP
 						className={`w-full ${sizeClasses[size]} bg-white rounded-3xl shadow-2xl relative flex flex-col max-h-[90vh] border border-slate-100 overflow-hidden`}
 					>
 						{/* Header */}
-						<div className="px-8 py-5 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white">
-							<h2 className="text-xl font-bold text-slate-900 tracking-tight">{title}</h2>
-							<button
-								onClick={onClose}
-								className="p-2 hover:bg-slate-100 rounded-xl transition-all text-slate-400 hover:text-slate-600 active:scale-95 cursor-pointer"
-							>
-								<X className="w-5 h-5" />
-							</button>
-						</div>
+						{!hideHeader && (
+							<div className="px-8 py-5 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white">
+								<h2 className="text-xl font-bold text-slate-900 tracking-tight">{title}</h2>
+								<button
+									onClick={onClose}
+									className="p-2 hover:bg-slate-100 rounded-xl transition-all text-slate-400 hover:text-slate-600 active:scale-95 cursor-pointer"
+								>
+									<X className="w-5 h-5" />
+								</button>
+							</div>
+						)}
 
 						{/* Content */}
-						<div className="flex-1 overflow-y-auto px-8 py-6 custom-scrollbar">{children}</div>
+						<div className={`flex-1 overflow-y-auto custom-scrollbar ${noPadding ? 'p-0' : 'px-8 py-6'}`}>{children}</div>
 
 						{/* Footer */}
 						{footer && (
