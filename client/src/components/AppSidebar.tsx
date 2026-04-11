@@ -149,7 +149,7 @@ const AppSidebar = () => {
 			],
 			subItems: [
 				{ icon: Info, label: "Thông tin chung", path: "/business-information" },
-
+				{ icon: MapPin, label: "Tòa nhà", path: "/locations" },
 				{ icon: Users, label: "Nhân viên", path: "/users" },
 				{ icon: Shield, label: "Vai trò", path: "/roles" },
 				{ icon: Plug, label: "Tích hợp", path: "/integrations" },

@@ -41,7 +41,8 @@ router.post('/', authenticate, requireRole('landlord', 'broker', 'admin'), async
     name, address, ward, district, city, lat, lng, 
     floors, description, images, phone, status, 
     services, website, rental_type, structure_type, 
-    amenities, metered_services, fixed_services 
+    amenities, metered_services, fixed_services,
+    rooms, structure_data
   } = req.body;
 
   if (!name || !address) {
@@ -72,11 +73,33 @@ router.post('/', authenticate, requireRole('landlord', 'broker', 'admin'), async
       amenities: amenities || [],
       metered_services: metered_services || [],
       fixed_services: fixed_services || [],
+      structure_data: structure_data || {}
     })
     .select()
     .single();
 
   if (error) { res.status(400).json({ error: error.message }); return; }
+
+  // Handle room creation if building created successfully
+  if (rooms && Array.isArray(rooms) && rooms.length > 0) {
+    const roomsToInsert = rooms.map((r: any) => ({
+      building_id: data.id,
+      room_number: r.name,
+      floor_name: r.floor_name || "Trệt",
+      floor: parseInt(r.floor_name?.match(/\d+/)?.[0] || "1", 10),
+      status: 'available'
+    }));
+
+    const { error: roomsError } = await getSupabase()
+      .from('rooms')
+      .insert(roomsToInsert);
+
+    if (roomsError) {
+      console.error('Error creating rooms:', roomsError);
+      // We don't fail the whole request but maybe log it
+    }
+  }
+
   res.status(201).json({ building: data });
 });
 
@@ -101,7 +124,8 @@ router.put('/:id', authenticate, async (req: AuthRequest, res: Response) => {
     name, address, ward, district, city, lat, lng, 
     floors, description, images, phone, status, 
     services, website, rental_type, structure_type, 
-    amenities, metered_services, fixed_services 
+    amenities, metered_services, fixed_services,
+    rooms, structure_data
   } = req.body;
 
   const updates: Record<string, unknown> = {};
@@ -124,6 +148,7 @@ router.put('/:id', authenticate, async (req: AuthRequest, res: Response) => {
   if (amenities !== undefined) updates.amenities = amenities;
   if (metered_services !== undefined) updates.metered_services = metered_services;
   if (fixed_services !== undefined) updates.fixed_services = fixed_services;
+  if (structure_data !== undefined) updates.structure_data = structure_data;
 
   const { data, error } = await getSupabase()
     .from('buildings')
@@ -133,6 +158,26 @@ router.put('/:id', authenticate, async (req: AuthRequest, res: Response) => {
     .single();
 
   if (error) { res.status(400).json({ error: error.message }); return; }
+
+  // Sync rooms if provided
+  if (rooms && Array.isArray(rooms)) {
+    // Basic sync: Upsert incoming rooms
+    const roomsToUpsert = rooms.map((r: any) => ({
+      building_id: id,
+      room_number: r.name,
+      floor_name: r.floor_name || "Trệt",
+      floor: parseInt(r.floor_name?.match(/\d+/)?.[0] || "1", 10),
+    }));
+
+    const { error: roomsError } = await getSupabase()
+      .from('rooms')
+      .upsert(roomsToUpsert, { onConflict: 'building_id,room_number' });
+
+    if (roomsError) {
+      console.error('Error syncing rooms:', roomsError);
+    }
+  }
+
   res.json({ building: data });
 });
 
