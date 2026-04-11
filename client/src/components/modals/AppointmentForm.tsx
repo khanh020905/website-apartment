@@ -12,16 +12,27 @@ import {
 	UserCheck,
 } from "lucide-react";
 
+export interface AppointmentFormData {
+	customerName: string;
+	email: string;
+	phone: string;
+	date: string;
+	time: string;
+	buildingId: string;
+	room: string;
+	assignedTo: string;
+	message: string;
+}
+
 interface AppointmentFormProps {
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	onSubmit: (data: any) => void;
+	onSubmit: (data: AppointmentFormData) => void;
 	onCancel: () => void;
 }
 
 const AppointmentForm = ({ onSubmit, onCancel }: AppointmentFormProps) => {
 	const { buildings, selectedBuildingId } = useBuilding();
 	const [rooms, setRooms] = useState<{ id: string; room_number: string }[]>([]);
-	const [formData, setFormData] = useState({
+	const [formData, setFormData] = useState<AppointmentFormData>({
 		customerName: "",
 		email: "",
 		phone: "",
@@ -42,18 +53,29 @@ const AppointmentForm = ({ onSubmit, onCancel }: AppointmentFormProps) => {
 					}
 				})
 				.catch(console.error);
-		} else {
-			setRooms([]);
 		}
 	}, [formData.buildingId]);
+
+	const availableRooms = formData.buildingId === "all" ? [] : rooms;
 
 	const handleChange = (
 		e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
 	) => {
 		const { name, value } = e.target;
+		const fieldName = name as keyof AppointmentFormData;
+
+		if (fieldName === "buildingId") {
+			setFormData((prev) => ({
+				...prev,
+				buildingId: value,
+				room: "",
+			}));
+			return;
+		}
+
 		setFormData((prev) => ({
 			...prev,
-			[name]: value,
+			[fieldName]: value,
 		}));
 	};
 
@@ -174,7 +196,7 @@ const AppointmentForm = ({ onSubmit, onCancel }: AppointmentFormProps) => {
 							className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary transition-all outline-none appearance-none"
 						>
 							<option value="">Phòng (Không bắt buộc)</option>
-							{rooms.map((r) => (
+							{availableRooms.map((r) => (
 								<option key={r.id} value={r.id}>
 									{r.room_number}
 								</option>

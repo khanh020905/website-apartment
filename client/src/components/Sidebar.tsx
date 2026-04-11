@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { motion } from "framer-motion";
+import type { LucideIcon } from "lucide-react";
 import PropertyCard from "./PropertyCard";
 import type { Listing, Amenity } from "../../../shared/types";
 import {
@@ -36,6 +37,36 @@ interface SidebarProps {
 	onSelectListing?: (listingId: string) => void;
 }
 
+interface AppliedOtherFilters {
+	furniture?: Listing["furniture"];
+	bedrooms?: number;
+}
+
+type FilterTag =
+	| {
+			label: string;
+			icon: LucideIcon;
+			type: "amenity";
+			value: number | string;
+	  }
+	| {
+			label: string;
+			icon: LucideIcon;
+			type: "furniture";
+			value: Listing["furniture"];
+	  }
+	| {
+			label: string;
+			icon: LucideIcon;
+			type: "bedrooms";
+			value: number;
+	  };
+
+interface FilterCategory {
+	title: string;
+	tags: FilterTag[];
+}
+
 const Sidebar = ({
 	listings,
 	amenities,
@@ -46,8 +77,9 @@ const Sidebar = ({
 	const [search, setSearch] = useState("");
 	const [showFilters, setShowFilters] = useState(false);
 	const [appliedAmenities, setAppliedAmenities] = useState<(number | string)[]>([]);
-	const [appliedOtherFilters, setAppliedOtherFilters] = useState<Record<string, any>>({});
-	const filterCategories = [
+	const [appliedOtherFilters, setAppliedOtherFilters] = useState<AppliedOtherFilters>({});
+
+	const filterCategories: FilterCategory[] = [
 		{
 			title: "Loại phòng",
 			tags: [
@@ -223,22 +255,33 @@ const Sidebar = ({
 
 			return matchSearch && matchAmenities && matchFurniture && matchBedrooms;
 		});
+
 		onFilterChange(filtered);
 		return filtered;
 	}, [search, appliedAmenities, appliedOtherFilters, listings, onFilterChange]);
 
-	const toggleTag = (tag: any) => {
+	const toggleTag = (tag: FilterTag) => {
 		if (tag.type === "amenity") {
 			setAppliedAmenities((prev) =>
 				prev.includes(tag.value) ? prev.filter((a) => a !== tag.value) : [...prev, tag.value],
 			);
-		} else {
+			return;
+		}
+
+		if (tag.type === "furniture") {
 			setAppliedOtherFilters((prev) => ({
 				...prev,
-				[tag.type]: prev[tag.type] === tag.value ? undefined : tag.value,
+				furniture: prev.furniture === tag.value ? undefined : tag.value,
 			}));
+			return;
 		}
+
+		setAppliedOtherFilters((prev) => ({
+			...prev,
+			bedrooms: prev.bedrooms === tag.value ? undefined : tag.value,
+		}));
 	};
+
 	const clearFilters = () => {
 		setAppliedAmenities([]);
 		setAppliedOtherFilters({});
@@ -306,9 +349,10 @@ const Sidebar = ({
 									<div className="flex flex-wrap gap-2">
 										{category.tags.map((tag) => {
 											const isSelected =
-												tag.type === "amenity" ?
-													appliedAmenities.includes(tag.value)
-												:	appliedOtherFilters[tag.type] === tag.value;
+												tag.type === "amenity" ? appliedAmenities.includes(tag.value)
+												: tag.type === "furniture" ? appliedOtherFilters.furniture === tag.value
+												: appliedOtherFilters.bedrooms === tag.value;
+
 											return (
 												<button
 													key={tag.label}
@@ -319,7 +363,7 @@ const Sidebar = ({
 														:	"bg-white border-slate-100 text-slate-500 hover:border-slate-200"
 													}`}
 												>
-													{tag.icon && <tag.icon className="w-4 h-4 opacity-70" />}
+													<tag.icon className="w-4 h-4 opacity-70" />
 													{tag.label}
 													{isSelected && <Check className="w-3.5 h-3.5" />}
 												</button>
@@ -410,4 +454,5 @@ const Sidebar = ({
 		</motion.div>
 	);
 };
+
 export default Sidebar;

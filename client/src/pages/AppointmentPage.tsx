@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { api } from "../lib/api";
 import { useBuilding } from "../contexts/BuildingContext";
 import Modal from "../components/modals/Modal";
-import AppointmentForm from "../components/modals/AppointmentForm";
+import AppointmentForm, { type AppointmentFormData } from "../components/modals/AppointmentForm";
 
 interface Tour {
   id: string;
@@ -17,6 +17,11 @@ interface Tour {
   building: { name: string };
   room: { room_number: string } | null;
   message: string;
+}
+
+interface VisitToursResponse {
+  tours: Tour[];
+  total: number;
 }
 
 export default function AppointmentPage() {
@@ -39,7 +44,7 @@ export default function AppointmentPage() {
     if (selectedBuildingId) params.append("building_id", selectedBuildingId);
 
     try {
-      const { data } = await api.get<any>(`/api/visit-tours?${params}`);
+      const { data } = await api.get<VisitToursResponse>(`/api/visit-tours?${params}`);
       if (data) {
         setTours(data.tours);
         setTotal(data.total);
@@ -54,7 +59,7 @@ export default function AppointmentPage() {
     fetchTours();
   }, [fetchTours]);
 
-  const handleCreateAppointment = async (formData: any) => {
+  const handleCreateAppointment = async (formData: AppointmentFormData) => {
     const payload = {
       customer_name: formData.customerName,
       customer_phone: formData.phone,

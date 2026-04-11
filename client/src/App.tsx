@@ -11,7 +11,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import RegisterPage from "./pages/RegisterPage";
 import LoginPage from "./pages/LoginPage";
 import ContactPage from "./pages/ContactPage";
-import SearchPage from "./pages/SearchPage";
+
 import ListingDetailPage from "./pages/ListingDetailPage";
 import CreateListingPage from "./pages/CreateListingPage";
 import CreateBuildingPage from "./pages/CreateBuildingPage";
@@ -89,6 +89,8 @@ function HomePage() {
 			if (amenitiesRes.data) {
 				setAmenities(amenitiesRes.data.amenities);
 			}
+
+
 
 			setLoading(false);
 		};
@@ -223,10 +225,7 @@ function App() {
 														path="/contact"
 														element={<ContactPage />}
 													/>
-													<Route
-														path="/search"
-														element={<SearchPage />}
-													/>
+
 													<Route
 														path="/forgot-password"
 														element={<ForgotPasswordPage />}
