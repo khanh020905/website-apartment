@@ -83,7 +83,7 @@ export default function CustomerPage() {
 	const [filterResidency, setFilterResidency] = useState("");
 	const [filterGender, setFilterGender] = useState("");
 
-	const [submitting, setSubmitting] = useState(false);
+	const [, setSubmitting] = useState(false);
 	const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
 
 	useEffect(() => {
