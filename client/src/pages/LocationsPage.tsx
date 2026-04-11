@@ -501,10 +501,10 @@ export default function LocationsPage() {
     try {
       const { data, error } = await api.get<{ qr: any; url: string }>(`/api/qr/building/${b.id}`);
       
-      if (error || !data.qr) {
+      if (error || !data || !data.qr) {
         // Generate new if not exists
         const { data: genData, error: genError } = await api.post<{ qr: any; url: string }>("/api/qr/generate", { building_id: b.id });
-        if (genError) throw new Error(genError);
+        if (genError || !genData) throw new Error(genError || "Failed to generate QR");
         setCurrentQRCode(genData.qr.code);
       } else {
         setCurrentQRCode(data.qr.code);
