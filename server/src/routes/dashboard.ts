@@ -69,15 +69,46 @@ router.get('/stats', authenticate, async (req: AuthRequest, res: Response) => {
     // Mock last month revenue for comparison (real app would query transactions or historical snapshots)
     const lastRevenue = currentRevenue * 0.95; 
 
-    // 4. Expiring contracts
-    const d7Limit = addDays(now, 7);
-    const d14Limit = addDays(now, 14);
-    const d30Limit = addDays(now, 30);
+    // 4. Incident stats (pending or in_progress)
+    const { count: incidentCount, error: incidentError } = await getSupabase()
+      .from('incidents')
+      .select('*', { count: 'exact', head: true })
+      .in('building_id', buildingIds)
+      .in('status', ['pending', 'in_progress']);
+
+    if (incidentError) console.error('Error fetching incident stats:', incidentError);
+
+    // 5. Overdue invoices (due_date < now and not paid)
+    const { count: overdueInvoiceCount, error: invoiceError } = await getSupabase()
+      .from('invoices')
+      .select('*', { count: 'exact', head: true })
+      .in('building_id', buildingIds)
+      .neq('status', 'paid')
+      .lt('due_date', now.toISOString());
+
+    if (invoiceError) console.error('Error fetching invoice stats:', invoiceError);
+
+    // 6. Today's appointments
+    const todayStart = new Date(now.setHours(0,0,0,0)).toISOString();
+    const todayEnd = new Date(now.setHours(23,59,59,999)).toISOString();
+    const { count: todayAppointmentCount, error: appointmentError } = await getSupabase()
+      .from('appointments')
+      .select('*', { count: 'exact', head: true })
+      .in('building_id', buildingIds)
+      .gte('appointment_date', todayStart)
+      .lte('appointment_date', todayEnd);
+
+    if (appointmentError) console.error('Error fetching appointment stats:', appointmentError);
+
+    // 7. Expiring contracts
+    const d7Limit = addDays(new Date(), 7);
+    const d14Limit = addDays(new Date(), 14);
+    const d30Limit = addDays(new Date(), 30);
 
     const expiring = {
-      d7: contracts.filter(c => c.end_date && isAfter(new Date(c.end_date), now) && isBefore(new Date(c.end_date), d7Limit)),
-      d14: contracts.filter(c => c.end_date && isAfter(new Date(c.end_date), now) && isBefore(new Date(c.end_date), d14Limit)),
-      d30: contracts.filter(c => c.end_date && isAfter(new Date(c.end_date), now) && isBefore(new Date(c.end_date), d30Limit)),
+      d7: contracts.filter(c => c.end_date && isAfter(new Date(c.end_date), new Date()) && isBefore(new Date(c.end_date), d7Limit)),
+      d14: contracts.filter(c => c.end_date && isAfter(new Date(c.end_date), new Date()) && isBefore(new Date(c.end_date), d14Limit)),
+      d30: contracts.filter(c => c.end_date && isAfter(new Date(c.end_date), new Date()) && isBefore(new Date(c.end_date), d30Limit)),
     };
 
     res.json({
@@ -89,7 +120,12 @@ router.get('/stats', authenticate, async (req: AuthRequest, res: Response) => {
       },
       expiringContracts: expiring,
       occupancyRate,
-      buildingCount: buildingIds.length
+      buildingCount: buildingIds.length,
+      upcomingStats: {
+        incidents: incidentCount || 0,
+        overdueInvoices: overdueInvoiceCount || 0,
+        todayAppointments: todayAppointmentCount || 0
+      }
     });
 
   } catch (error: any) {

@@ -404,4 +404,9 @@ export interface DashboardStats {
   };
   occupancyRate: number;
   buildingCount: number;
+  upcomingStats?: {
+    incidents: number;
+    overdueInvoices: number;
+    todayAppointments: number;
+  };
 }

@@ -86,116 +86,187 @@ export const Overview = ({ stats }: OverviewProps) => {
 				/>
 			</div>
 
-			<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-				{/* Occupancy Chart */}
+			{/* Occupancy Chart - RESTORED */}
+			<motion.div
+				initial={{ opacity: 0, y: 10 }}
+				animate={{ opacity: 1, y: 0 }}
+				transition={{ delay: 0.15 }}
+				className="bg-white p-6 rounded-[24px] border border-slate-100 shadow-sm"
+			>
+				<div className="flex items-center justify-between mb-8">
+					<div>
+						<h3 className="text-sm font-black text-slate-800 uppercase tracking-tighter">
+							Tỷ lệ lấp đầy theo thời gian
+						</h3>
+						<p className="text-[10px] font-bold text-emerald-600 mt-0.5">
+							(trung bình {Math.round(stats.occupancyRate)}%)
+						</p>
+					</div>
+					<select className="text-[11px] font-bold border border-slate-200 rounded-xl px-3 py-1.5 text-slate-600 bg-white cursor-pointer hover:border-brand-primary/30 transition-all outline-none">
+						<option>Tháng này</option>
+						<option>Tháng trước</option>
+						<option>3 tháng</option>
+					</select>
+				</div>
+
+				<div className="h-64 w-full">
+					<ResponsiveContainer
+						width="100%"
+						height="100%"
+					>
+						<AreaChart data={chartData}>
+							<defs>
+								<linearGradient
+									id="colorO"
+									x1="0"
+									y1="0"
+									x2="0"
+									y2="1"
+								>
+									<stop
+										offset="5%"
+										stopColor="#0f9b9b"
+										stopOpacity={0.05}
+									/>
+									<stop
+										offset="95%"
+										stopColor="#0f9b9b"
+										stopOpacity={0}
+									/>
+								</linearGradient>
+							</defs>
+							<CartesianGrid
+								strokeDasharray="0"
+								vertical={false}
+								stroke="#f1f5f9"
+							/>
+							<XAxis
+								dataKey="day"
+								axisLine={false}
+								tickLine={false}
+								tick={{ fill: "#94a3b8", fontSize: 10, fontWeight: 700 }}
+							/>
+							<YAxis
+								axisLine={false}
+								tickLine={false}
+								tick={{ fill: "#94a3b8", fontSize: 10, fontWeight: 700 }}
+								tickFormatter={(v) => `${v}%`}
+							/>
+							<Tooltip
+								contentStyle={{
+									borderRadius: "12px",
+									border: "none",
+									boxShadow: "0 10px 25px rgba(0,0,0,0.05)",
+									padding: "8px 12px",
+								}}
+							/>
+							<Area
+								type="monotone"
+								dataKey="rate"
+								stroke="#0f9b9b"
+								strokeWidth={3}
+								fill="url(#colorO)"
+								dot={{ fill: "#0f9b9b", stroke: "#fff", strokeWidth: 2, r: 4 }}
+								activeDot={{ r: 6, strokeWidth: 0 }}
+							/>
+						</AreaChart>
+					</ResponsiveContainer>
+				</div>
+			</motion.div>
+
+			<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+				{/* Section: Incidents */}
 				<motion.div
-					initial={{ opacity: 0, y: 10 }}
+					initial={{ opacity: 0, y: 20 }}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ delay: 0.2 }}
-					className="lg:col-span-2 bg-white p-6 rounded-xl border border-slate-100 shadow-sm"
+					className="bg-white rounded-[24px] border border-slate-100 shadow-sm overflow-hidden flex flex-col min-h-[400px]"
 				>
-					<div className="flex items-center justify-between mb-8">
-						<div>
-							<h3 className="text-sm font-black text-slate-800 uppercase tracking-tighter">
-								Tỷ lệ lấp đầy theo thời gian
-							</h3>
-							<p className="text-[10px] font-bold text-emerald-600 mt-0.5">
-								(trung bình {Math.round(stats.occupancyRate)}%)
-							</p>
+					<div className="px-6 py-5 flex items-center justify-between border-b border-slate-50">
+						<h3 className="text-[14px] font-bold text-slate-900 tracking-tight">
+							Sự cố cần xử lý ({stats.upcomingStats?.incidents || 0})
+						</h3>
+						<div className="flex items-center gap-3">
+							<div className="relative">
+								<select className="text-[12px] font-bold border border-slate-200 rounded-xl px-3 py-1.5 text-slate-500 bg-white cursor-pointer hover:border-brand-primary/30 transition-all outline-none appearance-none pr-8">
+									<option>Hôm nay</option>
+									<option>3 ngày trước</option>
+									<option>7 ngày trước</option>
+								</select>
+								<Calendar className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+							</div>
+							<div className="w-8 h-8 flex items-center justify-center text-slate-300 hover:text-slate-500 transition-colors cursor-pointer">
+								<TrendingUp className="w-4 h-4" />
+							</div>
 						</div>
-						<select className="text-[11px] font-bold border border-slate-200 rounded-lg px-2.5 py-1.5 text-slate-600 bg-white cursor-pointer">
-							<option>Tháng này</option>
-							<option>Tháng trước</option>
-							<option>3 tháng</option>
-						</select>
 					</div>
 
-					<div className="h-64 w-full">
-						<ResponsiveContainer
-							width="100%"
-							height="100%"
-						>
-							<AreaChart data={chartData}>
-								<defs>
-									<linearGradient
-										id="colorO"
-										x1="0"
-										y1="0"
-										x2="0"
-										y2="1"
-									>
-										<stop
-											offset="5%"
-											stopColor="#0f9b9b"
-											stopOpacity={0.05}
-										/>
-										<stop
-											offset="95%"
-											stopColor="#0f9b9b"
-											stopOpacity={0}
-										/>
-									</linearGradient>
-								</defs>
-								<CartesianGrid
-									strokeDasharray="0"
-									vertical={false}
-									stroke="#f1f5f9"
-								/>
-								<XAxis
-									dataKey="day"
-									axisLine={false}
-									tickLine={false}
-									tick={{ fill: "#94a3b8", fontSize: 10, fontWeight: 700 }}
-								/>
-								<YAxis
-									axisLine={false}
-									tickLine={false}
-									tick={{ fill: "#94a3b8", fontSize: 10, fontWeight: 700 }}
-									tickFormatter={(v) => `${v}%`}
-								/>
-								<Tooltip
-									contentStyle={{
-										borderRadius: "12px",
-										border: "none",
-										boxShadow: "0 10px 25px rgba(0,0,0,0.05)",
-										padding: "8px 12px",
-									}}
-								/>
-								<Area
-									type="monotone"
-									dataKey="rate"
-									stroke="#0f9b9b"
-									strokeWidth={3}
-									fill="url(#colorO)"
-									dot={{ fill: "#0f9b9b", stroke: "#fff", strokeWidth: 2, r: 4 }}
-									activeDot={{ r: 6, strokeWidth: 0 }}
-								/>
-							</AreaChart>
-						</ResponsiveContainer>
+					<div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-[#fdfdfd]">
+						<div className="relative mb-8">
+							<div className="w-32 h-32 bg-linear-to-b from-slate-50 to-white rounded-full flex items-center justify-center relative z-10">
+								<div className="w-24 h-24 bg-white rounded-full shadow-lg shadow-slate-100 flex items-center justify-center">
+									<AlertCircle className="w-12 h-12 text-slate-100" />
+								</div>
+							</div>
+							<div className="absolute -bottom-2 -right-2 w-10 h-10 bg-brand-bg rounded-2xl flex items-center justify-center animate-bounce duration-3000">
+								<div className="w-2 h-2 bg-brand-primary rounded-full" />
+							</div>
+						</div>
+						<h4 className="text-[18px] font-black text-slate-800 mb-2">Không có sự cố nào cần xử lý</h4>
+						<p className="text-[13px] font-medium text-slate-400 max-w-64 leading-relaxed">
+							Khi có báo cáo về sự cố, bạn có thể kiểm tra và xử lý ở đây.
+						</p>
 					</div>
 				</motion.div>
 
-				{/* Overdue/Notices (Secondary content) */}
+				{/* Section: Overdue Invoices */}
 				<motion.div
-					initial={{ opacity: 0, x: 10 }}
-					animate={{ opacity: 1, x: 0 }}
+					initial={{ opacity: 0, y: 20 }}
+					animate={{ opacity: 1, y: 0 }}
 					transition={{ delay: 0.3 }}
-					className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm h-full"
+					className="bg-white rounded-[24px] border border-slate-100 shadow-sm overflow-hidden flex flex-col min-h-[400px]"
 				>
-					<h3 className="text-sm font-black text-slate-800 uppercase tracking-tighter mb-6">
-						Sự cố cần xử lý (0)
-					</h3>
-					<div className="flex flex-col items-center justify-center py-10 text-center">
-						<div className="w-16 h-16 bg-slate-50 flex items-center justify-center rounded-full mb-4 text-slate-200">
-							<AlertCircle className="w-8 h-8" />
+					<div className="px-6 py-5 flex items-center justify-between border-b border-slate-50">
+						<h3 className="text-[14px] font-bold text-slate-900 tracking-tight">
+							Hoá đơn quá hạn chưa thanh toán ({stats.upcomingStats?.overdueInvoices || 0})
+						</h3>
+					</div>
+
+					<div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-[#fdfdfd]">
+						<div className="relative mb-8">
+							<div className="w-32 h-32 bg-linear-to-b from-slate-50 to-white rounded-full flex items-center justify-center relative z-10">
+								<div className="w-24 h-24 bg-white rounded-full shadow-lg shadow-slate-100 flex items-center justify-center">
+									<DollarSign className="w-12 h-12 text-slate-100" />
+								</div>
+							</div>
 						</div>
-						<p className="text-xs font-bold text-slate-700">Không có sự cố nào cần xử lý</p>
-						<p className="text-[11px] text-slate-400 mt-1 max-w-45">
-							Khi có báo cáo sự cố, bạn có thể xử lý ở đây.
+						<h4 className="text-[18px] font-black text-slate-800 mb-2">Không hoá đơn quá hạn nào</h4>
+						<p className="text-[13px] font-medium text-slate-400 max-w-64 leading-relaxed">
+							Khi có hoá đơn quá hạn chưa thanh toán, bạn có thể kiểm tra và xử lý ở đây.
 						</p>
 					</div>
 				</motion.div>
 			</div>
+
+			{/* Section: Today's Appointments */}
+			<motion.div
+				initial={{ opacity: 0, y: 20 }}
+				animate={{ opacity: 1, y: 0 }}
+				transition={{ delay: 0.4 }}
+				className="bg-white rounded-[24px] border border-slate-100 shadow-sm overflow-hidden"
+			>
+				<div className="px-6 py-5 border-b border-slate-50">
+					<h3 className="text-[14px] font-bold text-slate-900 tracking-tight">
+						Xem phòng hôm nay ({stats.upcomingStats?.todayAppointments || 0})
+					</h3>
+				</div>
+				<div className="p-12 flex flex-col items-center justify-center text-center">
+					<div className="w-16 h-16 bg-slate-50 rounded-3xl flex items-center justify-center mb-4 text-slate-300">
+						<Calendar className="w-8 h-8" />
+					</div>
+					<p className="text-[13px] font-bold text-slate-400">Hôm nay chưa có lịch hẹn xem phòng nào.</p>
+				</div>
+			</motion.div>
 		</div>
 	);
 };
