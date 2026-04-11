@@ -1,11 +1,12 @@
-import { useState, useCallback, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { useState, useCallback, useEffect, useMemo, type ReactNode } from "react";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import { motion } from "framer-motion";
 import { AuthProvider } from "./contexts/AuthContext";
 import { api } from "./lib/api";
 import Navbar from "./components/Navbar";
 import Sidebar from "./components/Sidebar";
 import MapView from "./components/MapView";
+import ListingInfoPanel from "./components/ListingInfoPanel";
 import ProtectedRoute from "./components/ProtectedRoute";
 import RegisterPage from "./pages/RegisterPage";
 import LoginPage from "./pages/LoginPage";
@@ -102,53 +103,88 @@ function HomePage() {
 	const handleFilterChange = useCallback((filtered: Listing[]) => {
 		setFilteredListings(filtered);
 	}, []);
+	const handleSelectListing = useCallback((listingId: string | null) => {
+		setSelectedListingId((current) => {
+			if (listingId === null) return null;
+			return current === listingId ? null : listingId;
+		});
+	}, []);
 
 	useEffect(() => {
-		if (filteredListings.length === 0) {
+		if (!selectedListingId) return;
+		if (!filteredListings.some((listing) => listing.id === selectedListingId)) {
 			// eslint-disable-next-line react-hooks/set-state-in-effect
 			setSelectedListingId(null);
-			return;
-		}
-		if (
-			!selectedListingId ||
-			!filteredListings.some((listing) => listing.id === selectedListingId)
-		) {
-			setSelectedListingId(filteredListings[0].id);
 		}
 	}, [filteredListings, selectedListingId]);
+
+	const selectedListing = useMemo(
+		() => filteredListings.find((listing) => listing.id === selectedListingId) || null,
+		[filteredListings, selectedListingId],
+	);
 
 	return (
 		<motion.div
 			initial={{ opacity: 0 }}
 			animate={{ opacity: 1 }}
 			transition={{ duration: 0.3, delay: 0.15 }}
-			className="flex flex-1 h-full overflow-hidden"
+			className="relative flex flex-1 h-full overflow-hidden bg-brand-bg"
 		>
-			<Sidebar
-				listings={listings}
-				amenities={amenities}
-				onFilterChange={handleFilterChange}
-				selectedListingId={selectedListingId}
-				onSelectListing={setSelectedListingId}
-			/>
-			{loading ?
-				<div className="flex-1 h-full flex items-center justify-center bg-slate-100 text-slate-500">
-					<div className="flex flex-col items-center gap-3">
-						<div className="w-10 h-10 border-4 border-teal-600/20 border-t-teal-600 rounded-full animate-spin" />
-						<p className="text-sm font-medium">Đang tải dữ liệu bản đồ...</p>
+			<div className="absolute inset-0 z-0">
+				{loading ?
+					<div className="h-full flex items-center justify-center bg-slate-100 text-slate-500">
+						<div className="flex flex-col items-center gap-3">
+							<div className="w-10 h-10 border-4 border-teal-600/20 border-t-teal-600 rounded-full animate-spin" />
+							<p className="text-sm font-medium">Đang tải dữ liệu bản đồ...</p>
+						</div>
 					</div>
-				</div>
-			: loadError ?
-				<div className="flex-1 h-full flex items-center justify-center bg-slate-100 text-red-600 font-medium px-6 text-center">
-					{loadError}
-				</div>
-			:	<MapView
-					listings={filteredListings}
-					selectedListingId={selectedListingId}
-					onSelectListing={setSelectedListingId}
-				/>
-			}
+				: loadError ?
+					<div className="h-full flex items-center justify-center bg-slate-100 text-red-600 font-medium px-6 text-center">
+						{loadError}
+					</div>
+				:	<MapView
+						listings={filteredListings}
+						selectedListingId={selectedListingId}
+						onSelectListing={handleSelectListing}
+					/>
+				}
+			</div>
+
+			<aside className="absolute inset-y-0 left-0 z-[1100] w-[430px] max-w-[calc(100vw-1rem)]">
+				{selectedListing ?
+					<ListingInfoPanel
+						listing={selectedListing}
+						listings={filteredListings}
+						onClose={() => setSelectedListingId(null)}
+						onSelectListing={handleSelectListing}
+					/>
+				:	<Sidebar
+						listings={listings}
+						amenities={amenities}
+						onFilterChange={handleFilterChange}
+						selectedListingId={selectedListingId}
+						onSelectListing={handleSelectListing}
+					/>
+				}
+			</aside>
 		</motion.div>
+	);
+}
+
+function AppFrame({ children }: { children: ReactNode }) {
+	const location = useLocation();
+	const isMapHome = location.pathname === "/";
+
+	return (
+		<>
+			{!isMapHome && <AppSidebar />}
+			<div className="flex-1 flex flex-col overflow-hidden bg-slate-50">
+				<Navbar />
+				<main className={`flex-1 ${isMapHome ? "overflow-hidden" : "overflow-y-auto"}`}>
+					{children}
+				</main>
+			</div>
+		</>
 	);
 }
 
@@ -169,11 +205,7 @@ function App() {
 							<Route
 								path="*"
 								element={
-									<>
-										<AppSidebar />
-										<div className="flex-1 flex flex-col overflow-hidden bg-slate-50">
-											<Navbar />
-											<main className="flex-1 overflow-y-auto">
+									<AppFrame>
 												<Routes>
 													<Route
 														path="/"
@@ -466,9 +498,7 @@ function App() {
 														}
 													/>
 												</Routes>
-											</main>
-										</div>
-									</>
+									</AppFrame>
 								}
 							/>
 						</Routes>

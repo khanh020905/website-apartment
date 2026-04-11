@@ -635,7 +635,7 @@ export default function CreateListingPage() {
 							)}
 
 							<div className="pt-4 border-t border-slate-100">
-								<p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2 ml-1">
+								<p className="text-[10px] font-black uppercase text-white tracking-widest mb-2 ml-1">
 									Liên hệ
 								</p>
 								<p className="text-base font-black text-slate-800 flex items-center gap-2">

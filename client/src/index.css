@@ -135,6 +135,22 @@ body {
 	line-height: 1.5 !important;
 }
 
+.map-gallery-popup .leaflet-popup-content-wrapper {
+	padding: 0 !important;
+}
+
+.map-gallery-popup .leaflet-popup-content {
+	margin: 0 !important;
+}
+
+.map-gallery-popup .leaflet-popup-close-button {
+	top: 10px !important;
+	right: 10px !important;
+	color: var(--color-brand-primary) !important;
+	font-size: 20px !important;
+	font-weight: 700 !important;
+}
+
 /* Clear leaflet default background on markers */
 .leaflet-div-icon {
 	background: transparent !important;

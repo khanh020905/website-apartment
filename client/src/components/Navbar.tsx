@@ -1,7 +1,16 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Bell, Search, PlusCircle, MinusCircle, ChevronDown, Settings, Grid } from "lucide-react";
-import { Link } from "react-router-dom";
+import {
+	Bell,
+	Search,
+	PlusCircle,
+	MinusCircle,
+	ChevronDown,
+	Settings,
+	Grid,
+	LayoutDashboard,
+} from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { useBuilding } from "../contexts/BuildingContext";
 import { api } from "../lib/api";
@@ -12,6 +21,8 @@ import Modal from "./modals/Modal";
 const Navbar = () => {
 	const { user, signOut, role } = useAuth();
 	const { buildings, selectedBuildingId, setSelectedBuildingId } = useBuilding();
+	const location = useLocation();
+	const isHomeRoute = location.pathname === "/";
 
 	const [dropdownOpen, setDropdownOpen] = useState(false);
 	const [notificationCount, setNotificationCount] = useState(0);
@@ -164,6 +175,18 @@ const Navbar = () => {
 			<div className="flex items-center gap-6">
 				{/* Action Buttons */}
 				<div className="hidden lg:flex items-center gap-2 pr-4 border-r border-slate-100">
+					{role !== "user" && isHomeRoute && (
+						<Link to="/dashboard">
+							<motion.button
+								whileHover={{ scale: 1.03 }}
+								whileTap={{ scale: 0.97 }}
+								className="flex items-center gap-2 px-4 py-2.5 bg-white border border-brand-primary text-brand-primary rounded-xl text-sm font-black transition-all cursor-pointer hover:bg-brand-bg"
+							>
+								<LayoutDashboard className="w-4.5 h-4.5" />
+								<span>Quản lý</span>
+							</motion.button>
+						</Link>
+					)}
 					<Link to="/create-listing">
 						<motion.button
 							whileHover={{ scale: 1.05 }}
