@@ -83,7 +83,7 @@ export default function CustomerPage() {
 	const [filterResidency, setFilterResidency] = useState("");
 	const [filterGender, setFilterGender] = useState("");
 
-	const [, setSubmitting] = useState(false);
+	const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
 
 	useEffect(() => {
 		if (!selectedBuildingId) return;
@@ -163,29 +163,40 @@ export default function CustomerPage() {
 		setExporting(false);
 	};
 
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const handleAddCustomer = async (formData: any) => {
-		setSubmitting(true);
-		const { data, error } = await api.post("/api/contracts", {
-			room_id: formData.room_id,
+	const handleSaveCustomer = async (formData: any) => {
+		const dataToSave = {
+			room_id: formData.room_id || editingCustomer?.room?.id,
 			tenant_name: formData.tenant_name,
 			tenant_phone: formData.tenant_phone || null,
 			tenant_email: formData.tenant_email || null,
 			tenant_gender: formData.tenant_gender || null,
+			tenant_dob: formData.tenant_dob || null,
+			tenant_job: formData.tenant_job || null,
+			tenant_nationality: formData.tenant_nationality || 'Việt Nam',
+			tenant_city: formData.tenant_city || null,
+			tenant_district: formData.tenant_district || null,
+			tenant_ward: formData.tenant_ward || null,
+			tenant_address: formData.tenant_address || null,
+			tenant_avatar: formData.tenant_avatar || null,
+			tenant_notes: formData.tenant_notes || null,
 			start_date: formData.start_date,
 			end_date: formData.end_date || null,
-			rent_amount: parseInt(formData.rent_amount),
+			rent_amount: parseInt(formData.rent_amount) || 0,
 			deposit_amount: parseInt(formData.deposit_amount) || 0,
-			notes: formData.notes || null,
-		});
+			notes: formData.tenant_notes || null,
+		};
 
-		setSubmitting(false);
-
-		if (data) {
+		try {
+			if (editingCustomer) {
+				await api.put(`/api/contracts/${editingCustomer.id}`, dataToSave);
+			} else {
+				await api.post("/api/contracts", dataToSave);
+			}
 			setIsAddModalOpen(false);
+			setEditingCustomer(null);
 			fetchCustomers();
-		} else if (error) {
-			alert(error);
+		} catch (err: any) {
+			alert(err.response?.data?.error || "Lỗi khi lưu thông tin");
 		}
 	};
 
@@ -425,7 +436,13 @@ export default function CustomerPage() {
 											</td>
 											<td className="px-5 py-3 text-right">
 												<div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-													<button className="p-1.5 hover:bg-white rounded-lg text-slate-400 hover:text-brand-dark transition-colors shadow-sm">
+													<button 
+														onClick={() => {
+															setEditingCustomer(c);
+															setIsAddModalOpen(true);
+														}}
+														className="p-1.5 hover:bg-white rounded-lg text-slate-400 hover:text-brand-dark transition-colors shadow-sm"
+													>
 														<Edit3 className="w-4 h-4" />
 													</button>
 												</div>
@@ -575,13 +592,20 @@ export default function CustomerPage() {
 			{/* Add Customer Modal */}
 			<Modal
 				isOpen={isAddModalOpen}
-				onClose={() => setIsAddModalOpen(false)}
-				title="Thông tin chung"
+				onClose={() => {
+					setIsAddModalOpen(false);
+					setEditingCustomer(null);
+				}}
+				title={editingCustomer ? "Chỉnh sửa thông tin chung" : "Thông tin chung"}
 				size="lg"
 			>
 				<CustomerForm
-					onSubmit={handleAddCustomer}
-					onCancel={() => setIsAddModalOpen(false)}
+					onSubmit={handleSaveCustomer}
+					onCancel={() => {
+						setIsAddModalOpen(false);
+						setEditingCustomer(null);
+					}}
+					initialData={editingCustomer}
 				/>
 			</Modal>
 		</div>
