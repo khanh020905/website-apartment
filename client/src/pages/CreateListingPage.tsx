@@ -166,7 +166,7 @@ export default function CreateListingPage() {
 								Mua ngay
 							</button>
 							<Link
-								to="/search"
+								to="/"
 								className="px-5 py-2.5 border border-slate-300 text-slate-700 rounded-xl font-semibold hover:bg-slate-50 transition-colors"
 							>
 								Xem danh sách phòng

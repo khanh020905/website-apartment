@@ -75,13 +75,7 @@ export default function ListingDetailPage() {
 						Trang chủ
 					</Link>
 					<span className="opacity-30">/</span>
-					<Link
-						to="/search"
-						className="hover:text-teal-700 transition-colors"
-					>
-						Tìm kiếm
-					</Link>
-					<span className="opacity-30">/</span>
+
 					<span className="text-slate-900 font-bold line-clamp-1">{listing.title}</span>
 				</div>
 
