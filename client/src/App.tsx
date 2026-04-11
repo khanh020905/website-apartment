@@ -39,7 +39,7 @@ import ContractTemplatesPage from "./pages/ContractTemplatesPage";
 
 import IncidentsPage from "./pages/IncidentsPage";
 import IncidentTypesPage from "./pages/IncidentTypesPage";
-import CheckInsPage from "./pages/CheckInsPage";
+
 
 // Reports
 import OccupancyReportPage from "./pages/OccupancyReportPage";
@@ -394,14 +394,7 @@ function App() {
 															</ProtectedRoute>
 														}
 													/>
-													<Route
-														path="/check-ins"
-														element={
-															<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-																<CheckInsPage />
-															</ProtectedRoute>
-														}
-													/>
+
 
 													{/* ── REPORTS ── */}
 													<Route

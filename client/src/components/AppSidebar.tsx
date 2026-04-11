@@ -78,12 +78,11 @@ const AppSidebar = () => {
 			label: "Đặt phòng",
 			path: "/reservations",
 			show: canPost,
-			matchPaths: ["/reservations", "/reservation-history", "/visitTours", "/check-ins"],
+			matchPaths: ["/reservations", "/reservation-history", "/visitTours"],
 			subItems: [
 				{ icon: CalendarDays, label: "Đặt phòng", path: "/reservations" },
 				{ icon: History, label: "Lịch sử đặt phòng", path: "/reservation-history" },
 				{ icon: CalendarSearch, label: "Lịch hẹn xem phòng", path: "/visitTours" },
-				{ icon: CheckSquare, label: "Nhận / Trả phòng", path: "/check-ins" },
 			],
 		},
 		{
@@ -150,7 +149,7 @@ const AppSidebar = () => {
 			],
 			subItems: [
 				{ icon: Info, label: "Thông tin chung", path: "/business-information" },
-				{ icon: Building2, label: "Toà nhà", path: "/locations" },
+
 				{ icon: Users, label: "Nhân viên", path: "/users" },
 				{ icon: Shield, label: "Vai trò", path: "/roles" },
 				{ icon: Plug, label: "Tích hợp", path: "/integrations" },

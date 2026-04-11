@@ -1,9 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useNavigate } from "react-router-dom";
-import { Building2, PieChart, AlertCircle } from "lucide-react";
-import { useAuth } from "../contexts/AuthContext";
+import { AlertCircle } from "lucide-react";
 import { api } from "../lib/api";
 import type {
 	BuildingWithRooms,
@@ -14,17 +11,14 @@ import type {
 
 // Components
 import { Overview } from "../components/dashboard/Overview";
-import { BuildingList } from "../components/dashboard/BuildingList";
+
 import { BuildingModal } from "../components/dashboard/BuildingModal";
 
 import { ContractModal } from "../components/dashboard/ContractModal";
 
-type DashboardTab = "overview" | "buildings";
+
 
 export default function DashboardPage() {
-	const navigate = useNavigate();
-	const { canManageBuildings } = useAuth();
-	const [activeTab, setActiveTab] = useState<DashboardTab>("overview");
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
@@ -39,10 +33,8 @@ export default function DashboardPage() {
 	const [editingContract, setEditingContract] = useState<ContractWithRoom | undefined>(undefined);
 
 	useEffect(() => {
-		if (canManageBuildings) {
-			loadInitialData();
-		}
-	}, [canManageBuildings]);
+		loadInitialData();
+	}, []);
 
 	const loadInitialData = async () => {
 		setLoading(true);
@@ -80,12 +72,7 @@ export default function DashboardPage() {
 		}
 	};
 
-	const handleDeleteBuilding = async (id: string) => {
-		if (!confirm("Cảnh báo: Tòa nhà chỉ xóa được khi không còn phòng. Tiếp tục?")) return;
-		const { error } = await api.delete(`/api/buildings/${id}`);
-		if (error) alert(error);
-		else loadInitialData();
-	};
+
 
 	// Actions: Contract
 	const handleSaveContract = async (data: any) => {
@@ -105,28 +92,7 @@ export default function DashboardPage() {
 
 
 
-	if (!canManageBuildings) {
-		return (
-			<div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-				<div className="w-32 h-32 bg-rose-50 rounded-[48px] flex items-center justify-center mb-10 border-4 border-white shadow-xl rotate-6">
-					<AlertCircle className="w-16 h-16 text-rose-500" />
-				</div>
-				<h2 className="text-4xl font-black text-slate-900 mb-4 tracking-tighter">
-					Tính năng giới hạn
-				</h2>
-				<p className="max-w-md text-slate-500 font-medium leading-relaxed mb-10">
-					Bạn cần tài khoản **Chủ trọ** hoặc **Môi giới** để sử dụng bộ công cụ quản lý chuyên
-					nghiệp này.
-				</p>
-				<button
-					onClick={() => (window.location.href = "/")}
-					className="px-10 py-4 bg-slate-900 text-white rounded-3xl font-black uppercase tracking-widest text-xs shadow-2xl shadow-slate-900/40 hover:scale-105 transition-transform"
-				>
-					Quay lại Trang chủ
-				</button>
-			</div>
-		);
-	}
+
 
 	return (
 		<div className="flex-1 overflow-y-auto bg-brand-bg scroll-smooth">
@@ -135,26 +101,6 @@ export default function DashboardPage() {
 				<div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 px-4">
 					<div>
 						<h1 className="text-xl font-bold text-slate-900 tracking-tight">Trang tổng quan</h1>
-					</div>
-
-					<div className="flex items-center gap-2 bg-white p-2 rounded-3xl shadow-sm border border-slate-100">
-						{(["overview", "buildings"] as const).map((tab) => (
-							<button
-								key={tab}
-								onClick={() => setActiveTab(tab)}
-								className={`flex items-center gap-2 px-6 py-3 rounded-2xl text-xs font-black uppercase tracking-widest transition-all cursor-pointer ${
-									activeTab === tab ?
-										"bg-brand-primary text-white shadow-lg shadow-brand-primary/20"
-									:	"text-slate-400 hover:bg-slate-50 hover:text-brand-ink"
-								}`}
-							>
-								{tab === "overview" && <PieChart className="w-4 h-4" />}
-								{tab === "buildings" && <Building2 className="w-4 h-4" />}
-								{tab === "overview" ?
-									"Tổng quan"
-								:	"Tòa nhà"}
-							</button>
-						))}
 					</div>
 				</div>
 
@@ -173,28 +119,14 @@ export default function DashboardPage() {
 
 				<AnimatePresence mode="wait">
 					<motion.div
-						key={activeTab}
+						key="dashboard-overview"
 						initial={{ opacity: 0, y: 10 }}
 						animate={{ opacity: 1, y: 0 }}
 						exit={{ opacity: 0, y: -10 }}
 						transition={{ duration: 0.3, ease: "easeOut" }}
 						className="px-4"
 					>
-						{activeTab === "overview" && stats && <Overview stats={stats} />}
-
-						{activeTab === "buildings" && (
-							<BuildingList
-								buildings={buildings}
-								selectedId={null}
-								onSelect={() => {}}
-								onAdd={() => navigate("/create-building")}
-								onEdit={(b) => {
-									setEditingBuilding(b);
-									setIsBuildingModalOpen(true);
-								}}
-								onDelete={handleDeleteBuilding}
-							/>
-						)}
+						{stats && <Overview stats={stats} />}
 
 					</motion.div>
 				</AnimatePresence>
