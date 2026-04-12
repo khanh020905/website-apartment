@@ -65,6 +65,7 @@ const Navbar = () => {
 		selectedBuildingId ?
 			buildings.find((b) => b.id === selectedBuildingId)?.name || "N/A"
 		:	"Mọi toà nhà";
+	const managementPath = role === "user" ? "/profile" : "/dashboard";
 
 	const handleSignOut = async () => {
 		setDropdownOpen(false);
@@ -175,8 +176,8 @@ const Navbar = () => {
 			<div className="flex items-center gap-6">
 				{/* Action Buttons */}
 				<div className="hidden lg:flex items-center gap-2 pr-4 border-r border-slate-100">
-					{role !== "user" && isHomeRoute && (
-						<Link to="/dashboard">
+					{user && isHomeRoute && (
+						<Link to={managementPath}>
 							<motion.button
 								whileHover={{ scale: 1.03 }}
 								whileTap={{ scale: 0.97 }}
