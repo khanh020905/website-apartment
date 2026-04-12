@@ -156,3 +156,15 @@ body {
 	background: transparent !important;
 	border: none !important;
 }
+
+/* Custom Map Tooltip Overrides */
+.leaflet-tooltip.custom-map-tooltip {
+	background: transparent !important;
+	border: none !important;
+	box-shadow: none !important;
+	padding: 0 !important;
+}
+
+.leaflet-tooltip-top.custom-map-tooltip::before {
+	display: none !important;
+}
