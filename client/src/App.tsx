@@ -57,6 +57,7 @@ import ApiManagementPage from "./pages/ApiManagementPage";
 import type { Listing, Amenity } from "../../shared/types";
 import AppSidebar from "./components/AppSidebar";
 import { BuildingProvider } from "./contexts/BuildingContext";
+import { applyBusinessThemeFromSettings, applyDefaultAppTheme } from "./lib/brandTheme";
 
 function HomePage() {
 	const [listings, setListings] = useState<Listing[]>([]);
@@ -194,6 +195,48 @@ function AppFrame({ children }: { children: ReactNode }) {
 }
 
 function App() {
+	useEffect(() => {
+		let mounted = true;
+
+		const syncTheme = async () => {
+			const token = localStorage.getItem("access_token");
+			if (!token) {
+				applyDefaultAppTheme();
+				return;
+			}
+
+			const { data } = await api.get<{ settings?: { primary_color?: string; text_color?: string } }>(
+				"/api/business-settings",
+			);
+			if (!mounted) return;
+			if (data?.settings) {
+				applyBusinessThemeFromSettings(data.settings);
+				return;
+			}
+			applyDefaultAppTheme();
+		};
+
+		const onThemeUpdated = (event: Event) => {
+			const detail = (event as CustomEvent<{ settings?: { primary_color?: string; text_color?: string } }>)
+				.detail;
+			if (detail?.settings) {
+				applyBusinessThemeFromSettings(detail.settings);
+				return;
+			}
+			syncTheme();
+		};
+
+		syncTheme();
+		window.addEventListener("business-theme-updated", onThemeUpdated as EventListener);
+		window.addEventListener("storage", syncTheme);
+
+		return () => {
+			mounted = false;
+			window.removeEventListener("business-theme-updated", onThemeUpdated as EventListener);
+			window.removeEventListener("storage", syncTheme);
+		};
+	}, []);
+
 	return (
 		<Router>
 			<AuthProvider>
@@ -203,7 +246,11 @@ function App() {
 							{/* QR Status page — no navbar/sidebar, standalone  */}
 							<Route
 								path="/qr/:code"
-								element={<BuildingStatusPage />}
+								element={
+									<div className="h-full w-full overflow-y-auto overflow-x-hidden bg-slate-50">
+										<BuildingStatusPage />
+									</div>
+								}
 							/>
 
 							{/* All other routes with layout */}

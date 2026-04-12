@@ -4,6 +4,14 @@ import { authenticate } from "../middleware/auth";
 import type { AuthRequest } from "../middleware/auth";
 
 const router = Router();
+const DEFAULT_PRIMARY_COLOR = "#0f9b9b";
+const DEFAULT_TEXT_COLOR = "#000000";
+const isHexColor = (value: string) => /^#([0-9a-f]{6})$/i.test(value);
+const normalizeColor = (value: unknown, fallback: string): string => {
+	if (typeof value !== "string") return fallback;
+	const normalized = value.trim().toLowerCase();
+	return isHexColor(normalized) ? normalized : fallback;
+};
 
 // GET /api/business-settings
 // Lấy cài đặt doanh nghiệp
@@ -26,6 +34,8 @@ router.get("/", authenticate, async (req: AuthRequest, res: Response) => {
 				// Initialize an empty record for this user if it doesn't exist
 				const newRec = {
 					owner_id: req.user.id,
+					primary_color: DEFAULT_PRIMARY_COLOR,
+					text_color: DEFAULT_TEXT_COLOR,
 				};
 				const { data: inserted, error: insertErr } = await supabase
 					.from("business_settings")
@@ -41,6 +51,31 @@ router.get("/", authenticate, async (req: AuthRequest, res: Response) => {
 			}
 			res.status(400).json({ error: error.message });
 			return;
+		}
+
+		const rawPrimary = typeof data.primary_color === "string" ? data.primary_color.trim().toLowerCase() : "";
+		const rawText = typeof data.text_color === "string" ? data.text_color.trim().toLowerCase() : "";
+		const isLegacyPrimary = rawPrimary === "#ffba38";
+		const normalizedPrimary = isLegacyPrimary ? DEFAULT_PRIMARY_COLOR : normalizeColor(data.primary_color, DEFAULT_PRIMARY_COLOR);
+		const normalizedText = normalizeColor(data.text_color, DEFAULT_TEXT_COLOR);
+		const shouldNormalize = rawPrimary !== normalizedPrimary || rawText !== normalizedText;
+
+		if (shouldNormalize) {
+			const { data: normalizedSettings, error: normalizeError } = await supabase
+				.from("business_settings")
+				.update({
+					primary_color: normalizedPrimary,
+					text_color: normalizedText,
+					updated_at: new Date().toISOString(),
+				})
+				.eq("owner_id", req.user.id)
+				.select("*")
+				.single();
+
+			if (!normalizeError && normalizedSettings) {
+				res.json({ settings: normalizedSettings });
+				return;
+			}
 		}
 
 		res.json({ settings: data });

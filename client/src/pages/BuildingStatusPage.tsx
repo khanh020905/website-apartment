@@ -1,369 +1,488 @@
-import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { useEffect, useMemo, useState } from "react";
+import { Link, useParams } from "react-router-dom";
+import { AnimatePresence, motion } from "framer-motion";
 import {
-	Building2,
-	Phone,
-	User,
 	AlertCircle,
+	Building2,
+	Filter,
 	MapPin,
-	RefreshCw,
 	MessageCircle,
+	Phone,
+	RefreshCw,
+	Search,
+	Users,
+	X,
 } from "lucide-react";
 import { api } from "../lib/api";
 import type { Room, RoomStatus } from "../../../shared/types";
 
-const PUBLIC_STATUS_CONFIG: Record<
+interface QrBuilding {
+	id: string;
+	name: string;
+	address: string;
+	ward: string | null;
+	district: string | null;
+	city: string | null;
+	floors: number;
+	description: string | null;
+	phone: string | null;
+	rooms: Room[];
+}
+
+interface QrContact {
+	full_name: string | null;
+	phone: string | null;
+	email: string | null;
+	avatar_url: string | null;
+}
+
+interface QrResponse {
+	building: QrBuilding;
+	contact: QrContact | null;
+}
+
+type StatusFilter = RoomStatus | "all";
+type FloorFilter = number | "all";
+
+const ROOM_STATUS_META: Record<
 	RoomStatus,
-	{ color: string; bg: string; border: string; dot: string }
+	{ label: string; shortLabel: string; chip: string; card: string; dot: string }
 > = {
 	available: {
-		color: "text-emerald-700",
-		bg: "bg-emerald-50",
-		border: "border-emerald-200",
+		label: "Còn trống",
+		shortLabel: "Trống",
+		chip: "bg-emerald-50 text-emerald-700 border-emerald-200",
+		card: "border-emerald-200 bg-emerald-50/40",
 		dot: "bg-emerald-500",
 	},
 	reserved: {
-		color: "text-amber-700",
-		bg: "bg-amber-50",
-		border: "border-amber-200",
+		label: "Đã cọc",
+		shortLabel: "Đã cọc",
+		chip: "bg-amber-50 text-amber-700 border-amber-200",
+		card: "border-amber-200 bg-amber-50/40",
 		dot: "bg-amber-500",
 	},
 	occupied: {
-		color: "text-rose-700",
-		bg: "bg-rose-50",
-		border: "border-rose-200",
+		label: "Đang sử dụng",
+		shortLabel: "Đã thuê",
+		chip: "bg-rose-50 text-rose-700 border-rose-200",
+		card: "border-rose-200 bg-rose-50/40",
 		dot: "bg-rose-500",
 	},
 	maintenance: {
-		color: "text-brand-ink",
-		bg: "bg-brand-bg",
-		border: "border-brand-primary/20",
-		dot: "bg-brand-bg0",
+		label: "Đang bảo trì",
+		shortLabel: "Bảo trì",
+		chip: "bg-slate-100 text-slate-700 border-slate-200",
+		card: "border-slate-200 bg-slate-50/60",
+		dot: "bg-slate-400",
 	},
 };
+
+const formatCurrency = (value: number | null) => {
+	if (!value || value <= 0) return "Chưa cập nhật";
+	return `${new Intl.NumberFormat("vi-VN").format(value)} đ/tháng`;
+};
+
+const buildAddress = (building: QrBuilding) =>
+	[building.address, building.ward, building.district, building.city].filter(Boolean).join(", ");
+
+const normalizePhoneForUrl = (phone: string) => phone.replace(/[^\d+]/g, "");
+const normalizePhoneForZalo = (phone: string) => phone.replace(/\D/g, "");
 
 export default function BuildingStatusPage() {
 	const { code } = useParams();
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const [data, setData] = useState<{ building: any; contact: any } | null>(null);
+	const [data, setData] = useState<QrResponse | null>(null);
 	const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
+	const [searchKeyword, setSearchKeyword] = useState("");
+	const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
+	const [floorFilter, setFloorFilter] = useState<FloorFilter>("all");
 
 	useEffect(() => {
+		let mounted = true;
+
+		const loadStatus = async () => {
+			setLoading(true);
+			setError(null);
+			const { data, error } = await api.get<QrResponse>(`/api/qr/${code}`);
+			if (!mounted) return;
+			if (error || !data) {
+				setError(error || "Không thể tải thông tin từ mã QR.");
+				setData(null);
+			} else {
+				setData(data);
+			}
+			setLoading(false);
+		};
+
 		loadStatus();
-		// eslint-disable-next-line react-hooks/exhaustive-deps
+		return () => {
+			mounted = false;
+		};
 	}, [code]);
 
-	const loadStatus = async () => {
-		setLoading(true);
-		try {
-			const { data, error } = await api.get<{ building: any; contact: any }>(`/api/qr/${code}`);
-			if (error) setError(error);
-			else if (data) setData(data);
-			// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		} catch (err) {
-			setError("Không thể tải thông tin. Vui lòng quét lại mã QR.");
-		} finally {
-			setLoading(false);
-		}
-	};
+	const building = data?.building;
+	const contact = data?.contact;
 
-	if (loading)
+	const allRooms = useMemo(() => {
+		if (!building?.rooms) return [];
+		return [...building.rooms].sort((a, b) => {
+			if (a.floor !== b.floor) return a.floor - b.floor;
+			return a.room_number.localeCompare(b.room_number, "vi", { numeric: true });
+		});
+	}, [building?.rooms]);
+
+	const floorOptions = useMemo(() => Array.from(new Set(allRooms.map((room) => room.floor))).sort((a, b) => a - b), [allRooms]);
+
+	const roomStats = useMemo(
+		() => ({
+			total: allRooms.length,
+			available: allRooms.filter((room) => room.status === "available").length,
+			reserved: allRooms.filter((room) => room.status === "reserved").length,
+			occupied: allRooms.filter((room) => room.status === "occupied").length,
+			maintenance: allRooms.filter((room) => room.status === "maintenance").length,
+		}),
+		[allRooms],
+	);
+
+	const filteredRooms = useMemo(() => {
+		const keyword = searchKeyword.trim().toLowerCase();
+		return allRooms.filter((room) => {
+			if (statusFilter !== "all" && room.status !== statusFilter) return false;
+			if (floorFilter !== "all" && room.floor !== floorFilter) return false;
+			if (!keyword) return true;
+			return room.room_number.toLowerCase().includes(keyword);
+		});
+	}, [allRooms, statusFilter, floorFilter, searchKeyword]);
+
+	const contactPhone = contact?.phone || building?.phone || "";
+	const telPhone = contactPhone ? normalizePhoneForUrl(contactPhone) : "";
+	const zaloPhone = contactPhone ? normalizePhoneForZalo(contactPhone) : "";
+
+	if (loading) {
 		return (
-			<div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-10 space-y-6">
-				<RefreshCw className="w-12 h-12 text-indigo-500 animate-spin" />
-				<p className="text-xs font-black text-slate-400 uppercase tracking-widest">
-					Đang tải trạng thái phòng...
-				</p>
+			<div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center gap-4 p-8">
+				<RefreshCw className="w-10 h-10 text-brand-primary animate-spin" />
+				<p className="text-sm font-semibold text-slate-500">Đang tải thông tin tòa nhà từ QR...</p>
 			</div>
 		);
+	}
 
-	if (error || !data)
+	if (error || !building) {
 		return (
-			<div className="min-h-screen bg-white flex flex-col items-center justify-center p-10 text-center">
-				<div className="w-24 h-24 bg-rose-50 rounded-[40px] flex items-center justify-center mb-8 border-4 border-white shadow-xl rotate-6">
-					<AlertCircle className="w-12 h-12 text-rose-500" />
+			<div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
+				<div className="w-full max-w-md bg-white border border-slate-200 rounded-2xl p-8 text-center shadow-sm">
+					<div className="w-16 h-16 mx-auto rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mb-4">
+						<AlertCircle className="w-8 h-8" />
+					</div>
+					<h2 className="text-xl font-bold text-slate-900 mb-2">QR không hợp lệ</h2>
+					<p className="text-sm text-slate-500 mb-6">{error || "Mã QR đã hết hiệu lực hoặc không tồn tại."}</p>
+					<Link
+						to="/"
+						className="inline-flex items-center justify-center px-5 py-2.5 rounded-xl bg-brand-primary text-white text-sm font-semibold hover:bg-brand-dark"
+					>
+						Về trang chủ
+					</Link>
 				</div>
-				<h2 className="text-2xl font-black text-slate-900 mb-2 tracking-tight">QR Không tồn tại</h2>
-				<p className="text-slate-400 font-bold mb-10 max-w-xs">
-					{error || "Mã QR đã hết hiệu lực hoặc không chính xác."}
-				</p>
-				<button
-					onClick={() => (window.location.href = "/")}
-					className="px-10 py-4 bg-slate-900 text-white rounded-3xl font-black uppercase tracking-widest text-xs"
-				>
-					Quay lại trang chủ
-				</button>
 			</div>
 		);
-
-	const { building, contact } = data;
-	const rooms: Room[] = building.rooms || [];
-
-	const floorGroups: Record<number, Room[]> = {};
-	rooms.forEach((room) => {
-		if (!floorGroups[room.floor]) floorGroups[room.floor] = [];
-		floorGroups[room.floor].push(room);
-	});
-	const sortedFloors = Object.keys(floorGroups)
-		.map(Number)
-		.sort((a, b) => b - a);
+	}
 
 	return (
-		<div className="min-h-screen bg-slate-50 flex flex-col items-center pb-20">
-			<div className="w-full max-w-md bg-white border-b border-slate-100 p-8 shadow-sm relative overflow-hidden">
-				{/* HomeSpot Branding */}
-				<Link
-					to="/"
-					className="absolute top-4 left-6 flex items-center gap-2 group"
-				>
-					<div className="w-6 h-6 bg-slate-900 rounded-lg flex items-center justify-center overflow-hidden transition-transform group-hover:scale-110">
-						<img
-							src="/logo.jpg"
-							alt="HomeSpot"
-							className="w-full h-full object-cover"
-						/>
-					</div>
-					<span className="text-[10px] font-black text-slate-900 uppercase tracking-widest opacity-40 group-hover:opacity-100 transition-opacity">
-						HomeSpot
-					</span>
-				</Link>
-
-				{/* Abstract background shape */}
-				<div className="absolute -top-10 -right-10 w-40 h-40 bg-indigo-50 rounded-full blur-[80px] opacity-60" />
-
-				<div className="relative z-10 flex flex-col items-center text-center mt-6">
-					<div className="w-16 h-16 bg-white rounded-[28px] flex items-center justify-center shadow-xl shadow-indigo-900/5 mb-6 border-2 border-slate-50 overflow-hidden">
-						<div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-white">
-							<Building2 size={24} />
-						</div>
-					</div>
-					<h1 className="text-2xl font-black text-slate-900 tracking-tight mb-2 uppercase leading-none">
-						{building.name}
-					</h1>
-					<div className="flex items-start justify-center gap-1 text-slate-400 font-black text-[10px] uppercase tracking-widest px-4">
-						<MapPin className="w-3.5 h-3.5 shrink-0" />
-						<span className="line-clamp-2">{building.address}</span>
-					</div>
-				</div>
-			</div>
-
-			<div className="w-full max-w-md px-4 mt-8 space-y-10">
-				<div className="flex items-center justify-around p-4 bg-white/60 backdrop-blur-md rounded-3xl border border-white shadow-xl shadow-slate-900/3">
-					{Object.entries(PUBLIC_STATUS_CONFIG).map(([key, cfg]) => (
-						<div
-							key={key}
-							className="flex flex-col items-center gap-2"
-						>
-							<div className={`w-3 h-3 rounded-full ${cfg.dot} shadow-lg shadow-black/10`} />
-							<span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">
-								{key === "available" ?
-									"Trống"
-								: key === "reserved" ?
-									"Đã cọc"
-								: key === "occupied" ?
-									"Đã thuê"
-								:	"Đang sửa"}
-							</span>
-						</div>
-					))}
-				</div>
-
-				<div className="space-y-12 pb-10">
-					{sortedFloors.length > 0 ?
-						sortedFloors.map((floor) => (
-							<div
-								key={floor}
-								className="space-y-6"
-							>
-								<div className="flex items-center gap-4">
-									<div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-md border border-slate-50">
-										<span className="text-lg font-black text-slate-900">{floor}</span>
-									</div>
-									<div className="flex-1 h-px bg-slate-200/50" />
-								</div>
-
-								<div className="grid grid-cols-4 gap-3">
-									{floorGroups[floor]
-										.sort((a, b) => a.room_number.localeCompare(b.room_number))
-										.map((room) => {
-											const cfg = PUBLIC_STATUS_CONFIG[room.status];
-											return (
-												<motion.button
-													key={room.id}
-													onClick={() => setSelectedRoom(room)}
-													initial={{ scale: 0.9, opacity: 0 }}
-													animate={{ scale: 1, opacity: 1 }}
-													whileTap={{ scale: 0.95 }}
-													className={`aspect-square ${cfg.bg} border ${cfg.border} rounded-2xl flex flex-col items-center justify-center gap-1 shadow-sm relative overflow-hidden group cursor-pointer`}
-												>
-													<span className={`text-base font-black ${cfg.color}`}>
-														{room.room_number}
-													</span>
-													<div className={`w-1 h-1 rounded-full ${cfg.dot}`} />
-												</motion.button>
-											);
-										})}
-								</div>
+		<div className="w-full min-h-full bg-slate-50">
+			<div className="w-full max-w-7xl mx-auto px-4 py-6 lg:py-8 space-y-6">
+				<div className="bg-white border border-slate-200 rounded-2xl p-5 lg:p-6 shadow-sm">
+					<div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5">
+						<div className="space-y-3">
+							<div className="inline-flex items-center gap-2 rounded-full border border-brand-primary/20 bg-brand-bg px-3 py-1">
+								<Building2 className="w-4 h-4 text-brand-primary" />
+								<span className="text-xs font-semibold text-brand-dark">Trang thông tin từ mã QR</span>
 							</div>
-						))
-					:	<div className="py-20 text-center font-bold text-slate-400">Không có dữ liệu phòng</div>}
-				</div>
-			</div>
-
-			<div className="fixed bottom-0 left-0 right-0 p-4 z-100 flex justify-center">
-				<motion.div
-					initial={{ y: 100 }}
-					animate={{ y: 0 }}
-					className="w-full max-w-sm bg-slate-900/95 backdrop-blur-xl rounded-[40px] p-4 flex items-center shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-white/10"
-				>
-					<div className="flex-1 flex items-center gap-4 pl-2">
-						<div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center overflow-hidden border border-white/20">
-							<User className="w-6 h-6 text-white/40" />
+							<h1 className="text-2xl lg:text-3xl font-bold text-slate-900">{building.name}</h1>
+							<div className="flex items-start gap-2 text-slate-600">
+								<MapPin className="w-4 h-4 mt-0.5 shrink-0 text-slate-400" />
+								<span className="text-sm leading-relaxed">{buildAddress(building) || "Chưa cập nhật địa chỉ"}</span>
+							</div>
+							{building.description && <p className="text-sm text-slate-500 max-w-3xl">{building.description}</p>}
 						</div>
-						<div>
-							<p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">
-								Chủ tòa nhà
-							</p>
-							<h5 className="text-sm font-black text-white">
-								{contact?.full_name || "Chưa cập nhật"}
-							</h5>
+
+						<div className="grid grid-cols-2 sm:grid-cols-4 gap-3 min-w-0">
+							<div className="rounded-xl border border-slate-200 p-3">
+								<p className="text-xs text-slate-400">Tổng phòng</p>
+								<p className="text-lg font-bold text-slate-900">{roomStats.total}</p>
+							</div>
+							<div className="rounded-xl border border-emerald-200 bg-emerald-50/40 p-3">
+								<p className="text-xs text-emerald-700">Còn trống</p>
+								<p className="text-lg font-bold text-emerald-700">{roomStats.available}</p>
+							</div>
+							<div className="rounded-xl border border-rose-200 bg-rose-50/40 p-3">
+								<p className="text-xs text-rose-700">Đang sử dụng</p>
+								<p className="text-lg font-bold text-rose-700">{roomStats.occupied}</p>
+							</div>
+							<div className="rounded-xl border border-slate-200 p-3">
+								<p className="text-xs text-slate-400">Tầng</p>
+								<p className="text-lg font-bold text-slate-900">{building.floors || floorOptions.length || 0}</p>
+							</div>
 						</div>
 					</div>
-					<a
-						href={`tel:${contact?.phone}`}
-						className="w-20 h-14 bg-white/10 text-white rounded-2xl flex items-center justify-center hover:bg-white/20 transition-colors"
-					>
-						<Phone className="w-6 h-6" />
-					</a>
-					<a
-						href={`https://zalo.me/${contact?.phone}`}
-						target="_blank"
-						rel="noopener noreferrer"
-						className="w-14 h-14 ml-2 bg-indigo-600 text-white rounded-2xl flex items-center justify-center shadow-xl shadow-indigo-900/40"
-					>
-						<MessageCircle className="w-6 h-6" />
-					</a>
-				</motion.div>
+
+					<div className="mt-5 pt-5 border-t border-slate-100 flex flex-wrap items-center gap-3">
+						<div className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 bg-slate-50">
+							<Users className="w-4 h-4 text-slate-500" />
+							<span className="text-sm font-semibold text-slate-700">{contact?.full_name || "Chủ tòa nhà"}</span>
+						</div>
+						<a
+							href={telPhone ? `tel:${telPhone}` : undefined}
+							className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
+								telPhone ? "bg-brand-primary text-white hover:bg-brand-dark" : "bg-slate-100 text-slate-400 cursor-not-allowed"
+							}`}
+						>
+							<Phone className="w-4 h-4" />
+							Gọi ngay
+						</a>
+						<a
+							href={zaloPhone ? `https://zalo.me/${zaloPhone}` : undefined}
+							target="_blank"
+							rel="noreferrer noopener"
+							className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
+								zaloPhone ? "bg-blue-600 text-white hover:bg-blue-700" : "bg-slate-100 text-slate-400 cursor-not-allowed"
+							}`}
+						>
+							<MessageCircle className="w-4 h-4" />
+							Nhắn Zalo
+						</a>
+					</div>
+				</div>
+
+				<div className="bg-white border border-slate-200 rounded-2xl p-4 lg:p-5 shadow-sm space-y-4">
+					<div className="flex items-center gap-2 text-sm font-semibold text-slate-700">
+						<Filter className="w-4 h-4 text-slate-500" />
+						Lọc phòng
+					</div>
+
+					<div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+						<div className="relative">
+							<Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+							<input
+								value={searchKeyword}
+								onChange={(e) => setSearchKeyword(e.target.value)}
+								placeholder="Tìm theo số phòng (VD: 101)"
+								className="w-full pl-9 pr-3 py-2.5 border border-slate-200 rounded-lg text-sm text-slate-700 focus:outline-none focus:border-brand-primary"
+							/>
+						</div>
+
+						<select
+							value={floorFilter}
+							onChange={(e) => {
+								const value = e.target.value;
+								setFloorFilter(value === "all" ? "all" : Number(value));
+							}}
+							className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm text-slate-700 focus:outline-none focus:border-brand-primary"
+						>
+							<option value="all">Tất cả tầng</option>
+							{floorOptions.map((floor) => (
+								<option
+									key={floor}
+									value={floor}
+								>
+									Tầng {floor}
+								</option>
+							))}
+						</select>
+
+						<select
+							value={statusFilter}
+							onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}
+							className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm text-slate-700 focus:outline-none focus:border-brand-primary"
+						>
+							<option value="all">Tất cả trạng thái</option>
+							<option value="available">Còn trống</option>
+							<option value="reserved">Đã cọc</option>
+							<option value="occupied">Đang sử dụng</option>
+							<option value="maintenance">Đang bảo trì</option>
+						</select>
+					</div>
+
+					<div className="flex flex-wrap gap-2">
+						{(["all", "available", "reserved", "occupied", "maintenance"] as StatusFilter[]).map((status) => (
+							<button
+								key={status}
+								onClick={() => setStatusFilter(status)}
+								className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+									statusFilter === status ?
+										"border-brand-primary bg-brand-bg text-brand-dark"
+									:	"border-slate-200 bg-white text-slate-600 hover:border-slate-300"
+								}`}
+							>
+								{status === "all" ? "Tất cả" : ROOM_STATUS_META[status].shortLabel}
+							</button>
+						))}
+					</div>
+				</div>
+
+				<div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+					<div className="px-4 lg:px-5 py-4 border-b border-slate-100 flex items-center justify-between gap-3">
+						<div>
+							<h2 className="text-base lg:text-lg font-bold text-slate-900">Danh sách phòng tòa {building.name}</h2>
+							<p className="text-xs lg:text-sm text-slate-500 mt-0.5">
+								Hiển thị trạng thái phòng theo thời gian thực
+							</p>
+						</div>
+						<span className="text-xs lg:text-sm font-semibold text-slate-600">{filteredRooms.length} phòng</span>
+					</div>
+
+					<div className="overflow-x-auto">
+						<table className="w-full min-w-[920px]">
+							<thead className="bg-[#EDEDED] border-b border-slate-200 text-[10px] font-bold uppercase tracking-widest text-slate-500">
+								<tr>
+									<th className="px-5 py-3.5 text-left">Phòng</th>
+									<th className="px-5 py-3.5 text-left">Tầng</th>
+									<th className="px-5 py-3.5 text-left">Trạng thái</th>
+									<th className="px-5 py-3.5 text-left">Giá thuê</th>
+									<th className="px-5 py-3.5 text-left">Diện tích</th>
+									<th className="px-5 py-3.5 text-left">Sức chứa</th>
+									<th className="px-5 py-3.5 text-left">Liên hệ</th>
+									<th className="px-5 py-3.5 text-right">Chi tiết</th>
+								</tr>
+							</thead>
+							<tbody className="divide-y divide-slate-100">
+								{filteredRooms.length === 0 ?
+									<tr>
+										<td
+											colSpan={8}
+											className="px-6 py-20 text-center text-slate-500 text-sm"
+										>
+											Không có phòng phù hợp với điều kiện lọc.
+										</td>
+									</tr>
+								:	filteredRooms.map((room) => {
+										const meta = ROOM_STATUS_META[room.status];
+										return (
+											<tr
+												key={room.id}
+												className={`hover:bg-slate-50/70 transition-colors ${meta.card}`}
+											>
+												<td className="px-5 py-4">
+													<div className="font-extrabold text-slate-900">Phòng {room.room_number}</div>
+												</td>
+												<td className="px-5 py-4 text-slate-700 font-semibold">Tầng {room.floor}</td>
+												<td className="px-5 py-4">
+													<span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${meta.chip}`}>
+														<span className={`w-1.5 h-1.5 rounded-full ${meta.dot}`} />
+														{meta.label}
+													</span>
+												</td>
+												<td className="px-5 py-4 text-slate-700 font-semibold whitespace-nowrap">
+													{formatCurrency(room.price)}
+												</td>
+												<td className="px-5 py-4 text-slate-700 font-semibold whitespace-nowrap">
+													{room.area || 0} m²
+												</td>
+												<td className="px-5 py-4 text-slate-700 font-semibold whitespace-nowrap">
+													{room.current_occupants || 0}/{room.max_occupants || 0} người
+												</td>
+												<td className="px-5 py-4">
+													{room.status === "available" && telPhone ?
+														<a
+															href={`tel:${telPhone}`}
+															className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-brand-primary text-white hover:bg-brand-dark text-xs font-semibold whitespace-nowrap"
+														>
+															<Phone className="w-3.5 h-3.5" />
+															Gọi ngay
+														</a>
+													:	<span className="text-xs font-semibold text-slate-400">Không khả dụng</span>}
+												</td>
+												<td className="px-5 py-4 text-right">
+													<button
+														onClick={() => setSelectedRoom(room)}
+														className="px-3 py-2 rounded-lg border border-slate-200 bg-white text-xs font-semibold text-slate-700 hover:bg-slate-50"
+													>
+														Xem chi tiết
+													</button>
+												</td>
+											</tr>
+										);
+									})
+								}
+							</tbody>
+						</table>
+					</div>
+				</div>
 			</div>
 
 			<AnimatePresence>
 				{selectedRoom && (
-					<div className="fixed inset-0 z-200 flex items-center justify-center p-6 bg-slate-900/60 backdrop-blur-md">
+					<div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50">
 						<motion.div
-							initial={{ opacity: 0, scale: 0.9, y: 20 }}
+							initial={{ opacity: 0, scale: 0.95, y: 8 }}
 							animate={{ opacity: 1, scale: 1, y: 0 }}
-							exit={{ opacity: 0, scale: 0.9, y: 20 }}
-							className="w-full max-w-sm bg-white rounded-[40px] p-8 shadow-2xl relative overflow-hidden"
+							exit={{ opacity: 0, scale: 0.95, y: 8 }}
+							className="w-full max-w-md bg-white rounded-2xl border border-slate-200 p-5 shadow-xl"
 						>
-							<div className="absolute top-0 right-0 w-32 h-32 bg-slate-50 rounded-full -mr-16 -mt-16" />
-							<button
-								onClick={() => setSelectedRoom(null)}
-								className="absolute top-6 right-6 w-10 h-10 border border-slate-100 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-50 transition-colors cursor-pointer"
-							>
-								×
-							</button>
-
-							<div className="relative z-10">
-								<div className="flex items-center gap-4 mb-8">
+							<div className="flex items-start justify-between gap-3">
+								<div>
+									<h3 className="text-xl font-bold text-slate-900">Phòng {selectedRoom.room_number}</h3>
 									<div
-										className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg ${PUBLIC_STATUS_CONFIG[selectedRoom.status].bg} ${PUBLIC_STATUS_CONFIG[selectedRoom.status].border} border-2`}
+										className={`mt-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border ${ROOM_STATUS_META[selectedRoom.status].chip}`}
 									>
-										<span
-											className={`text-xl font-black ${PUBLIC_STATUS_CONFIG[selectedRoom.status].color}`}
-										>
-											{selectedRoom.room_number}
-										</span>
-									</div>
-									<div>
-										<h3 className="text-xl font-black text-slate-900 leading-none mb-1">
-											Chi tiết phòng
-										</h3>
-										<span
-											className={`text-[10px] font-black uppercase tracking-widest ${PUBLIC_STATUS_CONFIG[selectedRoom.status].color}`}
-										>
-											{selectedRoom.status === "available" ?
-												"Đang trống"
-											: selectedRoom.status === "occupied" ?
-												"Đã có người"
-											:	"Bảo trì"}
-										</span>
+										<span className={`w-1.5 h-1.5 rounded-full ${ROOM_STATUS_META[selectedRoom.status].dot}`} />
+										{ROOM_STATUS_META[selectedRoom.status].label}
 									</div>
 								</div>
+								<button
+									onClick={() => setSelectedRoom(null)}
+									className="w-9 h-9 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 flex items-center justify-center"
+								>
+									<X className="w-4 h-4" />
+								</button>
+							</div>
 
-								<div className="grid grid-cols-2 gap-4 mb-8">
-									<div className="p-4 bg-slate-50 rounded-3xl border border-slate-100">
-										<p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 opacity-50">
-											Giá thuê
-										</p>
-										<p className="text-sm font-black text-slate-900">
-											{((selectedRoom.price || 0) / 1000000).toFixed(1)}{" "}
-											<span className="text-xs">Trđ/th</span>
-										</p>
-									</div>
-									<div className="p-4 bg-slate-50 rounded-3xl border border-slate-100">
-										<p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 opacity-50">
-											Diện tích
-										</p>
-										<p className="text-sm font-black text-slate-900">{selectedRoom.area} m²</p>
-									</div>
-									<div className="p-4 bg-slate-50 rounded-3xl border border-slate-100">
-										<p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 opacity-50">
-											Sức chứa
-										</p>
-										<p className="text-sm font-black text-slate-900">
-											{selectedRoom.max_occupants || "--"} người
-										</p>
-									</div>
-									<div className="p-4 bg-slate-50 rounded-3xl border border-slate-100">
-										<p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 opacity-50">
-											Hiện tại
-										</p>
-										<p className="text-sm font-black text-slate-900">
-											{selectedRoom.current_occupants || 0} người
-										</p>
-									</div>
+							<div className="grid grid-cols-2 gap-3 mt-4">
+								<div className="rounded-lg border border-slate-200 p-3">
+									<p className="text-xs text-slate-400">Giá thuê</p>
+									<p className="text-sm font-semibold text-slate-800 mt-0.5">{formatCurrency(selectedRoom.price)}</p>
 								</div>
+								<div className="rounded-lg border border-slate-200 p-3">
+									<p className="text-xs text-slate-400">Diện tích</p>
+									<p className="text-sm font-semibold text-slate-800 mt-0.5">{selectedRoom.area || 0} m²</p>
+								</div>
+								<div className="rounded-lg border border-slate-200 p-3">
+									<p className="text-xs text-slate-400">Sức chứa</p>
+									<p className="text-sm font-semibold text-slate-800 mt-0.5">{selectedRoom.max_occupants || 0} người</p>
+								</div>
+								<div className="rounded-lg border border-slate-200 p-3">
+									<p className="text-xs text-slate-400">Hiện tại</p>
+									<p className="text-sm font-semibold text-slate-800 mt-0.5">{selectedRoom.current_occupants || 0} người</p>
+								</div>
+							</div>
 
-								{selectedRoom.status === "available" ?
-									<div className="flex flex-col gap-3">
-										<button
-											onClick={() => {
-												setSelectedRoom(null);
-												window.location.href = `tel:${contact?.phone}`;
-											}}
-											className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black text-xs shadow-xl shadow-slate-900/20 hover:bg-slate-800 transition-all flex items-center justify-center gap-3 active:scale-95 uppercase tracking-widest cursor-pointer"
-										>
-											<Phone className="w-4 h-4" />
-											Gọi ngay
-										</button>
-										<button
-											onClick={() => {
-												setSelectedRoom(null);
-												window.open(`https://zalo.me/${contact?.phone}`, "_blank");
-											}}
-											className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-black text-xs shadow-xl shadow-indigo-900/20 hover:bg-indigo-700 transition-all flex items-center justify-center gap-3 active:scale-95 uppercase tracking-widest cursor-pointer"
-										>
-											<MessageCircle className="w-4 h-4" />
-											Nhắn qua Zalo
-										</button>
-									</div>
-								:	<div className="py-4 text-center border-2 border-dashed border-slate-100 rounded-3xl">
-										<p className="text-xs font-bold text-slate-300 italic uppercase tracking-widest">
-											Phòng này hiện không sẵn sàng
-										</p>
-									</div>
-								}
+							<div className="mt-5 flex gap-2">
+								<a
+									href={telPhone ? `tel:${telPhone}` : undefined}
+									className={`flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold ${
+										telPhone ? "bg-brand-primary text-white hover:bg-brand-dark" : "bg-slate-100 text-slate-400 cursor-not-allowed"
+									}`}
+								>
+									<Phone className="w-4 h-4" />
+									Gọi tư vấn
+								</a>
+								<a
+									href={zaloPhone ? `https://zalo.me/${zaloPhone}` : undefined}
+									target="_blank"
+									rel="noreferrer noopener"
+									className={`flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold ${
+										zaloPhone ? "bg-blue-600 text-white hover:bg-blue-700" : "bg-slate-100 text-slate-400 cursor-not-allowed"
+									}`}
+								>
+									<MessageCircle className="w-4 h-4" />
+									Nhắn Zalo
+								</a>
 							</div>
 						</motion.div>
 					</div>
 				)}
 			</AnimatePresence>
-
-			<p className="mt-10 mb-20 text-[10px] font-black text-slate-300 uppercase tracking-widest text-center px-10 leading-relaxed">
-				* Dữ liệu cập nhật thời gian thực từ hệ thống HomeSpot. Quét mã QR tại tòa nhà để xem lại.
-			</p>
 		</div>
 	);
 }
