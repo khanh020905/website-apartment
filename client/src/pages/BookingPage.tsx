@@ -20,6 +20,11 @@ const STATUS = {
     colorClass: "bg-emerald-500",
     borderColorClass: "border-emerald-500",
   },
+  reserved: {
+    label: "Đã cọc",
+    colorClass: "bg-amber-500",
+    borderColorClass: "border-amber-500",
+  },
   occupied: {
     label: "Đang sử dụng",
     colorClass: "bg-brand-primary",

@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
 	LayoutGrid,
+	Home,
 	Users,
 	User,
 	Car,
@@ -61,6 +62,13 @@ const AppSidebar = () => {
 			path: "/dashboard",
 			show: canPost,
 			matchPaths: ["/dashboard"],
+		},
+		{
+			icon: Home,
+			label: "Tin đã đăng",
+			path: "/my-listings",
+			show: canPost,
+			matchPaths: ["/my-listings"],
 		},
 		{
 			icon: Users,
@@ -133,6 +141,13 @@ const AppSidebar = () => {
 				{ icon: TrendingUp, label: "Doanh thu", path: "/revenues" },
 				{ icon: Building2, label: "Cho chủ doanh nghiệp", path: "/for-owner" },
 			],
+		},
+		{
+			icon: Shield,
+			label: "Kiểm duyệt tin",
+			path: "/admin",
+			show: role === "admin",
+			matchPaths: ["/admin"],
 		},
 		{
 			icon: Settings,

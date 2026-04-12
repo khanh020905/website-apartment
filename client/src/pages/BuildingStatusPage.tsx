@@ -23,6 +23,12 @@ const PUBLIC_STATUS_CONFIG: Record<
 		border: "border-emerald-200",
 		dot: "bg-emerald-500",
 	},
+	reserved: {
+		color: "text-amber-700",
+		bg: "bg-amber-50",
+		border: "border-amber-200",
+		dot: "bg-amber-500",
+	},
 	occupied: {
 		color: "text-rose-700",
 		bg: "bg-rose-50",
@@ -41,7 +47,6 @@ export default function BuildingStatusPage() {
 	const { code } = useParams();
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const [data, setData] = useState<{ building: any; contact: any } | null>(null);
 	const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
 
@@ -53,7 +58,6 @@ export default function BuildingStatusPage() {
 	const loadStatus = async () => {
 		setLoading(true);
 		try {
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			const { data, error } = await api.get<{ building: any; contact: any }>(`/api/qr/${code}`);
 			if (error) setError(error);
 			else if (data) setData(data);
@@ -156,6 +160,8 @@ export default function BuildingStatusPage() {
 							<span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">
 								{key === "available" ?
 									"Trống"
+								: key === "reserved" ?
+									"Đã cọc"
 								: key === "occupied" ?
 									"Đã thuê"
 								:	"Đang sửa"}

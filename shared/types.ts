@@ -8,7 +8,7 @@ export type UserRole = 'user' | 'landlord' | 'broker' | 'admin';
 
 export type SubscriptionTier = 'free' | 'broker_basic' | 'broker_pro' | 'landlord_basic' | 'landlord_pro';
 
-export type RoomStatus = 'available' | 'occupied' | 'maintenance';
+export type RoomStatus = 'available' | 'reserved' | 'occupied' | 'maintenance';
 
 export type ListingStatus = 'draft' | 'pending' | 'approved' | 'rejected';
 
@@ -40,6 +40,7 @@ export const FURNITURE_LABELS: Record<FurnitureStatus, string> = {
 
 export const ROOM_STATUS_LABELS: Record<RoomStatus, string> = {
   available: 'Còn trống',
+  reserved: 'Đã cọc',
   occupied: 'Đang sử dụng',
   maintenance: 'Đang bảo trì',
 };
@@ -118,6 +119,9 @@ export interface Room {
   amenity_ids: number[];
   images: string[];
   description: string | null;
+  available_from: string | null;
+  deposit_meta: Record<string, unknown> | null;
+  rental_meta: Record<string, unknown> | null;
   created_at: string;
   updated_at: string;
 }
@@ -148,7 +152,17 @@ export interface Listing {
   contact_phone: string;
   contact_name: string | null;
   images: ListingImage[];
+  video_url: string | null;
   amenity_ids: number[];
+  room_features: string[];
+  interior_features: string[];
+  is_discounted: boolean;
+  is_newly_built: boolean;
+  max_people: number | null;
+  max_vehicles: number | null;
+  length_m: number | null;
+  width_m: number | null;
+  guest_note: string | null;
   status: ListingStatus;
   available_date: string | null;
   direction: HomeDirection | null;
@@ -341,6 +355,9 @@ export interface CreateRoomInput {
   amenity_ids?: number[];
   images?: string[];
   description?: string;
+  available_from?: string;
+  deposit_meta?: Record<string, unknown> | null;
+  rental_meta?: Record<string, unknown> | null;
 }
 
 export interface CreateListingInput {
@@ -361,6 +378,16 @@ export interface CreateListingInput {
   contact_phone: string;
   contact_name?: string;
   amenity_ids?: number[];
+  video_url?: string;
+  room_features?: string[];
+  interior_features?: string[];
+  is_discounted?: boolean;
+  is_newly_built?: boolean;
+  max_people?: number;
+  max_vehicles?: number;
+  length_m?: number;
+  width_m?: number;
+  guest_note?: string;
   available_date?: string;
   room_id?: string;
 }
