@@ -26,11 +26,17 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response) => {
     room_id, tenant_name, tenant_phone, tenant_email, tenant_gender,
     tenant_dob, tenant_job, tenant_nationality, tenant_city,
     tenant_district, tenant_ward, tenant_address, tenant_avatar,
-    tenant_notes, start_date, end_date, rent_amount, deposit_amount, notes 
+    tenant_notes, tenant_id_number, residence_status,
+    start_date, end_date, rent_amount, deposit_amount, notes 
   } = req.body;
 
   if (!room_id || !tenant_name || !start_date || !rent_amount) {
     res.status(400).json({ error: 'Thiếu thông tin bắt buộc (phòng, tên khách, ngày bắt đầu, tiền thuê)' });
+    return;
+  }
+
+  if (residence_status && !['pending', 'completed', 'not_registered'].includes(residence_status)) {
+    res.status(400).json({ error: 'Trạng thái tạm trú không hợp lệ' });
     return;
   }
 
@@ -67,6 +73,8 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response) => {
       tenant_address: tenant_address || null,
       tenant_avatar: tenant_avatar || null,
       tenant_notes: tenant_notes || null,
+      tenant_id_number: tenant_id_number || null,
+      residence_status: residence_status || 'not_registered',
       start_date,
       end_date: end_date || null,
       rent_amount,

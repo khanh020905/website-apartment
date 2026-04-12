@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
 	Search,
@@ -11,12 +11,15 @@ import {
 	Settings,
 	Edit3,
 	Download,
+	Upload,
+	FileSpreadsheet,
 } from "lucide-react";
 import { useBuilding } from "../contexts/BuildingContext";
 import { api } from "../lib/api";
 import * as XLSX from "xlsx";
 import Modal from "../components/modals/Modal";
 import CustomerForm from "../components/modals/CustomerForm";
+import { CUSTOMER_SYNC_FIELDS, type CustomerSyncFieldKey } from "../../../shared/customerSyncFields";
 
 interface CustomerRoom {
 	id: string;
@@ -61,16 +64,66 @@ interface CustomerResponse {
 	stats: CustomerStats;
 }
 
+interface ManagedRoom {
+	id: string;
+	room_number: string;
+	floor: number;
+	status: string;
+	building_id: string;
+	buildings: {
+		id: string;
+		name: string;
+		owner_id: string;
+	};
+}
+
+type CustomerImportPayloadRow = Partial<Record<CustomerSyncFieldKey, string>>;
+
+interface CustomerImportResponse {
+	imported: number;
+	failed: number;
+	total: number;
+	results: Array<{
+		row: number;
+		status: "success" | "error";
+		message: string;
+		contract_id?: string;
+	}>;
+}
+
+const normalizeHeader = (value: string) =>
+	value
+		.normalize("NFD")
+		.replace(/[\u0300-\u036f]/g, "")
+		.toLowerCase()
+		.replace(/[^\w/]+/g, " ")
+		.trim();
+
+const EXCEL_HEADER_FIELD_MAP: Record<string, CustomerSyncFieldKey> = {
+	...Object.fromEntries(
+		CUSTOMER_SYNC_FIELDS.map((field) => [normalizeHeader(field.label), field.key]),
+	),
+	"toa nha": "building_name",
+	"ho ten khach": "tenant_name",
+	"quan huyen": "tenant_district",
+	"phuong xa": "tenant_ward",
+	"tinh trang tam tru": "residence_status",
+	"anh dai dien": "tenant_avatar",
+};
+
 export default function CustomerPage() {
 	const { selectedBuildingId } = useBuilding();
 	const [loading, setLoading] = useState(true);
 	const [customers, setCustomers] = useState<Customer[]>([]);
-	const [rooms, setRooms] = useState<any[]>([]);
+	const [rooms, setRooms] = useState<ManagedRoom[]>([]);
 	const [search, setSearch] = useState("");
 	const [debouncedSearch, setDebouncedSearch] = useState("");
 	const [isFilterOpen, setIsFilterOpen] = useState(false);
 	const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 	const [exporting, setExporting] = useState(false);
+	const [importing, setImporting] = useState(false);
+	const [lastImportSummary, setLastImportSummary] = useState<string>("");
+	const importFileRef = useRef<HTMLInputElement | null>(null);
 
 	// Pagination
 	const [page, setPage] = useState(1);
@@ -86,9 +139,9 @@ export default function CustomerPage() {
 	const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
 
 	useEffect(() => {
-		if (!selectedBuildingId) return;
-		api.get<{rooms: any[]}>(`/api/rooms?building_id=${selectedBuildingId}`)
-			.then(res => setRooms(res.data?.rooms || []))
+		const query = selectedBuildingId ? `?building_id=${selectedBuildingId}` : "";
+		api.get<{ rooms: ManagedRoom[] }>(`/api/customers/rooms${query}`)
+			.then((res) => setRooms(res.data?.rooms || []))
 			.catch(console.error);
 	}, [selectedBuildingId]);
 
@@ -120,6 +173,7 @@ export default function CustomerPage() {
 		if (filterStatus) params.append("status", filterStatus);
 		if (filterGender) params.append("gender", filterGender);
 		if (filterResidency) params.append("residence_status", filterResidency);
+		if (filterRoom) params.append("room_id", filterRoom);
 		if (selectedBuildingId) params.append("building_id", selectedBuildingId);
 
 		try {
@@ -139,6 +193,7 @@ export default function CustomerPage() {
 		filterStatus,
 		filterGender,
 		filterResidency,
+		filterRoom,
 		selectedBuildingId,
 	]);
 
@@ -163,6 +218,136 @@ export default function CustomerPage() {
 		setExporting(false);
 	};
 
+	const handleDownloadTemplate = () => {
+		const templateRowValues: CustomerImportPayloadRow = {
+			building_name: rooms[0]?.buildings?.name || "",
+			room_number: rooms[0]?.room_number || "",
+			tenant_name: "Nguyễn Văn A",
+			tenant_phone: "0900000000",
+			tenant_email: "example@gmail.com",
+			tenant_gender: "male",
+			tenant_dob: "1998-05-12",
+			tenant_id_number: "0123456789",
+			tenant_job: "Nhân viên văn phòng",
+			tenant_nationality: "Việt Nam",
+			tenant_city: "Đà Nẵng",
+			tenant_district: "Ngũ Hành Sơn",
+			tenant_ward: "Hòa Hải",
+			tenant_address: "Số 1 Trần Đại Nghĩa",
+			residence_status: "not_registered",
+			start_date: "2026-04-12",
+			end_date: "2027-04-11",
+			rent_amount: "3500000",
+			deposit_amount: "3500000",
+			tenant_notes: "Khách nhập từ file mẫu",
+			tenant_avatar: "",
+		};
+		const templateData = [
+			CUSTOMER_SYNC_FIELDS.reduce(
+				(acc, field) => {
+					acc[field.label] = templateRowValues[field.key] || "";
+					return acc;
+				},
+				{} as Record<string, string>,
+			),
+		];
+
+		const roomReference = rooms.map((room) => ({
+			"Tên tòa nhà": room.buildings?.name || "",
+			"Số phòng": room.room_number,
+			Tầng: room.floor,
+			"Trạng thái phòng": room.status,
+			"Room ID (tham chiếu kỹ thuật)": room.id,
+		}));
+
+		const guideData = [
+			{
+				"Hướng dẫn": "Điền đúng Tên tòa nhà + Số phòng theo sheet DanhSachPhong.",
+			},
+			{
+				"Hướng dẫn": "Cột bắt buộc: Tên khách hàng, Số điện thoại, Ngày bắt đầu (YYYY-MM-DD), Tiền thuê.",
+			},
+			{
+				"Hướng dẫn": "Giới tính dùng giá trị DB: male / female / other.",
+			},
+			{
+				"Hướng dẫn": "Trạng thái tạm trú dùng giá trị DB: not_registered / pending / completed.",
+			},
+			{
+				"Hướng dẫn": "Sau khi import thành công, hệ thống sẽ tự tạo hợp đồng và cập nhật phòng sang Đang sử dụng.",
+			},
+		];
+
+		const workbook = XLSX.utils.book_new();
+		const templateSheet = XLSX.utils.json_to_sheet(templateData);
+		const roomSheet = XLSX.utils.json_to_sheet(roomReference);
+		const guideSheet = XLSX.utils.json_to_sheet(guideData);
+
+		XLSX.utils.book_append_sheet(workbook, templateSheet, "MauNhap");
+		XLSX.utils.book_append_sheet(workbook, roomSheet, "DanhSachPhong");
+		XLSX.utils.book_append_sheet(workbook, guideSheet, "HuongDan");
+		XLSX.writeFile(workbook, `mau-khach-hang-${new Date().toISOString().split("T")[0]}.xlsx`);
+	};
+
+	const mapExcelRowToPayload = (row: Record<string, unknown>): CustomerImportPayloadRow => {
+		const payload: CustomerImportPayloadRow = {};
+		for (const [rawKey, rawValue] of Object.entries(row)) {
+			const key = EXCEL_HEADER_FIELD_MAP[normalizeHeader(rawKey)];
+			if (!key) continue;
+			if (rawValue === null || rawValue === undefined) continue;
+			payload[key] = String(rawValue).trim();
+		}
+		return payload;
+	};
+
+	const handleImportExcel = async (event: React.ChangeEvent<HTMLInputElement>) => {
+		const file = event.target.files?.[0];
+		if (!file) return;
+
+		setImporting(true);
+		setLastImportSummary("");
+		try {
+			const buffer = await file.arrayBuffer();
+			const workbook = XLSX.read(buffer, { type: "array", raw: false, cellDates: true });
+			const firstSheetName = workbook.SheetNames[0];
+			if (!firstSheetName) {
+				alert("File Excel không hợp lệ");
+				return;
+			}
+
+			const sheet = workbook.Sheets[firstSheetName];
+			const rawRows = XLSX.utils.sheet_to_json<Record<string, unknown>>(sheet, {
+				defval: "",
+				raw: false,
+			});
+			const rows = rawRows
+				.map(mapExcelRowToPayload)
+				.filter((row) => Object.values(row).some((value) => String(value || "").trim().length > 0));
+
+			if (rows.length === 0) {
+				alert("Không tìm thấy dữ liệu để import trong sheet đầu tiên.");
+				return;
+			}
+
+			const { data, error } = await api.post<CustomerImportResponse>("/api/customers/import", { rows });
+			if (error || !data) {
+				alert(error || "Import thất bại.");
+				return;
+			}
+
+			const summary = `Đã nhập ${data.imported}/${data.total} khách hàng.`;
+			setLastImportSummary(summary);
+			alert(summary + (data.failed > 0 ? ` Có ${data.failed} dòng lỗi, vui lòng kiểm tra file và import lại.` : ""));
+			await fetchCustomers();
+		} catch (err) {
+			console.error("Import error:", err);
+			alert("Không thể đọc file Excel. Vui lòng kiểm tra định dạng file.");
+		} finally {
+			event.target.value = "";
+			setImporting(false);
+		}
+	};
+
 	const handleSaveCustomer = async (formData: any) => {
 		const dataToSave = {
 			room_id: formData.room_id || editingCustomer?.room?.id,
@@ -171,12 +356,14 @@ export default function CustomerPage() {
 			tenant_email: formData.tenant_email || null,
 			tenant_gender: formData.tenant_gender || null,
 			tenant_dob: formData.tenant_dob || null,
+			tenant_id_number: formData.tenant_id_number || null,
 			tenant_job: formData.tenant_job || null,
 			tenant_nationality: formData.tenant_nationality || 'Việt Nam',
 			tenant_city: formData.tenant_city || null,
 			tenant_district: formData.tenant_district || null,
 			tenant_ward: formData.tenant_ward || null,
 			tenant_address: formData.tenant_address || null,
+			residence_status: formData.residence_status || "not_registered",
 			tenant_avatar: formData.tenant_avatar || null,
 			tenant_notes: formData.tenant_notes || null,
 			start_date: formData.start_date,
@@ -188,15 +375,23 @@ export default function CustomerPage() {
 
 		try {
 			if (editingCustomer) {
-				await api.put(`/api/contracts/${editingCustomer.id}`, dataToSave);
+				const result = await api.put(`/api/contracts/${editingCustomer.id}`, dataToSave);
+				if (result.error) {
+					alert(result.error);
+					return;
+				}
 			} else {
-				await api.post("/api/contracts", dataToSave);
+				const result = await api.post("/api/contracts", dataToSave);
+				if (result.error) {
+					alert(result.error);
+					return;
+				}
 			}
 			setIsAddModalOpen(false);
 			setEditingCustomer(null);
 			fetchCustomers();
-		} catch (err: any) {
-			alert(err.response?.data?.error || "Lỗi khi lưu thông tin");
+		} catch {
+			alert("Lỗi khi lưu thông tin");
 		}
 	};
 
@@ -213,16 +408,42 @@ export default function CustomerPage() {
 			<div className="bg-white border-b border-slate-200">
 				<div className="px-6 py-4 flex items-center justify-between">
 					<h1 className="text-[20px] font-bold text-slate-900 tracking-tight">Khách hàng</h1>
-					<button
-						onClick={handleExportExcel}
-						disabled={exporting}
-						className="flex items-center gap-2 px-4 py-2 border border-slate-200 rounded-lg text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors shadow-sm disabled:opacity-50"
-					>
-						{exporting ?
-							<div className="w-4 h-4 border-2 border-emerald-600/20 border-t-emerald-600 rounded-full animate-spin" />
-						:	<Download className="w-4 h-4" />}
-						<span className="hidden sm:inline">Xuất Excel</span>
-					</button>
+					<div className="flex items-center gap-2">
+						<button
+							onClick={handleDownloadTemplate}
+							className="flex items-center gap-2 px-4 py-2 border border-slate-200 rounded-lg text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors shadow-sm"
+						>
+							<FileSpreadsheet className="w-4 h-4" />
+							<span className="hidden sm:inline">Xuất mẫu Excel</span>
+						</button>
+						<button
+							onClick={() => importFileRef.current?.click()}
+							disabled={importing}
+							className="flex items-center gap-2 px-4 py-2 border border-slate-200 rounded-lg text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors shadow-sm disabled:opacity-50"
+						>
+							{importing ?
+								<div className="w-4 h-4 border-2 border-brand-primary/20 border-t-brand-primary rounded-full animate-spin" />
+							:	<Upload className="w-4 h-4" />}
+							<span className="hidden sm:inline">Nhập Excel</span>
+						</button>
+						<button
+							onClick={handleExportExcel}
+							disabled={exporting}
+							className="flex items-center gap-2 px-4 py-2 border border-slate-200 rounded-lg text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors shadow-sm disabled:opacity-50"
+						>
+							{exporting ?
+								<div className="w-4 h-4 border-2 border-emerald-600/20 border-t-emerald-600 rounded-full animate-spin" />
+							:	<Download className="w-4 h-4" />}
+							<span className="hidden sm:inline">Xuất danh sách</span>
+						</button>
+					</div>
+					<input
+						ref={importFileRef}
+						type="file"
+						accept=".xlsx,.xls"
+						onChange={handleImportExcel}
+						className="hidden"
+					/>
 				</div>
 
 				{/* Toolbar */}
@@ -246,7 +467,9 @@ export default function CustomerPage() {
 						>
 							<option value="">Tất cả phòng</option>
 							{rooms.map(r => (
-								<option key={r.id} value={r.id}>{r.room_number}</option>
+								<option key={r.id} value={r.id}>
+									{r.room_number} - {r.buildings?.name || "Không rõ tòa"}
+								</option>
 							))}
 						</select>
 					</div>
@@ -278,8 +501,14 @@ export default function CustomerPage() {
 						onClick={() => setIsAddModalOpen(true)}
 						className="flex items-center gap-2 px-5 py-2 bg-brand-primary text-white rounded-lg text-sm font-bold transition-colors hover:bg-brand-dark shadow-sm ml-auto cursor-pointer"
 					>
-						+ Khách hàng
+						+ Nhập tay
 					</button>
+				</div>
+				<div className="px-6 pb-4">
+					<p className="text-xs font-medium text-slate-500">
+						Bạn có thể nhập thông tin khách hàng bằng form tay hoặc dùng file mẫu Excel để import nhanh sau khi tạo phòng/hợp đồng.
+					</p>
+					{lastImportSummary && <p className="text-xs font-semibold text-emerald-600 mt-1">{lastImportSummary}</p>}
 				</div>
 			</div>
 
@@ -596,7 +825,7 @@ export default function CustomerPage() {
 					setIsAddModalOpen(false);
 					setEditingCustomer(null);
 				}}
-				title={editingCustomer ? "Chỉnh sửa thông tin chung" : "Thông tin chung"}
+				title={editingCustomer ? "Chỉnh sửa thông tin chung" : "Nhập tay thông tin khách hàng"}
 				size="lg"
 			>
 				<CustomerForm
@@ -606,6 +835,7 @@ export default function CustomerPage() {
 						setEditingCustomer(null);
 					}}
 					initialData={editingCustomer}
+					rooms={rooms}
 				/>
 			</Modal>
 		</div>
