@@ -50,7 +50,7 @@ interface MenuItem {
 
 const AppSidebar = () => {
 	const location = useLocation();
-	const { user, canPost, signOut } = useAuth();
+	const { user, role, canPost, signOut } = useAuth();
 	const [isHovered, setIsHovered] = useState(false);
 	const [isSubCollapsed, setIsSubCollapsed] = useState(false);
 
@@ -154,6 +154,17 @@ const AppSidebar = () => {
 				{ icon: Shield, label: "Vai trò", path: "/roles" },
 				{ icon: Plug, label: "Tích hợp", path: "/integrations" },
 				{ icon: Key, label: "Quản lý API", path: "/api-management" },
+			],
+		},
+		{
+			icon: Settings,
+			label: "Quản lý cá nhân",
+			path: "/profile",
+			show: !!user && role === "user",
+			matchPaths: ["/profile", "/my-listings"],
+			subItems: [
+				{ icon: User, label: "Hồ sơ cá nhân", path: "/profile" },
+				{ icon: LayoutGrid, label: "Tin đăng của tôi", path: "/my-listings" },
 			],
 		},
 		{
