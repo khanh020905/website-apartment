@@ -1,9 +1,21 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvents } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, Tooltip, useMap, useMapEvents } from "react-leaflet";
 import type { Marker as LeafletMarker } from "leaflet";
+import { Clock } from "lucide-react";
 import { createPriceIcon } from "./PriceMarker";
 import type { Listing } from "../../../shared/types";
 import "leaflet/dist/leaflet.css";
+
+const formatTimeAgo = (dateStr: string) => {
+	const now = new Date();
+	const date = new Date(dateStr);
+	const diffInMs = now.getTime() - date.getTime();
+	const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+
+	if (diffInDays === 0) return "Đăng hôm nay";
+	if (diffInDays === 1) return "Đăng 1 ngày trước";
+	return `Đăng cách đây ${diffInDays} ngày trước`;
+};
 
 interface MapViewProps {
 	listings: Listing[];
@@ -88,7 +100,14 @@ function FocusOnListing({ selectedListing, markerRef }: FocusOnListingProps) {
 	useEffect(() => {
 		if (!selectedListing || selectedListing.lat === null || selectedListing.lng === null) return;
 
-		map.flyTo([selectedListing.lat, selectedListing.lng], Math.max(map.getZoom(), MAP_SELECTED_ZOOM), {
+		const targetZoom = Math.max(map.getZoom(), MAP_SELECTED_ZOOM);
+		// Calculate offset to center the popup (which is above the marker)
+		const point = map.project([selectedListing.lat, selectedListing.lng], targetZoom);
+		// Move the visual center down by ~180px so the popup (above marker) is centered
+		point.y -= 180; 
+		const targetLatLng = map.unproject(point, targetZoom);
+
+		map.flyTo(targetLatLng, targetZoom, {
 			duration: 0.6,
 		});
 		markerRef?.openPopup();
@@ -179,8 +198,8 @@ function ListingPopupContent({ listing }: ListingPopupContentProps) {
 	const activeImage = images[safeIndex];
 
 	return (
-		<div className="w-[min(44rem,84vw)] rounded-2xl bg-slate-200/95 p-3 md:p-4">
-			<div className="relative flex h-[26rem] items-center justify-center overflow-hidden rounded-xl bg-slate-200">
+		<div className="w-[min(36rem,80vw)] rounded-2xl bg-white p-3">
+			<div className="relative flex h-[20rem] items-center justify-center overflow-hidden rounded-xl bg-slate-100">
 				<img
 					src={activeImage}
 					alt={listing.title}
@@ -348,11 +367,34 @@ const MapView = ({ listings, selectedListingId = null, onSelectListing }: MapVie
 							},
 						}}
 					>
+						<Tooltip
+							direction="top"
+							offset={[0, -10]}
+							opacity={1}
+							permanent={false}
+							className="custom-map-tooltip"
+						>
+							<div className="min-w-[200px] overflow-hidden rounded-[24px] bg-white shadow-2xl border border-slate-50">
+								<div className="bg-gradient-to-br from-brand-primary to-brand-dark px-5 py-3">
+									<p className="text-[14px] font-extrabold text-white tracking-tight line-clamp-1">
+										{listing.address?.split(",")[0] || "Địa chỉ"}
+									</p>
+								</div>
+								<div className="flex items-center gap-2.5 px-5 py-4 bg-white">
+									<div className="flex items-center justify-center w-7 h-7 rounded-full bg-brand-primary/10">
+										<Clock className="h-3.5 w-3.5 text-brand-primary" />
+									</div>
+									<p className="text-[13px] font-bold text-slate-500">
+										{formatTimeAgo(listing.created_at)}
+									</p>
+								</div>
+							</div>
+						</Tooltip>
 						<Popup
 							closeButton={true}
 							offset={[0, -10]}
-							maxWidth={760}
-							minWidth={320}
+							maxWidth={600}
+							minWidth={300}
 							className="map-gallery-popup"
 						>
 							<div className="text-left">

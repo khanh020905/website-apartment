@@ -91,14 +91,14 @@ export default function TransactionsPage() {
 			iconColor: "text-violet-600",
 		},
 		{
-			label: "Tổng thu",
+			label: "Tổng nạp",
 			value: stats.income,
 			icon: TrendingUp,
 			iconBg: "bg-emerald-100",
 			iconColor: "text-emerald-600",
 		},
 		{
-			label: "Tổng chi",
+			label: "Tổng rút",
 			value: stats.expense,
 			icon: TrendingDown,
 			iconBg: "bg-rose-100",
@@ -128,7 +128,7 @@ export default function TransactionsPage() {
 		<div className="flex-1 flex flex-col h-full bg-[#f8f9fa] relative overflow-hidden font-['Plus_Jakarta_Sans',sans-serif]">
 			<div className="bg-white border-b border-slate-200">
 				<div className="px-6 py-4 flex items-center justify-between">
-					<h1 className="text-[20px] font-bold text-slate-900 tracking-tight">Giao dịch thu chi</h1>
+					<h1 className="text-[20px] font-bold text-slate-900 tracking-tight">Giao dịch nạp rút</h1>
 					<div className="flex items-center gap-2">
 						<button className="flex items-center gap-2 px-4 py-2 border border-slate-200 rounded-lg text-sm font-bold text-slate-600 hover:bg-slate-50 transition-colors shadow-sm">
 							<Download className="w-4 h-4" /> Xuất dữ liệu
@@ -155,8 +155,8 @@ export default function TransactionsPage() {
 							className="w-full px-3 py-2 border border-slate-200 rounded-lg text-[13px] font-bold text-slate-600 bg-white focus:outline-none appearance-none cursor-pointer"
 						>
 							<option value="">Loại giao dịch</option>
-							<option value="income">Thu nhập</option>
-							<option value="expense">Chi phí</option>
+							<option value="income">Nạp</option>
+							<option value="expense">Rút</option>
 						</select>
 					</div>
 
@@ -233,7 +233,7 @@ export default function TransactionsPage() {
 				</div>
 			</div>
 
-			<Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Tạo giao dịch mới" size="lg">
+			<Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Tạo giao dịch nạp/rút mới" size="lg">
 				<TransactionForm onSubmit={handleCreateTransaction} onCancel={() => setIsModalOpen(false)} />
 			</Modal>
 		</div>

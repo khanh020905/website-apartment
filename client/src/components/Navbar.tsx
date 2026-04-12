@@ -6,8 +6,6 @@ import {
 	PlusCircle,
 	MinusCircle,
 	ChevronDown,
-	Settings,
-	Grid,
 	LayoutDashboard,
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
@@ -78,6 +76,8 @@ const Navbar = () => {
 		broker: "Môi giới",
 		admin: "Admin",
 	};
+	const compactActionButtonClass =
+		"w-[106px] h-9 px-3 rounded-lg text-[13px] font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer";
 
 	return (
 		<div className="h-16 bg-white border-b border-slate-100 flex items-center justify-between px-8 z-40 sticky top-0 shadow-sm shadow-slate-200/50 gap-6">
@@ -205,9 +205,9 @@ const Navbar = () => {
 									<motion.button
 										whileHover={{ scale: 1.03 }}
 										whileTap={{ scale: 0.97 }}
-										className="flex items-center gap-2 px-4 py-2.5 bg-white border border-brand-primary text-brand-primary rounded-xl text-sm font-black transition-all cursor-pointer hover:bg-brand-bg"
+										className={`${compactActionButtonClass} bg-white border border-brand-primary text-brand-primary hover:bg-brand-bg`}
 									>
-										<LayoutDashboard className="w-4.5 h-4.5" />
+										<LayoutDashboard className="w-4 h-4" />
 										<span>Quản lý</span>
 									</motion.button>
 								</Link>
@@ -216,9 +216,9 @@ const Navbar = () => {
 								<motion.button
 									whileHover={{ scale: 1.05 }}
 									whileTap={{ scale: 0.95 }}
-									className="flex items-center gap-2 px-5 py-2.5 bg-brand-dark text-white rounded-xl text-sm font-black transition-all cursor-pointer shadow-lg shadow-brand-dark/20 hover:shadow-brand-dark/40"
+									className={`${compactActionButtonClass} bg-brand-dark text-white shadow-md shadow-brand-dark/20 hover:shadow-brand-dark/35`}
 								>
-									<PlusCircle className="w-5 h-5" />
+									<PlusCircle className="w-4 h-4" />
 									<span>Đăng tin</span>
 								</motion.button>
 							</Link>
@@ -228,19 +228,19 @@ const Navbar = () => {
 										whileHover={{ scale: 1.02 }}
 										whileTap={{ scale: 0.98 }}
 										onClick={() => setIsIncomeModalOpen(true)}
-										className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-primary text-white rounded-lg text-xs font-bold transition-all cursor-pointer"
+										className={`${compactActionButtonClass} bg-brand-primary text-white shadow-sm shadow-brand-primary/20 hover:bg-brand-dark`}
 									>
-										<PlusCircle className="w-3.5 h-3.5" />
-										<span>Thu nhập</span>
+										<PlusCircle className="w-4 h-4" />
+										<span>Nạp</span>
 									</motion.button>
 									<motion.button
 										whileHover={{ scale: 1.02 }}
 										whileTap={{ scale: 0.98 }}
 										onClick={() => setIsExpenseModalOpen(true)}
-										className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-primary text-white rounded-lg text-xs font-bold transition-all cursor-pointer"
+										className={`${compactActionButtonClass} bg-brand-primary text-white shadow-sm shadow-brand-primary/20 hover:bg-brand-dark`}
 									>
-										<MinusCircle className="w-3.5 h-3.5" />
-										<span>Chi phí</span>
+										<MinusCircle className="w-4 h-4" />
+										<span>Rút</span>
 									</motion.button>
 								</>
 							)}
@@ -270,18 +270,12 @@ const Navbar = () => {
 
 				{/* Icons */}
 				{user && (
-					<div className="flex items-center gap-1.5 pt-0.5">
-						<button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-xl transition-all cursor-pointer">
-							<Grid className="w-5 h-5" />
-						</button>
+					<div className="flex items-center pt-0.5">
 						<button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-xl transition-all relative cursor-pointer">
 							<Bell className="w-5 h-5" />
 							{notificationCount > 0 && (
 								<span className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full border-2 border-white shadow-sm" />
 							)}
-						</button>
-						<button className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-50 rounded-xl transition-all cursor-pointer">
-							<Settings className="w-5 h-5" />
 						</button>
 					</div>
 				)}
@@ -289,29 +283,26 @@ const Navbar = () => {
 				{/* Profile */}
 				{user ?
 					<div
-						className="relative pl-6 border-l border-slate-100"
+						className="relative pl-4 border-l border-slate-100"
 						ref={dropdownRef}
 					>
 						<button
 							onClick={() => setDropdownOpen(!dropdownOpen)}
-							className="flex items-center gap-3 h-full cursor-pointer group"
+							className="flex items-center gap-2.5 h-full cursor-pointer group"
 						>
 							<div className="text-right hidden sm:block">
-								<p className="text-sm font-black text-slate-800 leading-tight truncate max-w-30">
+								<p className="text-[13px] font-black text-slate-800 leading-tight truncate max-w-28">
 									{user.user_metadata?.full_name || "Người dùng"}
 								</p>
-								<p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+								<p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
 									{ROLE_LABELS[role] || role}
 								</p>
 							</div>
-							<div className="w-10 h-10 bg-teal-600 rounded-full flex items-center justify-center text-white ring-4 ring-teal-50 group-hover:ring-teal-100 transition-all shadow-sm">
-								<span className="text-sm font-black italic">
+							<div className="w-8 h-8 bg-teal-600 rounded-full flex items-center justify-center text-white ring-2 ring-teal-50 group-hover:ring-teal-100 transition-all shadow-sm">
+								<span className="text-[13px] font-black italic">
 									{(user.user_metadata?.full_name?.[0] || "U").toUpperCase()}
 								</span>
 							</div>
-							<ChevronDown
-								className={`w-4 h-4 text-slate-400 transition-transform ${dropdownOpen ? "rotate-180" : ""}`}
-							/>
 						</button>
 
 						<AnimatePresence>
@@ -361,19 +352,19 @@ const Navbar = () => {
 			<Modal
 				isOpen={isIncomeModalOpen}
 				onClose={() => setIsIncomeModalOpen(false)}
-				title="+ Thu nhập"
+				title="+ Nạp"
 				size="lg"
 			>
 				<IncomeForm
 					onCancel={() => setIsIncomeModalOpen(false)}
 					onSubmit={async (data) => {
 						try {
-							await api.post("/api/transactions", { ...data, type: "income" });
+							await api.post("/api/transactions", data);
 							setIsIncomeModalOpen(false);
-							alert("Tạo phiếu thu thành công!");
+							alert("Tạo phiếu nạp thành công!");
 						} catch (err) {
 							console.error(err);
-							alert("Lỗi khi tạo phiếu thu");
+							alert("Lỗi khi tạo phiếu nạp");
 						}
 					}}
 				/>
@@ -382,19 +373,19 @@ const Navbar = () => {
 			<Modal
 				isOpen={isExpenseModalOpen}
 				onClose={() => setIsExpenseModalOpen(false)}
-				title="- Chi phí"
+				title="- Rút"
 				size="lg"
 			>
 				<ExpenseForm
 					onCancel={() => setIsExpenseModalOpen(false)}
 					onSubmit={async (data) => {
 						try {
-							await api.post("/api/transactions", { ...data, type: "expense" });
+							await api.post("/api/transactions", data);
 							setIsExpenseModalOpen(false);
-							alert("Tạo phiếu chi thành công!");
+							alert("Tạo phiếu rút thành công!");
 						} catch (err) {
 							console.error(err);
-							alert("Lỗi khi tạo phiếu chi");
+							alert("Lỗi khi tạo phiếu rút");
 						}
 					}}
 				/>

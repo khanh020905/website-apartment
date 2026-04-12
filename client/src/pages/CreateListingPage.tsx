@@ -117,6 +117,8 @@ export default function CreateListingPage() {
 	const [error, setError] = useState("");
 	const [success, setSuccess] = useState("");
 	const [customAmenityDraft, setCustomAmenityDraft] = useState("");
+	const [amenityKeyword, setAmenityKeyword] = useState("");
+	const [showCustomAmenityInput, setShowCustomAmenityInput] = useState(false);
 
 	const imageInputRef = useRef<HTMLInputElement | null>(null);
 	const videoInputRef = useRef<HTMLInputElement | null>(null);
@@ -312,6 +314,12 @@ export default function CreateListingPage() {
 		return Number.isFinite(area) && area > 0 ? area : 0;
 	}, [form.length_m, form.width_m, form.area]);
 
+	const filteredAmenities = useMemo(() => {
+		const keyword = amenityKeyword.trim().toLowerCase();
+		if (!keyword) return amenities;
+		return amenities.filter((am) => am.name_vi.toLowerCase().includes(keyword));
+	}, [amenities, amenityKeyword]);
+
 	const toggleStringArray = (field: "room_features" | "interior_features", value: string) => {
 		setForm((prev) => ({
 			...prev,
@@ -397,6 +405,7 @@ export default function CreateListingPage() {
 				prev.custom_amenities.includes(trimmed) ? prev.custom_amenities : [...prev.custom_amenities, trimmed],
 		}));
 		setCustomAmenityDraft("");
+		setShowCustomAmenityInput(false);
 	};
 
 	const handleRemoveImage = (url: string) => {
@@ -525,9 +534,9 @@ export default function CreateListingPage() {
 	return (
 		<div className="flex-1 overflow-y-auto bg-slate-50">
 			<div className="max-w-7xl mx-auto p-4 sm:p-6 pb-28 lg:pb-10">
-				<div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+				<div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
 					<div className="px-5 sm:px-6 py-4 border-b border-slate-100 sticky top-0 bg-white z-10">
-						<h1 className="text-2xl font-black text-amber-700 tracking-tight">
+						<h1 className="text-[20px] font-bold text-slate-900 tracking-tight">
 							{listingIdParam ? "Sửa tin đăng" : "Tạo tin đăng"}
 						</h1>
 					</div>
@@ -545,7 +554,7 @@ export default function CreateListingPage() {
 						)}
 
 						<section className="space-y-4">
-							<h2 className="text-2xl font-black text-slate-900">Hình ảnh và video</h2>
+							<h2 className="text-[20px] font-bold text-slate-900">Hình ảnh và video</h2>
 							<div className="grid gap-6 lg:grid-cols-2">
 								<div>
 								<p className="text-lg font-bold mb-2">
@@ -562,7 +571,7 @@ export default function CreateListingPage() {
 								<button
 									onClick={() => imageInputRef.current?.click()}
 									disabled={uploadingImages || imageUploads.length >= 15}
-									className="w-44 h-44 border border-dashed border-slate-300 rounded-2xl flex flex-col items-center justify-center gap-2 text-slate-500 hover:border-amber-400 hover:text-amber-700 transition-all disabled:opacity-50 cursor-pointer"
+									className="w-40 h-40 border border-dashed border-slate-300 rounded-xl flex flex-col items-center justify-center gap-2 text-slate-500 hover:border-brand-primary hover:text-brand-primary transition-all disabled:opacity-50 cursor-pointer"
 								>
 									<ImagePlus className="w-8 h-8" />
 									<span className="font-semibold">{uploadingImages ? "Đang tải..." : "Thêm ảnh"}</span>
@@ -596,7 +605,7 @@ export default function CreateListingPage() {
 								<button
 									onClick={() => videoInputRef.current?.click()}
 									disabled={uploadingVideo}
-									className="w-full max-w-lg border border-dashed border-slate-300 rounded-2xl py-5 px-4 text-left flex items-center gap-3 hover:border-amber-400 transition-all disabled:opacity-50 cursor-pointer"
+									className="w-full max-w-lg border border-dashed border-slate-300 rounded-xl py-4 px-4 text-left flex items-center gap-3 hover:border-brand-primary transition-all disabled:opacity-50 cursor-pointer"
 								>
 									<Video className="w-6 h-6 text-slate-500" />
 									<span className="font-semibold text-slate-700">
@@ -612,15 +621,15 @@ export default function CreateListingPage() {
 						</section>
 
 						<section className="space-y-4">
-							<h2 className="text-2xl font-black text-slate-900">Mã phòng chung giá</h2>
+							<h2 className="text-[20px] font-bold text-slate-900">Mã phòng chung giá</h2>
 							<p className="text-slate-500">Chọn mã phòng giống nhau về hình ảnh và giá</p>
 							{loadingInitialData ?
 								<div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-slate-500 font-semibold">
 									Đang tải thông tin tin đăng...
 								</div>
 							: selectedRoom ?
-								<div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 flex flex-wrap items-center gap-3">
-									<span className="inline-flex px-4 py-2 rounded-xl border border-slate-300 bg-white text-lg font-black text-slate-800">
+								<div className="rounded-xl border border-slate-200 bg-slate-50 p-4 flex flex-wrap items-center gap-3">
+									<span className="inline-flex px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-base font-bold text-slate-800">
 										{selectedRoom.room_number}
 									</span>
 									<span className="text-sm font-semibold text-slate-500">{selectedBuilding?.name}</span>
@@ -631,18 +640,18 @@ export default function CreateListingPage() {
 										Chọn mã khác
 									</button>
 								</div>
-							:	<div className="rounded-2xl border border-amber-300 bg-amber-50 p-4 space-y-3">
-									<p className="text-amber-800 font-bold">Bạn chưa chọn mã phòng để đăng tin.</p>
+							:	<div className="rounded-xl border border-brand-primary/30 bg-brand-bg p-4 space-y-3">
+									<p className="text-brand-dark font-bold">Bạn chưa chọn mã phòng để đăng tin.</p>
 									<div className="flex flex-wrap gap-2">
 										<button
 											onClick={() => navigate("/my-listings")}
-											className="px-4 py-2 rounded-xl bg-amber-700 text-white font-bold cursor-pointer"
+											className="px-4 py-2 rounded-lg bg-brand-primary text-white text-sm font-bold cursor-pointer hover:bg-brand-dark"
 										>
 											Chọn phòng để đăng tin
 										</button>
 										<button
 											onClick={() => navigate("/my-listings")}
-											className="px-4 py-2 rounded-xl border border-amber-400 text-amber-700 bg-white font-bold cursor-pointer"
+											className="px-4 py-2 rounded-lg border border-brand-primary/30 text-brand-primary bg-white text-sm font-bold cursor-pointer hover:bg-brand-bg"
 										>
 											Thêm mã phòng
 										</button>
@@ -656,7 +665,7 @@ export default function CreateListingPage() {
 								value={form.title}
 								onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
 								placeholder="Tiêu đề tin đăng *"
-								className="w-full h-14 rounded-2xl border border-slate-300 px-5 text-lg font-semibold"
+								className="w-full h-12 rounded-xl border border-slate-300 px-4 text-base font-semibold focus:outline-none focus:border-brand-primary"
 								maxLength={100}
 							/>
 							<div className="relative">
@@ -664,41 +673,41 @@ export default function CreateListingPage() {
 									value={formatVnd(form.price)}
 									onChange={(e) => setForm((prev) => ({ ...prev, price: e.target.value }))}
 									placeholder="Phí thuê *"
-									className="w-full h-16 rounded-2xl border border-slate-300 px-5 text-[38px] font-black tracking-tight text-slate-800"
+									className="w-full h-14 rounded-xl border border-slate-300 px-4 text-2xl font-bold tracking-tight text-slate-800 focus:outline-none focus:border-brand-primary"
 								/>
 								<span className="absolute right-5 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">VNĐ/tháng</span>
 							</div>
-							<label className="flex items-center gap-3 text-2xl font-semibold text-slate-800">
+							<label className="flex items-center gap-2.5 text-base font-semibold text-slate-800">
 								<input
 									type="checkbox"
 									checked={form.is_discounted}
 									onChange={(e) => setForm((prev) => ({ ...prev, is_discounted: e.target.checked }))}
-									className="w-6 h-6 rounded border-slate-300"
+									className="w-4 h-4 rounded border-slate-300"
 								/>
 								Đang có giảm giá tiền thuê
 							</label>
-							<label className="flex items-center gap-3 text-2xl font-semibold text-slate-800">
+							<label className="flex items-center gap-2.5 text-base font-semibold text-slate-800">
 								<input
 									type="checkbox"
 									checked={form.is_newly_built}
 									onChange={(e) => setForm((prev) => ({ ...prev, is_newly_built: e.target.checked }))}
-									className="w-6 h-6 rounded border-slate-300"
+									className="w-4 h-4 rounded border-slate-300"
 								/>
 								Mới xây chưa qua sử dụng
 							</label>
 						</section>
 
 						<section className="space-y-4">
-							<h2 className="text-2xl font-black text-slate-900">Loại hình</h2>
+							<h2 className="text-[20px] font-bold text-slate-900">Loại hình</h2>
 							<div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
 								{RENTAL_TYPES.map((type) => (
 									<button
 										key={type.key}
 										onClick={() => setForm((prev) => ({ ...prev, property_type: type.key }))}
-										className={`h-24 rounded-2xl border text-lg font-bold transition-all cursor-pointer ${
+										className={`h-14 rounded-xl border text-sm font-semibold transition-all cursor-pointer ${
 											form.property_type === type.key ?
-												"bg-slate-700 text-white border-slate-700"
-											:	"bg-white border-slate-200 text-slate-700"
+												"bg-brand-primary text-white border-brand-primary"
+											:	"bg-white border-slate-200 text-slate-700 hover:border-slate-300"
 										}`}
 									>
 										{type.label}
@@ -708,104 +717,162 @@ export default function CreateListingPage() {
 						</section>
 
 						<section className="space-y-4">
-							<h2 className="text-2xl font-black text-slate-900">Loại phòng</h2>
-							<div className="flex flex-wrap gap-3">
-								{ROOM_FEATURES.map((feature) => (
-									<button
-										key={feature}
-										onClick={() => toggleStringArray("room_features", feature)}
-										className={`px-4 py-2.5 rounded-full border text-sm md:text-base font-semibold cursor-pointer ${
-											form.room_features.includes(feature) ?
-												"bg-amber-50 border-amber-400 text-amber-700"
-											:	"bg-white border-slate-200 text-slate-700"
-										}`}
-									>
-										{feature}
-									</button>
-								))}
-							</div>
-						</section>
-
-						<section className="space-y-4">
-							<h2 className="text-2xl font-black text-slate-900">Nội thất</h2>
-							<div className="flex flex-wrap gap-3">
-								{INTERIOR_FEATURES.map((feature) => (
-									<button
-										key={feature}
-										onClick={() => toggleStringArray("interior_features", feature)}
-										className={`px-4 py-2.5 rounded-full border text-sm md:text-base font-semibold cursor-pointer ${
-											form.interior_features.includes(feature) ?
-												"bg-amber-50 border-amber-400 text-amber-700"
-											:	"bg-white border-slate-200 text-slate-700"
-										}`}
-									>
-										{feature}
-									</button>
-								))}
-							</div>
-						</section>
-
-						<section className="space-y-4">
-							<h2 className="text-2xl font-black text-slate-900">Tiện ích</h2>
-							<div className="flex flex-wrap gap-3">
-								{amenities.map((am) => (
-									<button
-										key={am.id}
-										onClick={() => toggleAmenity(am.id)}
-										className={`px-4 py-2.5 rounded-full border text-sm md:text-base font-semibold cursor-pointer ${
-											form.amenity_ids.includes(am.id) ?
-												"bg-amber-50 border-amber-400 text-amber-700"
-											:	"bg-white border-slate-200 text-slate-700"
-										}`}
-									>
-										{am.name_vi}
-									</button>
-								))}
-								<button
-									onClick={handleAddCustomAmenity}
-									className="px-4 py-2.5 rounded-full border border-amber-500 text-amber-700 font-bold flex items-center gap-1 cursor-pointer"
-								>
-									<PlusCircle className="w-4 h-4" /> Thêm tiện ích
-								</button>
-							</div>
-							<div className="flex gap-2">
-								<input
-									value={customAmenityDraft}
-									onChange={(e) => setCustomAmenityDraft(e.target.value)}
-									placeholder="Nhập tiện ích tùy chỉnh..."
-									className="flex-1 h-12 rounded-xl border border-slate-300 px-4"
-								/>
-								<button
-									onClick={handleAddCustomAmenity}
-									className="px-4 rounded-xl border border-slate-300 text-slate-700 font-semibold cursor-pointer"
-								>
-									Thêm
-								</button>
-							</div>
-							{form.custom_amenities.length > 0 && (
-								<div className="flex flex-wrap gap-2">
-									{form.custom_amenities.map((item) => (
-										<span key={item} className="px-3 py-1.5 rounded-full bg-slate-100 text-slate-700 text-sm font-semibold flex items-center gap-1">
-											{item}
-											<button
-												onClick={() =>
-													setForm((prev) => ({
-														...prev,
-														custom_amenities: prev.custom_amenities.filter((x) => x !== item),
-													}))
-												}
-												className="cursor-pointer"
-											>
-												<MinusCircle className="w-3.5 h-3.5" />
-											</button>
-										</span>
-									))}
+							<div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-5 md:p-6 space-y-6">
+								<div className="flex flex-wrap items-start justify-between gap-3">
+									<div>
+										<h2 className="text-[20px] font-bold text-slate-900">Chi tiết phòng</h2>
+										<p className="text-sm font-medium text-slate-500 mt-1">
+											Chọn thông tin giúp khách lọc phòng nhanh và chính xác hơn.
+										</p>
+									</div>
+									<span className="px-3 py-1.5 rounded-full border border-brand-primary/20 bg-brand-bg text-brand-primary text-xs font-bold">
+										{form.room_features.length + form.interior_features.length + form.amenity_ids.length + form.custom_amenities.length} mục đã chọn
+									</span>
 								</div>
-							)}
+
+								<div className="space-y-3">
+									<div className="flex items-center justify-between">
+										<h3 className="text-base font-bold text-slate-800">Loại phòng</h3>
+										<span className="text-xs font-bold text-slate-500">
+											{form.room_features.length} đã chọn
+										</span>
+									</div>
+									<div className="flex flex-wrap gap-2.5">
+										{ROOM_FEATURES.map((feature) => (
+											<button
+												key={feature}
+												type="button"
+												onClick={() => toggleStringArray("room_features", feature)}
+												className={`px-3.5 py-2 rounded-xl border text-sm font-semibold cursor-pointer transition-colors ${
+													form.room_features.includes(feature) ?
+														"bg-brand-bg border-brand-primary/40 text-brand-dark"
+													:	"bg-white border-slate-200 text-slate-700 hover:border-slate-300"
+												}`}
+											>
+												{feature}
+											</button>
+										))}
+									</div>
+								</div>
+
+								<div className="space-y-3">
+									<div className="flex items-center justify-between">
+										<h3 className="text-base font-bold text-slate-800">Nội thất</h3>
+										<span className="text-xs font-bold text-slate-500">
+											{form.interior_features.length} đã chọn
+										</span>
+									</div>
+									<div className="flex flex-wrap gap-2.5">
+										{INTERIOR_FEATURES.map((feature) => (
+											<button
+												key={feature}
+												type="button"
+												onClick={() => toggleStringArray("interior_features", feature)}
+												className={`px-3.5 py-2 rounded-xl border text-sm font-semibold cursor-pointer transition-colors ${
+													form.interior_features.includes(feature) ?
+														"bg-brand-bg border-brand-primary/40 text-brand-dark"
+													:	"bg-white border-slate-200 text-slate-700 hover:border-slate-300"
+												}`}
+											>
+												{feature}
+											</button>
+										))}
+									</div>
+								</div>
+
+								<div className="space-y-3">
+									<div className="flex flex-wrap items-center justify-between gap-2">
+										<h3 className="text-base font-bold text-slate-800">Tiện ích</h3>
+										<span className="text-xs font-bold text-slate-500">
+											{form.amenity_ids.length + form.custom_amenities.length} đã chọn
+										</span>
+									</div>
+
+									<input
+										value={amenityKeyword}
+										onChange={(e) => setAmenityKeyword(e.target.value)}
+										placeholder="Tìm nhanh tiện ích..."
+										className="w-full h-11 rounded-xl border border-slate-300 px-4 text-sm font-medium bg-white"
+									/>
+
+									<div className="flex flex-wrap gap-2.5">
+										{filteredAmenities.map((am) => (
+											<button
+												key={am.id}
+												type="button"
+												onClick={() => toggleAmenity(am.id)}
+												className={`px-3.5 py-2 rounded-xl border text-sm font-semibold cursor-pointer transition-colors ${
+													form.amenity_ids.includes(am.id) ?
+														"bg-brand-bg border-brand-primary/40 text-brand-dark"
+													:	"bg-white border-slate-200 text-slate-700 hover:border-slate-300"
+												}`}
+											>
+												{am.name_vi}
+											</button>
+										))}
+										{filteredAmenities.length === 0 && (
+											<p className="text-sm text-slate-500">Không tìm thấy tiện ích phù hợp.</p>
+										)}
+									</div>
+
+									<div className="space-y-2">
+										<button
+											type="button"
+											onClick={() => setShowCustomAmenityInput((prev) => !prev)}
+											className="px-4 py-2.5 rounded-xl border border-brand-primary/40 text-brand-primary text-sm font-bold flex items-center gap-1.5 hover:bg-brand-bg cursor-pointer"
+										>
+											<PlusCircle className="w-4 h-4" />
+											Thêm tiện ích tùy chỉnh
+										</button>
+										{showCustomAmenityInput && (
+											<div className="flex gap-2">
+												<input
+													value={customAmenityDraft}
+													onChange={(e) => setCustomAmenityDraft(e.target.value)}
+													placeholder="Nhập tiện ích mới..."
+													className="flex-1 h-11 rounded-xl border border-slate-300 px-4 text-sm font-medium bg-white"
+												/>
+												<button
+													type="button"
+													onClick={handleAddCustomAmenity}
+													className="px-4 rounded-xl border border-slate-300 text-slate-700 text-sm font-semibold cursor-pointer hover:bg-slate-100"
+												>
+													Thêm
+												</button>
+											</div>
+										)}
+									</div>
+
+									{form.custom_amenities.length > 0 && (
+										<div className="flex flex-wrap gap-2">
+											{form.custom_amenities.map((item) => (
+												<span
+													key={item}
+													className="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-sm font-semibold flex items-center gap-1.5"
+												>
+													{item}
+													<button
+														type="button"
+														onClick={() =>
+															setForm((prev) => ({
+																...prev,
+																custom_amenities: prev.custom_amenities.filter((x) => x !== item),
+															}))
+														}
+														className="cursor-pointer text-slate-400 hover:text-rose-500"
+													>
+														<MinusCircle className="w-3.5 h-3.5" />
+													</button>
+												</span>
+											))}
+										</div>
+									)}
+								</div>
+							</div>
 						</section>
 
 						<section className="space-y-4">
-							<h2 className="text-2xl font-black text-slate-900">Số người tối đa</h2>
+							<h2 className="text-[20px] font-bold text-slate-900">Số người tối đa</h2>
 							<div className="flex flex-wrap gap-3">
 								{Array.from({ length: 10 }).map((_, idx) => {
 									const value = idx + 1;
@@ -813,10 +880,10 @@ export default function CreateListingPage() {
 										<button
 											key={value}
 											onClick={() => setForm((prev) => ({ ...prev, max_people: value }))}
-											className={`w-14 h-14 rounded-full border text-xl font-bold cursor-pointer ${
+											className={`w-12 h-12 rounded-xl border text-base font-bold cursor-pointer ${
 												form.max_people === value ?
-													"bg-amber-50 border-amber-500 text-amber-700"
-												:	"border-slate-200 text-slate-700"
+													"bg-brand-bg border-brand-primary/40 text-brand-dark"
+												:	"border-slate-200 text-slate-700 hover:border-slate-300"
 											}`}
 										>
 											{value}
@@ -827,7 +894,7 @@ export default function CreateListingPage() {
 						</section>
 
 						<section className="space-y-4">
-							<h2 className="text-2xl font-black text-slate-900">Số xe tối đa</h2>
+							<h2 className="text-[20px] font-bold text-slate-900">Số xe tối đa</h2>
 							<div className="flex flex-wrap gap-3">
 								{Array.from({ length: 10 }).map((_, idx) => {
 									const value = idx + 1;
@@ -835,10 +902,10 @@ export default function CreateListingPage() {
 										<button
 											key={value}
 											onClick={() => setForm((prev) => ({ ...prev, max_vehicles: value }))}
-											className={`w-14 h-14 rounded-full border text-xl font-bold cursor-pointer ${
+											className={`w-12 h-12 rounded-xl border text-base font-bold cursor-pointer ${
 												form.max_vehicles === value ?
-													"bg-amber-50 border-amber-500 text-amber-700"
-												:	"border-slate-200 text-slate-700"
+													"bg-brand-bg border-brand-primary/40 text-brand-dark"
+												:	"border-slate-200 text-slate-700 hover:border-slate-300"
 											}`}
 										>
 											{value}
@@ -849,60 +916,60 @@ export default function CreateListingPage() {
 						</section>
 
 						<section className="space-y-4">
-							<h2 className="text-2xl font-black text-slate-900">Diện tích</h2>
+							<h2 className="text-[20px] font-bold text-slate-900">Diện tích</h2>
 							<div className="grid grid-cols-[1fr_auto_1fr] gap-3 items-center">
 								<input
 									value={form.length_m}
 									onChange={(e) => setForm((prev) => ({ ...prev, length_m: e.target.value }))}
 									placeholder="Chiều dài (m)"
-									className="h-14 rounded-xl border border-slate-300 px-4 text-lg font-semibold"
+									className="h-12 rounded-xl border border-slate-300 px-4 text-base font-semibold focus:outline-none focus:border-brand-primary"
 								/>
-								<span className="text-2xl font-black text-slate-700">x</span>
+								<span className="text-xl font-bold text-slate-700">x</span>
 								<input
 									value={form.width_m}
 									onChange={(e) => setForm((prev) => ({ ...prev, width_m: e.target.value }))}
 									placeholder="Chiều rộng (m)"
-									className="h-14 rounded-xl border border-slate-300 px-4 text-lg font-semibold"
+									className="h-12 rounded-xl border border-slate-300 px-4 text-base font-semibold focus:outline-none focus:border-brand-primary"
 								/>
 							</div>
 							<div className="max-w-sm rounded-2xl border border-slate-300 px-4 py-3">
 								<p className="text-sm font-semibold text-slate-500">Tổng diện tích</p>
-								<p className="text-3xl font-black text-slate-800">{computedArea.toFixed(2)} m²</p>
+								<p className="text-2xl font-bold text-slate-800">{computedArea.toFixed(2)} m²</p>
 							</div>
 						</section>
 
 						<section className="space-y-4">
-							<h2 className="text-2xl font-black text-slate-900">Lưu ý cho khách</h2>
+							<h2 className="text-[20px] font-bold text-slate-900">Lưu ý cho khách</h2>
 							<textarea
 								rows={4}
 								value={form.guest_note}
 								onChange={(e) => setForm((prev) => ({ ...prev, guest_note: e.target.value }))}
 								placeholder="Thông tin dành cho khách thuê, ví dụ: giảm giá nếu ở 1 mình..."
-								className="w-full rounded-2xl border border-slate-300 p-4 text-lg"
+								className="w-full rounded-xl border border-slate-300 p-4 text-sm focus:outline-none focus:border-brand-primary"
 							/>
 							<textarea
 								rows={4}
 								value={form.description}
 								onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
 								placeholder="Mô tả chi tiết thêm..."
-								className="w-full rounded-2xl border border-slate-300 p-4 text-lg"
+								className="w-full rounded-xl border border-slate-300 p-4 text-sm focus:outline-none focus:border-brand-primary"
 							/>
 						</section>
 
 						<section className="space-y-3">
-							<h2 className="text-2xl font-black text-slate-900">Thông tin liên hệ</h2>
+							<h2 className="text-[20px] font-bold text-slate-900">Thông tin liên hệ</h2>
 							<div className="grid sm:grid-cols-2 gap-3">
 								<input
 									value={form.contact_name}
 									onChange={(e) => setForm((prev) => ({ ...prev, contact_name: e.target.value }))}
 									placeholder="Họ và tên"
-									className="h-14 rounded-xl border border-slate-300 px-4 text-lg font-semibold"
+									className="h-12 rounded-xl border border-slate-300 px-4 text-base font-semibold focus:outline-none focus:border-brand-primary"
 								/>
 								<input
 									value={form.contact_phone}
 									onChange={(e) => setForm((prev) => ({ ...prev, contact_phone: e.target.value }))}
 									placeholder="Số điện thoại *"
-									className="h-14 rounded-xl border border-slate-300 px-4 text-lg font-semibold"
+									className="h-12 rounded-xl border border-slate-300 px-4 text-base font-semibold focus:outline-none focus:border-brand-primary"
 								/>
 							</div>
 						</section>
@@ -914,7 +981,7 @@ export default function CreateListingPage() {
 						<button
 							onClick={handleSubmit}
 							disabled={loading}
-							className="w-full h-14 rounded-full bg-amber-700 text-white text-2xl lg:text-lg font-black tracking-tight disabled:opacity-60 cursor-pointer"
+							className="w-full h-12 rounded-xl bg-brand-primary text-white text-lg lg:text-base font-bold tracking-tight disabled:opacity-60 cursor-pointer hover:bg-brand-dark transition-colors"
 						>
 							{loading ?
 								(listingIdParam ? "Đang cập nhật..." : "Đang tạo...")

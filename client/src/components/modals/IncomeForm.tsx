@@ -4,20 +4,31 @@ import { api } from "../../lib/api";
 
 interface IncomeFormProps {
     onCancel: () => void;
-    onSubmit: (data: any) => void;
+    onSubmit: (data: {
+        building_id: string;
+        room_id: string | null;
+        customer_name: string | null;
+        flow: "income";
+        category: string;
+        payment_method: "cash" | "bank_transfer" | "credit_card";
+        amount: number;
+        note: string | null;
+        transaction_date: string;
+    }) => void;
 }
 
 const TRANSACTION_TYPES = [
-    { id: "room_payment", label: "Thanh toán đặt phòng" },
-    { id: "cash_fund", label: "Nhập quỹ tiền mặt" },
-    { id: "deposit", label: "Đặt cọc" },
-    { id: "prepayment", label: "Tiền trả trước" },
-    { id: "subscription", label: "Thanh toán gói đăng ký" },
+    { id: "room_payment", label: "Nạp từ tiền thuê phòng" },
+    { id: "cash_fund", label: "Nạp quỹ tiền mặt" },
+    { id: "deposit", label: "Nạp tiền cọc" },
+    { id: "prepayment", label: "Nạp tiền trả trước" },
+    { id: "subscription", label: "Nạp từ gói đăng ký" },
 ];
 
 const PAYMENT_METHODS = [
     { id: "cash", label: "Tiền mặt" },
     { id: "bank_transfer", label: "Chuyển khoản ngân hàng" },
+    { id: "credit_card", label: "Thẻ ngân hàng" },
 ];
 
 export default function IncomeForm({ onCancel, onSubmit }: IncomeFormProps) {
@@ -84,11 +95,28 @@ export default function IncomeForm({ onCancel, onSubmit }: IncomeFormProps) {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onSubmit(formData);
+        const amount = Number(formData.amount);
+        if (!Number.isFinite(amount) || amount <= 0) {
+            return;
+        }
+
+        const selectedCustomer = customers.find((c) => c.id === formData.customer_id);
+        onSubmit({
+            building_id: formData.building_id,
+            room_id: formData.unit_id || null,
+            customer_name: selectedCustomer?.tenant_name || null,
+            flow: "income",
+            category: formData.transaction_type,
+            payment_method: formData.payment_method as "cash" | "bank_transfer" | "credit_card",
+            amount,
+            note: formData.note.trim() || null,
+            transaction_date: formData.transaction_date
+                ? new Date(formData.transaction_date).toISOString().split("T")[0]
+                : new Date().toISOString().split("T")[0],
+        });
     };
 
     const showCustomerAndUnit = ["room_payment", "deposit", "prepayment", "subscription"].includes(formData.transaction_type);
-    const showAmount = formData.transaction_type !== "room_payment";
 
     return (
         <form onSubmit={handleSubmit} className="space-y-5">
@@ -169,25 +197,25 @@ export default function IncomeForm({ onCancel, onSubmit }: IncomeFormProps) {
                     </div>
                 )}
 
-                {/* So tien thu vao */}
-                {showAmount && (
-                    <div className="space-y-1.5">
-                        <label className="text-[13px] font-bold text-slate-700 flex items-center gap-2">
-                            <Wallet className="w-4 h-4 text-slate-400" />
-                            Số tiền thu vào
-                        </label>
-                        <div className="relative">
-                            <input
-                                type="number"
-                                value={formData.amount}
-                                onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                                placeholder="0"
-                                className="w-full pl-3 pr-8 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary outline-none transition-all"
-                            />
-                            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">₫</span>
-                        </div>
+                {/* So tien nap */}
+                <div className="space-y-1.5">
+                    <label className="text-[13px] font-bold text-slate-700 flex items-center gap-2">
+                        <Wallet className="w-4 h-4 text-slate-400" />
+                        Số tiền nạp <span className="text-rose-500">*</span>
+                    </label>
+                    <div className="relative">
+                        <input
+                            type="number"
+                            value={formData.amount}
+                            onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                            placeholder="0"
+                            min={1}
+                            required
+                            className="w-full pl-3 pr-8 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary outline-none transition-all"
+                        />
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">₫</span>
                     </div>
-                )}
+                </div>
 
                 {/* Phuong thuc thanh toan */}
                 <div className="space-y-1.5">

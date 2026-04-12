@@ -81,8 +81,12 @@ function HomePage() {
 				setLoadError(listingsRes.error || "Không thể tải danh sách tin đăng");
 			} else {
 				setLoadError(null);
-				setListings(listingsRes.data.listings);
-				setFilteredListings(listingsRes.data.listings);
+				// Explicitly sort by creation date (newest first)
+				const sorted = (listingsRes.data.listings || []).sort((a, b) => 
+					new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+				);
+				setListings(sorted);
+				setFilteredListings(sorted);
 			}
 
 			if (amenitiesRes.data) {

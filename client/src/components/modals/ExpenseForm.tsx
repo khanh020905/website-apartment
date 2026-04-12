@@ -4,25 +4,30 @@ import { api } from "../../lib/api";
 
 interface ExpenseFormProps {
     onCancel: () => void;
-    onSubmit: (data: any) => void;
+    onSubmit: (data: {
+        building_id: string;
+        room_id: string | null;
+        customer_name: string | null;
+        flow: "expense";
+        category: string;
+        payment_method: "cash" | "bank_transfer" | "credit_card";
+        amount: number;
+        note: string | null;
+        transaction_date: string;
+    }) => void;
 }
 
 const TRANSACTION_TYPES = [
     { id: "cash_withdrawal", label: "Rút tiền mặt" },
-    { id: "refund", label: "Hoàn tiền" },
-    { id: "deposit_refund", label: "Hoàn cọc" },
-    { id: "prepaid_refund", label: "Hoàn lại tiền trả trước" },
+    { id: "maintenance", label: "Rút chi bảo trì" },
+    { id: "operation", label: "Rút chi vận hành" },
+    { id: "refund", label: "Rút hoàn tiền" },
 ];
 
 const PAYMENT_METHODS = [
-    { id: "cash", label: "Thanh toán bằng tiền mặt" },
-    { id: "transfer", label: "Thanh toán chuyển khoản" },
-    { id: "credit_card", label: "Thanh toán bằng thẻ tín dụng" },
-    { id: "paypal", label: "Thanh toán bằng Paypal" },
-    { id: "bank_wire", label: "Thanh toán bằng chuyển khoản ngân hàng" },
-    { id: "coin", label: "Thanh toán bằng coin" },
-    { id: "sponsor", label: "Tài trợ" },
-    { id: "free", label: "Miễn phí" },
+    { id: "cash", label: "Tiền mặt" },
+    { id: "bank_transfer", label: "Chuyển khoản ngân hàng" },
+    { id: "credit_card", label: "Thẻ ngân hàng" },
 ];
 
 export default function ExpenseForm({ onCancel, onSubmit }: ExpenseFormProps) {
@@ -89,7 +94,25 @@ export default function ExpenseForm({ onCancel, onSubmit }: ExpenseFormProps) {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        onSubmit(formData);
+        const amount = Number(formData.amount);
+        if (!Number.isFinite(amount) || amount <= 0) {
+            return;
+        }
+
+        const selectedCustomer = customers.find((c) => c.id === formData.customer_id);
+        onSubmit({
+            building_id: formData.building_id,
+            room_id: formData.unit_id || null,
+            customer_name: selectedCustomer?.tenant_name || null,
+            flow: "expense",
+            category: formData.transaction_type,
+            payment_method: formData.payment_method as "cash" | "bank_transfer" | "credit_card",
+            amount,
+            note: formData.note.trim() || null,
+            transaction_date: formData.transaction_date
+                ? new Date(formData.transaction_date).toISOString().split("T")[0]
+                : new Date().toISOString().split("T")[0],
+        });
     };
 
     return (
@@ -167,11 +190,11 @@ export default function ExpenseForm({ onCancel, onSubmit }: ExpenseFormProps) {
                     </select>
                 </div>
 
-                {/* So tien chi ra */}
+                {/* So tien rut */}
                 <div className="space-y-1.5">
                     <label className="text-[13px] font-bold text-slate-700 flex items-center gap-2">
                         <Wallet className="w-4 h-4 text-slate-400" />
-                        Số tiền chi ra
+                        Số tiền rút <span className="text-rose-500">*</span>
                     </label>
                     <div className="relative">
                         <input
@@ -179,6 +202,8 @@ export default function ExpenseForm({ onCancel, onSubmit }: ExpenseFormProps) {
                             value={formData.amount}
                             onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
                             placeholder="0"
+                            min={1}
+                            required
                             className="w-full pl-3 pr-8 py-2 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary outline-none transition-all font-inter"
                         />
                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">₫</span>

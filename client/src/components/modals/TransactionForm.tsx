@@ -24,9 +24,9 @@ const TransactionForm = ({ onSubmit, onCancel }: TransactionFormProps) => {
 		building_id: selectedBuildingId || "",
 		room_id: "",
 		customer_id: "",
-		type: "income", // income | expense
+		flow: "income", // income | expense
 		category: "",
-		pay_type: "transfer", // cash | transfer | e-wallet
+		payment_method: "bank_transfer", // cash | bank_transfer | credit_card
 		amount: "",
 		note: "",
 	});
@@ -58,7 +58,21 @@ const TransactionForm = ({ onSubmit, onCancel }: TransactionFormProps) => {
 
 	const handleSubmit = (e: React.FormEvent) => {
 		e.preventDefault();
-		onSubmit(formData);
+		const amount = Number(formData.amount);
+		if (!Number.isFinite(amount) || amount <= 0) return;
+
+		const selectedCustomer = customers.find((c) => c.id === formData.customer_id);
+		onSubmit({
+			building_id: formData.building_id,
+			room_id: formData.room_id || null,
+			customer_name: selectedCustomer?.tenant_name || null,
+			flow: formData.flow,
+			category: formData.category,
+			payment_method: formData.payment_method,
+			amount,
+			note: formData.note.trim() || null,
+			transaction_date: formData.date,
+		});
 	};
 
 	return (
@@ -69,17 +83,17 @@ const TransactionForm = ({ onSubmit, onCancel }: TransactionFormProps) => {
 			<div className="flex p-1 bg-slate-100 rounded-2xl w-fit">
 				<button
 					type="button"
-					onClick={() => setFormData((prev) => ({ ...prev, type: "income" }))}
-					className={`px-6 py-2 rounded-xl text-sm font-bold transition-all ${formData.type === "income" ? "bg-white text-emerald-600 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+					onClick={() => setFormData((prev) => ({ ...prev, flow: "income" }))}
+					className={`px-6 py-2 rounded-xl text-sm font-bold transition-all ${formData.flow === "income" ? "bg-white text-emerald-600 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
 				>
-					Phiếu thu
+					Phiếu nạp
 				</button>
 				<button
 					type="button"
-					onClick={() => setFormData((prev) => ({ ...prev, type: "expense" }))}
-					className={`px-6 py-2 rounded-xl text-sm font-bold transition-all ${formData.type === "expense" ? "bg-white text-rose-600 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+					onClick={() => setFormData((prev) => ({ ...prev, flow: "expense" }))}
+					className={`px-6 py-2 rounded-xl text-sm font-bold transition-all ${formData.flow === "expense" ? "bg-white text-rose-600 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
 				>
-					Phiếu chi
+					Phiếu rút
 				</button>
 			</div>
 
@@ -151,7 +165,7 @@ const TransactionForm = ({ onSubmit, onCancel }: TransactionFormProps) => {
 						<option value="rent">Tiền thuê phòng</option>
 						<option value="utilities">Tiện ích (Điện/Nước)</option>
 						<option value="service">Dịch vụ</option>
-						<option value="other">Thu nhập/Chi phí khác</option>
+						<option value="other">Nạp/Rút khác</option>
 					</select>
 				</div>
 			</div>
@@ -181,15 +195,15 @@ const TransactionForm = ({ onSubmit, onCancel }: TransactionFormProps) => {
 						Hình thức thanh toán <span className="text-rose-500">*</span>
 					</label>
 					<select
-						name="pay_type"
-						value={formData.pay_type}
+						name="payment_method"
+						value={formData.payment_method}
 						onChange={handleChange}
 						required
 						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary transition-all outline-none appearance-none"
 					>
-						<option value="transfer">Chuyển khoản</option>
+						<option value="bank_transfer">Chuyển khoản</option>
 						<option value="cash">Tiền mặt</option>
-						<option value="wallet">Ví điện tử</option>
+						<option value="credit_card">Thẻ ngân hàng</option>
 					</select>
 				</div>
 			</div>
