@@ -431,6 +431,16 @@ export interface DashboardStats {
   };
   occupancyRate: number;
   buildingCount: number;
+  quickStats?: {
+    roomsStartingToday: number;
+    roomsDueReturnToday: number;
+    invoicesDueSoon3d: number;
+    visaExpiringThisMonth: number;
+  };
+  occupancyTrend?: Array<{
+    day: string;
+    rate: number;
+  }>;
   upcomingStats?: {
     incidents: number;
     overdueInvoices: number;

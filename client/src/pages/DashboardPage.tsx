@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { AlertCircle } from "lucide-react";
 import { api } from "../lib/api";
+import { useBuilding } from "../contexts/BuildingContext";
 import type {
 	BuildingWithRooms,
 	DashboardStats,
@@ -21,10 +22,10 @@ import { ContractModal } from "../components/dashboard/ContractModal";
 export default function DashboardPage() {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	const { buildings, selectedBuildingId } = useBuilding();
 
 	// Data
 	const [stats, setStats] = useState<DashboardStats | null>(null);
-	const [buildings, setBuildings] = useState<BuildingWithRooms[]>([]);
 
 	// Modals state
 	const [isBuildingModalOpen, setIsBuildingModalOpen] = useState(false);
@@ -32,28 +33,28 @@ export default function DashboardPage() {
 	const [editingBuilding, setEditingBuilding] = useState<BuildingWithRooms | undefined>(undefined);
 	const [editingContract, setEditingContract] = useState<ContractWithRoom | undefined>(undefined);
 
-	useEffect(() => {
-		loadInitialData();
-	}, []);
-
-	const loadInitialData = async () => {
+	const loadInitialData = useCallback(async () => {
 		setLoading(true);
 		setError(null);
 		try {
-			const [statsRes, buildingsRes] = await Promise.all([
-				api.get<DashboardStats>("/api/dashboard/stats"),
-				api.get<{ buildings: BuildingWithRooms[] }>("/api/buildings"),
-			]);
+			const query = selectedBuildingId ? `?building_id=${selectedBuildingId}` : "";
+			const statsRes = await api.get<DashboardStats>(`/api/dashboard/stats${query}`);
 
 			if (statsRes.data) setStats(statsRes.data);
-			if (buildingsRes.data) setBuildings(buildingsRes.data.buildings);
-		} catch (err: any) {
+		} catch (err: unknown) {
 			setError("Không thể tải dữ liệu dashboard. Vui lòng thử lại sau.");
 			console.error(err);
 		} finally {
 			setLoading(false);
 		}
-	};
+	}, [selectedBuildingId]);
+
+	useEffect(() => {
+		loadInitialData();
+	}, [loadInitialData]);
+
+	const selectedBuildingName =
+		selectedBuildingId ? buildings.find((b) => b.id === selectedBuildingId)?.name || "N/A" : "Mọi toà nhà";
 
 	const handleSaveBuilding = async (data: CreateBuildingInput) => {
 		try {
@@ -101,6 +102,9 @@ export default function DashboardPage() {
 				<div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 px-4">
 					<div>
 						<h1 className="text-xl font-bold text-slate-900 tracking-tight">Trang tổng quan</h1>
+						<p className="text-sm font-semibold text-slate-500 mt-1">
+							Dữ liệu đang hiển thị: {selectedBuildingName}
+						</p>
 					</div>
 				</div>
 

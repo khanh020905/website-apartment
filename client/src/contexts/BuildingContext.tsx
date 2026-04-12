@@ -24,7 +24,7 @@ export const BuildingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
 	const [loading, setLoading] = useState(false);
 
 	useEffect(() => {
-		if (user && (role === "landlord" || role === "admin")) {
+		if (user && (role === "landlord" || role === "broker" || role === "admin")) {
 			// eslint-disable-next-line react-hooks/set-state-in-effect
 			setLoading(true);
 			api

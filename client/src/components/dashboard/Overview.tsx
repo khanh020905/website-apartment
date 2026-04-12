@@ -17,24 +17,10 @@ interface OverviewProps {
 }
 
 export const Overview = ({ stats }: OverviewProps) => {
-	// Replicate the Smartos chart style with Recharts
-	const chartData = [
-		{ day: "01/04", rate: 5 },
-		{ day: "03/04", rate: 8 },
-		{ day: "05/04", rate: 6 },
-		{ day: "07/04", rate: 10 },
-		{ day: "09/04", rate: 12 },
-		{ day: "11/04", rate: 15 },
-		{ day: "13/04", rate: 13 },
-		{ day: "15/04", rate: 18 },
-		{ day: "17/04", rate: 16 },
-		{ day: "19/04", rate: 20 },
-		{ day: "21/04", rate: 22 },
-		{ day: "23/04", rate: 18 },
-		{ day: "25/04", rate: 25 },
-		{ day: "27/04", rate: 30 },
-		{ day: "29/04", rate: 28 },
-	];
+	const chartData =
+		stats.occupancyTrend && stats.occupancyTrend.length > 0 ?
+			stats.occupancyTrend
+		:	[{ day: "N/A", rate: 0 }];
 
 	return (
 		<div className="space-y-6">
@@ -53,7 +39,7 @@ export const Overview = ({ stats }: OverviewProps) => {
 					subtitle="Phòng trống"
 				/>
 				<SmartosStatCard
-					value="0"
+					value={stats.quickStats?.roomsStartingToday || 0}
 					icon={<Calendar className="w-5 h-5 text-brand-primary" />}
 					iconBg="bg-brand-bg"
 					subtitle="Phòng sắp bắt đầu"
@@ -64,21 +50,21 @@ export const Overview = ({ stats }: OverviewProps) => {
 			{/* Row 2 */}
 			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
 				<SmartosStatCard
-					value="0"
+					value={stats.quickStats?.roomsDueReturnToday || 0}
 					icon={<TrendingUp className="w-5 h-5 text-blue-500" />}
 					iconBg="bg-blue-50"
 					subtitle="Phòng sắp đến hạn trả"
 					badge={{ text: "Hôm nay", type: "blue" }}
 				/>
 				<SmartosStatCard
-					value={stats.expiringContracts.d7.length}
+					value={stats.quickStats?.invoicesDueSoon3d || 0}
 					icon={<DollarSign className="w-5 h-5 text-orange-500" />}
 					iconBg="bg-orange-50"
 					subtitle="Hoá đơn sắp hết hạn"
 					badge={{ text: "3 ngày tới", type: "orange" }}
 				/>
 				<SmartosStatCard
-					value="0"
+					value={stats.quickStats?.visaExpiringThisMonth || 0}
 					icon={<Users className="w-5 h-5 text-purple-500" />}
 					iconBg="bg-purple-50"
 					subtitle="Visa sắp hết hạn"

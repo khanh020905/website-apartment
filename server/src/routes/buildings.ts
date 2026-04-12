@@ -5,15 +5,20 @@ import type { AuthRequest } from '../middleware/auth';
 
 const router = Router();
 
-// GET /api/buildings — List buildings for current user (landlord/broker)
+// GET /api/buildings — List buildings by role
 router.get('/', authenticate, async (req: AuthRequest, res: Response) => {
   if (!req.user) { res.status(401).json({ error: 'Chưa xác thực' }); return; }
 
-  const { data, error } = await getSupabase()
+  let query = getSupabase()
     .from('buildings')
     .select('*, rooms(*)')
-    .eq('owner_id', req.user.id)
     .order('created_at', { ascending: false });
+
+  if (req.user.role !== 'admin') {
+    query = query.eq('owner_id', req.user.id);
+  }
+
+  const { data, error } = await query;
 
   if (error) { res.status(400).json({ error: error.message }); return; }
   res.json({ buildings: data });

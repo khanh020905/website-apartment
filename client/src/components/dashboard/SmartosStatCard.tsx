@@ -21,24 +21,24 @@ const BADGE_COLORS = {
 
 export const SmartosStatCard = ({ icon, iconBg, value, subtitle, badge }: SmartosStatCardProps) => {
 	return (
-		<div className="bg-white rounded-xl border border-slate-100 p-5 flex items-center gap-4 hover:shadow-md transition-shadow group">
+		<div className="bg-white rounded-xl border border-slate-100 p-4 sm:p-5 flex items-start gap-3 sm:gap-4 hover:shadow-md transition-shadow group h-full">
 			<div
-				className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 transition-transform group-hover:scale-110 ${iconBg}`}
+				className={`w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center shrink-0 transition-transform group-hover:scale-110 ${iconBg}`}
 			>
 				{icon}
 			</div>
 			<div className="flex-1 min-w-0">
-				<div className="flex items-baseline gap-2">
-					<span className="text-2xl font-bold text-slate-900 tracking-tight">{value}</span>
+				<div className="flex flex-wrap items-center gap-2">
+					<span className="text-2xl leading-none font-bold text-slate-900 tracking-tight">{value}</span>
 					{badge && (
 						<span
-							className={`text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full ${BADGE_COLORS[badge.type || "emerald"]}`}
+							className={`inline-flex items-center h-5 text-[10px] font-bold uppercase tracking-wide px-2 rounded-full ${BADGE_COLORS[badge.type || "emerald"]}`}
 						>
 							{badge.text}
 						</span>
 					)}
 				</div>
-				<p className="text-[13px] font-semibold text-slate-400 mt-0.5 truncate uppercase tracking-tighter italic">
+				<p className="mt-1 text-sm font-semibold text-slate-600 leading-tight truncate">
 					{subtitle}
 				</p>
 			</div>
