@@ -185,6 +185,7 @@ export default function LocationsPage() {
   const [selectedType, setSelectedType] = useState("");
   const [selectedStructure, setSelectedStructure] = useState("");
   const [_currentStep, setCurrentStep] = useState(1);
+  const [saving, setSaving] = useState(false);
 
   // Form states for services & amenities
   const [meteredServices, setMeteredServices] = useState([
@@ -322,7 +323,42 @@ export default function LocationsPage() {
       return;
     }
 
-    // Instead of submitting, open the structure setup modal
+    if (editingBuilding) {
+       // Save Info Only
+       try {
+         const data = {
+           name: buildingName,
+           address: address,
+           rental_type: selectedType,
+           structure_type: selectedStructure,
+           amenities: selectedAmenities,
+           metered_services: meteredServices,
+           fixed_services: fixedServices,
+           lat: mapCoords?.[0] || null,
+           lng: mapCoords?.[1] || null,
+           phone,
+           website,
+           description,
+           structure_data: {
+             numFloors,
+             numRoomsPerFloor,
+             hasGroundFloor,
+             hasMezzanineFloor,
+             roomNumberingType
+           }
+         };
+         await api.put(`/api/buildings/${editingBuilding.id}`, data);
+         setIsModalOpen(false);
+         setEditingBuilding(null);
+         fetchLocations();
+       } catch (err: any) {
+         console.error(err);
+         alert(err.response?.data?.error || "Lỗi khi cập nhật thông tin");
+       }
+       return;
+    }
+
+    // New building: proceed to structure setup
     setIsModalOpen(false);
     setIsStructureSetupModalOpen(true);
   };
@@ -386,6 +422,8 @@ export default function LocationsPage() {
   };
 
   const handleFinishRoomSetup = async () => {
+     if (saving) return;
+     setSaving(true);
      const data = {
       name: buildingName,
       address: address,
@@ -427,17 +465,27 @@ export default function LocationsPage() {
     } catch (err: any) {
       console.error(err);
       alert(err.response?.data?.error || "Đã xảy ra lỗi");
+    } finally {
+      setSaving(false);
     }
   }
 
   const handleDelete = async (id: string) => {
+    const building = locations.find(l => l.id === id);
+    const roomCount = building?.rooms?.length || 0;
+
+    if (roomCount > 0) {
+      alert(`Toà nhà "${building?.name}" đang có ${roomCount} phòng. Bạn không thể xoá toà nhà khi còn dữ liệu phòng/sơ đồ. Vui lòng xoá hết phòng trước.`);
+      return;
+    }
+
     if (!confirm("Bạn có chắc chắn muốn xoá toà nhà này?")) return;
     try {
       await api.delete(`/api/buildings/${id}`);
       fetchLocations();
     } catch (err: any) {
       console.error(err);
-      alert(err.response?.data?.error || "Đã xảy ra lỗi. Toà nhà có thể vẫn còn phòng.");
+      alert(err.response?.data?.error || "Đã xảy ra lỗi khi xoá toà nhà.");
     }
   };
 
@@ -767,6 +815,50 @@ export default function LocationsPage() {
     }
   };
 
+  const openStructureEditModal = (b: any) => {
+    setEditingBuilding(b);
+    setSelectedType(b.rental_type || "");
+    setSelectedStructure(b.structure_type || "");
+    
+    // Populate floors and rooms for editing
+    if (b.rooms && b.rooms.length > 0) {
+      const uniqueFloorNames: string[] = [];
+      b.rooms.forEach((r: any) => {
+        const fn = r.floor_name || "Trệt";
+        if (!uniqueFloorNames.includes(fn)) uniqueFloorNames.push(fn);
+      });
+
+      const mappedFloors = uniqueFloorNames.map((name, idx) => ({
+        id: `floor_edit_${idx}`,
+        name: name,
+        numRooms: b.rooms.filter((r: any) => (r.floor_name || "Trệt") === name).length
+      }));
+      setFloorsList(mappedFloors);
+      
+      const mappedRooms = b.rooms.map((r: any, idx: number) => ({
+        id: `room_edit_${idx}`,
+        name: r.room_number || r.name || "",
+        floorId: mappedFloors.find(f => f.name === (r.floor_name || "Trệt"))?.id || mappedFloors[0].id
+      }));
+      setRoomsList(mappedRooms);
+    } else {
+      setFloorsList([]);
+      setRoomsList([]);
+    }
+
+    // Restore structure data if exists
+    if (b.structure_data) {
+      if (b.structure_data.numFloors !== undefined) setNumFloors(b.structure_data.numFloors);
+      if (b.structure_data.numRoomsPerFloor !== undefined) setNumRoomsPerFloor(b.structure_data.numRoomsPerFloor);
+      if (b.structure_data.hasGroundFloor !== undefined) setHasGroundFloor(b.structure_data.hasGroundFloor);
+      if (b.structure_data.hasMezzanineFloor !== undefined) setHasMezzanineFloor(b.structure_data.hasMezzanineFloor);
+      if (b.structure_data.roomNumberingType !== undefined) setRoomNumberingType(b.structure_data.roomNumberingType);
+    }
+    
+    setIsViewMode(false);
+    setIsRoomSetupModalOpen(true);
+  };
+
   useEffect(() => {
     // Logic for auto-centering removed to avoid jumping
   }, [isMapPickerOpen]);
@@ -913,20 +1005,27 @@ export default function LocationsPage() {
                          >
                             <QrCode className="w-5 h-5" />
                          </button>
-                           <button 
-                             onClick={() => openEditModal(loc)}
-                             className="p-2 text-slate-300 hover:text-brand-primary hover:bg-brand-primary/10 rounded-lg transition-all"
-                             title="Sửa"
-                           >
-                             <Edit2 className="w-4 h-4" />
-                           </button>
-                           <button 
-                             onClick={() => handleDelete(loc.id)}
-                             className="p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all"
-                             title="Xóa"
-                           >
-                             <Trash2 className="w-4 h-4" />
-                           </button>
+                            <button 
+                              onClick={() => openEditModal(loc)}
+                              className="p-2 text-slate-300 hover:text-brand-primary hover:bg-brand-primary/10 rounded-lg transition-all"
+                              title="Sửa thông tin"
+                            >
+                              <Edit2 className="w-4 h-4" />
+                            </button>
+                            <button 
+                              onClick={() => openStructureEditModal(loc)}
+                              className="p-2 text-slate-300 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition-all"
+                              title="Sửa cấu trúc"
+                            >
+                              <Settings className="w-4 h-4" />
+                            </button>
+                            <button 
+                              onClick={() => handleDelete(loc.id)}
+                              className="p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all"
+                              title="Xóa"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
                         </div>
                       </td>
                     </tr>
@@ -1864,9 +1963,10 @@ export default function LocationsPage() {
                 </button>
                 <button 
                   onClick={handleFinishRoomSetup}
-                  className="flex-[2] py-4 bg-brand-primary text-white rounded-[20px] text-[16px] font-bold shadow-md transition-all transform active:scale-[0.98]"
+                  disabled={saving}
+                  className={`flex-[2] py-4 bg-brand-primary text-white rounded-[20px] text-[16px] font-bold shadow-md transition-all transform active:scale-[0.98] ${saving ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
-                  Hoàn tất & Tạo tòa nhà
+                  {saving ? 'Đang tạo...' : (editingBuilding ? 'Cập nhật tòa nhà' : 'Hoàn tất & Tạo tòa nhà')}
                 </button>
               </>
             )}
@@ -1921,7 +2021,7 @@ export default function LocationsPage() {
                       link.click();
                    }
                 }}
-                className="w-full py-4 bg-slate-900 text-white rounded-[20px] text-[16px] font-bold hover:bg-slate-800 transition-all shadow-lg cursor-pointer"
+                className="w-full py-4 bg-brand-primary text-white rounded-[20px] text-[16px] font-bold hover:bg-brand-dark transition-all shadow-lg cursor-pointer"
              >
                 Tải mã QR
              </button>

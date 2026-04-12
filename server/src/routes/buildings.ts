@@ -205,7 +205,7 @@ router.delete('/:id', authenticate, async (req: AuthRequest, res: Response) => {
     .eq('building_id', id);
 
   if (count && count > 0) {
-    res.status(400).json({ error: 'Không thể xóa tòa nhà khi còn phòng. Vui lòng xóa hết phòng trước.' });
+    res.status(400).json({ error: `Toà nhà đang có ${count} phòng, không thể xoá. Vui lòng xoá hết phòng/sơ đồ trước.` });
     return;
   }
 
