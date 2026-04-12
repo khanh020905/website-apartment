@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
 import { useParams, Link } from "react-router-dom";
 import { MapContainer, TileLayer, Marker } from "react-leaflet";
 import L from "leaflet";
@@ -12,18 +11,10 @@ import {
 	Bed, 
 	Home, 
 	Check, 
-	Wifi, 
-	Wind, 
 	Layers, 
 	Maximize, 
-	Cigarette, 
-	Shield, 
-	Trash2, 
 	Droplet, 
 	Zap, 
-	Car, 
-	Utensils, 
-	Tv,
 	MapPin,
 	CircleDollarSign
 } from "lucide-react";

@@ -100,7 +100,14 @@ function FocusOnListing({ selectedListing, markerRef }: FocusOnListingProps) {
 	useEffect(() => {
 		if (!selectedListing || selectedListing.lat === null || selectedListing.lng === null) return;
 
-		map.flyTo([selectedListing.lat, selectedListing.lng], Math.max(map.getZoom(), MAP_SELECTED_ZOOM), {
+		const targetZoom = Math.max(map.getZoom(), MAP_SELECTED_ZOOM);
+		// Calculate offset to center the popup (which is above the marker)
+		const point = map.project([selectedListing.lat, selectedListing.lng], targetZoom);
+		// Move the visual center down by ~180px so the popup (above marker) is centered
+		point.y -= 180; 
+		const targetLatLng = map.unproject(point, targetZoom);
+
+		map.flyTo(targetLatLng, targetZoom, {
 			duration: 0.6,
 		});
 		markerRef?.openPopup();
