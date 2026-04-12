@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS public.reservations (
     deposit_amount NUMERIC DEFAULT 0,
     rent_amount NUMERIC DEFAULT 0,
     status TEXT NOT NULL DEFAULT 'confirmed' CHECK (status IN ('confirmed', 'active', 'completed', 'cancelled')),
-    payment_status TEXT DEFAULT 'unpaid' CHECK (status IN ('unpaid', 'partial', 'paid')), -- Cho Reservation History
+    payment_status TEXT DEFAULT 'unpaid' CHECK (payment_status IN ('unpaid', 'partial', 'paid')), -- Cho Reservation History
     package_type TEXT DEFAULT 'month' CHECK (package_type IN ('day', 'month')),
     notes TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL,

@@ -1,4 +1,4 @@
-import { Router, Response } from "express";
+import { Router, Response, Request } from "express";
 import { getSupabase } from "../lib/supabase";
 import { authenticate } from "../middleware/auth";
 import type { AuthRequest } from "../middleware/auth";
@@ -15,6 +15,153 @@ interface ReservationQueryParams {
   start_date?: string;
   end_date?: string;
 }
+
+interface PublicReservationPayload {
+  listing_id?: string;
+  customer_name?: string;
+  customer_phone?: string;
+  customer_email?: string;
+  check_in_date?: string;
+  expected_check_out?: string;
+  deposit_amount?: number | string;
+  notes?: string;
+}
+
+const isValidISODate = (value: string) => {
+  const parsed = new Date(value);
+  return !Number.isNaN(parsed.getTime());
+};
+
+const isBrokenPaymentStatusConstraintError = (error: unknown) => {
+  if (!error || typeof error !== "object") return false;
+  const pgError = error as { code?: string; message?: string; constraint?: string };
+  const message = pgError.message || "";
+  const constraint = pgError.constraint || "";
+  if (pgError.code !== "23514") return false;
+  return (
+    constraint.includes("reservations_status_check1") ||
+    message.includes("reservations_status_check1") ||
+    (message.includes("payment_status") && message.includes("reservations"))
+  );
+};
+
+const isRlsInsertError = (error: unknown) => {
+  if (!error || typeof error !== "object") return false;
+  const pgError = error as { code?: string; message?: string };
+  const message = (pgError.message || "").toLowerCase();
+  return pgError.code === "42501" || message.includes("row-level security policy");
+};
+
+// POST /api/reservations/public - Giữ chỗ từ trang listings (không cần đăng nhập)
+router.post("/public", async (req: Request, res: Response) => {
+  const {
+    listing_id,
+    customer_name,
+    customer_phone,
+    customer_email,
+    check_in_date,
+    expected_check_out,
+    deposit_amount,
+    notes,
+  } = req.body as PublicReservationPayload;
+
+  const normalizedListingId = listing_id?.trim();
+  const normalizedName = customer_name?.trim();
+  const normalizedPhone = customer_phone?.trim();
+  const normalizedEmail = customer_email?.trim() || null;
+  const normalizedCheckInDate = check_in_date?.trim();
+  const normalizedExpectedCheckout = expected_check_out?.trim() || null;
+  const normalizedNotes = notes?.trim() || null;
+  const parsedDeposit = Number(deposit_amount ?? 0);
+
+  if (!normalizedListingId || !normalizedName || !normalizedPhone || !normalizedCheckInDate) {
+    return res.status(400).json({ error: "Thiếu thông tin bắt buộc" });
+  }
+  if (!isValidISODate(normalizedCheckInDate)) {
+    return res.status(400).json({ error: "Ngày nhận phòng không hợp lệ" });
+  }
+  if (normalizedExpectedCheckout && !isValidISODate(normalizedExpectedCheckout)) {
+    return res.status(400).json({ error: "Ngày trả phòng dự kiến không hợp lệ" });
+  }
+  if (Number.isNaN(parsedDeposit) || parsedDeposit < 0) {
+    return res.status(400).json({ error: "Tiền cọc không hợp lệ" });
+  }
+
+  const supabase = getSupabase();
+
+  try {
+    const { data: listing, error: listingError } = await supabase
+      .from("listings")
+      .select("id, title, status, room_id, price")
+      .eq("id", normalizedListingId)
+      .single();
+
+    if (listingError || !listing) {
+      return res.status(404).json({ error: "Không tìm thấy tin đăng" });
+    }
+    if (listing.status !== "approved") {
+      return res.status(400).json({ error: "Tin đăng chưa sẵn sàng để giữ chỗ" });
+    }
+    if (!listing.room_id) {
+      return res.status(400).json({ error: "Tin đăng chưa gắn phòng cụ thể" });
+    }
+
+    const { data: room, error: roomError } = await supabase
+      .from("rooms")
+      .select("id, building_id, status")
+      .eq("id", listing.room_id)
+      .single();
+
+    if (roomError || !room) {
+      return res.status(404).json({ error: "Không tìm thấy phòng của tin đăng" });
+    }
+    if (room.status !== "available") {
+      return res.status(409).json({ error: "Phòng này hiện không còn trống để giữ chỗ" });
+    }
+
+    const reservationCode = `NTRE${Math.floor(100000 + Math.random() * 900000)}`;
+    const { data, error } = await supabase
+      .from("reservations")
+      .insert({
+        reservation_code: reservationCode,
+        customer_name: normalizedName,
+        customer_phone: normalizedPhone,
+        customer_email: normalizedEmail,
+        check_in_date: normalizedCheckInDate,
+        expected_check_out: normalizedExpectedCheckout,
+        deposit_amount: parsedDeposit,
+        rent_amount: listing.price || 0,
+        room_id: room.id,
+        building_id: room.building_id,
+        notes: normalizedNotes,
+        status: "confirmed",
+      })
+      .select("id, reservation_code, check_in_date, status")
+      .single();
+
+    if (error) throw error;
+
+    return res.status(201).json({
+      reservation: data,
+      message: "Đã giữ chỗ thành công. Chủ trọ sẽ liên hệ bạn sớm.",
+    });
+  } catch (err) {
+    console.error("Error creating public reservation:", err);
+    if (isRlsInsertError(err)) {
+      return res.status(500).json({
+        error:
+          "DB đang chặn quyền tạo giữ chỗ công khai (RLS). Vui lòng chạy migration mới nhất cho reservations/visit_tours.",
+      });
+    }
+    if (isBrokenPaymentStatusConstraintError(err)) {
+      return res.status(500).json({
+        error:
+          "Hệ thống đặt chỗ đang bị lệch cấu hình dữ liệu (payment_status). Vui lòng chạy migration sửa constraint rồi thử lại.",
+      });
+    }
+    return res.status(500).json({ error: "Lỗi server khi tạo yêu cầu giữ chỗ" });
+  }
+});
 
 // GET /api/reservations - Danh sách đặt chỗ (Dùng cho cả Hiện tại & Lịch sử)
 router.get("/", authenticate, async (req: AuthRequest, res: Response) => {
@@ -112,6 +259,13 @@ router.post("/", authenticate, async (req: AuthRequest, res: Response) => {
     if (error) throw error;
     res.status(201).json(data);
   } catch (err) {
+    console.error("Error creating reservation:", err);
+    if (isBrokenPaymentStatusConstraintError(err)) {
+      return res.status(500).json({
+        error:
+          "Hệ thống đặt chỗ đang bị lệch cấu hình dữ liệu (payment_status). Vui lòng chạy migration sửa constraint rồi thử lại.",
+      });
+    }
     res.status(500).json({ error: "Lỗi server khi đặt phòng" });
   }
 });

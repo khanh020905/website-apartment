@@ -80,12 +80,20 @@ const ListingInfoPanel = ({ listing, listings, onClose, onSelectListing }: Listi
 							<p className="text-3xl leading-none font-extrabold text-slate-900">
 								{formatPrice(listing.price)}
 							</p>
-							<Link
-								to={`/listings/${listing.id}`}
-								className="rounded-xl bg-brand-primary px-4 py-2 text-sm font-bold text-white hover:bg-brand-dark transition-colors"
-							>
-								Xem chi tiết
-							</Link>
+							<div className="flex items-center gap-2">
+								<Link
+									to={`/listings/${listing.id}`}
+									className="rounded-xl bg-brand-primary px-4 py-2 text-sm font-bold text-white hover:bg-brand-dark transition-colors"
+								>
+									Xem chi tiết
+								</Link>
+								<Link
+									to={`/listings/${listing.id}?action=reserve`}
+									className="rounded-xl border border-brand-primary/25 bg-white px-4 py-2 text-sm font-bold text-brand-primary hover:bg-brand-bg transition-colors"
+								>
+									Thuê ngay
+								</Link>
+							</div>
 						</div>
 					</div>
 

@@ -33,46 +33,59 @@ const PropertyCard = ({ listing, index, isActive = false, onSelect }: PropertyCa
 					onSelect?.(listing.id);
 				}
 			}}
-			className={`bg-white/90 backdrop-blur border rounded-2xl p-3.5 flex gap-4 cursor-pointer group hover:shadow-xl hover:shadow-cyan-900/10 transition-all duration-300 ${
+			className={`bg-white/95 backdrop-blur border rounded-2xl p-3 flex gap-3 cursor-pointer group hover:shadow-lg hover:shadow-cyan-900/10 transition-all duration-300 ${
 				isActive ?
 					"border-brand-primary ring-2 ring-brand-primary/20"
 				:	"border-slate-200 hover:border-cyan-200"
 			}`}
 			aria-label={`Xem vị trí trên bản đồ: ${listing.title}`}
 		>
-			{/* Thumbnail with "Xem chi tiết" button overlay */}
-			<div className="w-32.5 h-30 rounded-lg overflow-hidden shrink-0 bg-slate-100 relative">
+			<div className="w-24 h-20 rounded-xl overflow-hidden shrink-0 bg-slate-100">
 				<img
 					src={imageUrl}
 					alt={listing.title}
 					className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
 				/>
-				<Link
-					to={`/listings/${listing.id}`}
-					onClick={(e) => e.stopPropagation()}
-					className="absolute bottom-2 left-2 px-4 py-1.5 bg-brand-dark text-white text-xs rounded-md font-bold hover:bg-brand-primary transition-colors cursor-pointer shadow-md"
-				>
-					Xem chi tiết
-				</Link>
 			</div>
 
-			{/* Info */}
-			<div className="flex flex-col justify-between flex-1 min-w-0 py-0.5">
-				<div>
-					<h3 className="text-brand-ink font-bold text-[15px] leading-tight line-clamp-1 group-hover:text-brand-dark transition-colors">
+			<div className="flex flex-col flex-1 min-w-0">
+				<div className="min-w-0">
+					<h3 className="text-brand-ink font-bold text-[15px] leading-tight line-clamp-1 group-hover:text-brand-dark transition-colors mb-1">
 						{listing.title}
 					</h3>
-					<p className="text-xs text-slate-500 mt-1.5 leading-relaxed line-clamp-2">
+					<p className="text-xs text-slate-500 leading-relaxed line-clamp-2">
 						{displayAddress}
 					</p>
 				</div>
-				<div className="flex items-end justify-between mt-1">
-					<span className="text-lg font-extrabold text-slate-900">
-						{(Number(listing.price) / 1_000_000).toFixed(1)}{" "}
-						<span className="text-base font-bold">Trđ</span>
-					</span>
+
+				<div className="mt-2 flex items-end justify-between gap-2 flex-wrap">
+					<div className="shrink-0">
+						<p className="inline-flex items-baseline gap-1 whitespace-nowrap text-slate-900">
+							<span className="text-xl leading-none font-extrabold">
+								{(Number(listing.price) / 1_000_000).toFixed(1)}
+							</span>
+							<span className="text-sm font-bold">Trđ</span>
+						</p>
+						<p className="text-[11px] text-slate-400 mt-1">{postedTime}</p>
+					</div>
+
+					<div className="ml-auto flex items-center gap-1.5 shrink-0">
+						<Link
+							to={`/listings/${listing.id}`}
+							onClick={(e) => e.stopPropagation()}
+							className="h-8 px-2.5 inline-flex items-center justify-center rounded-lg border border-slate-200 bg-white text-[12px] font-bold text-slate-700 hover:border-brand-primary hover:text-brand-primary transition-colors whitespace-nowrap"
+						>
+							Chi tiết
+						</Link>
+						<Link
+							to={`/listings/${listing.id}?action=reserve`}
+							onClick={(e) => e.stopPropagation()}
+							className="h-8 px-2.5 inline-flex items-center justify-center rounded-lg bg-brand-primary text-[12px] font-bold text-white hover:bg-brand-dark transition-colors whitespace-nowrap"
+						>
+							Thuê ngay
+						</Link>
+					</div>
 				</div>
-				<span className="text-[11px] text-slate-400 italic">{postedTime}</span>
 			</div>
 		</motion.div>
 	);
