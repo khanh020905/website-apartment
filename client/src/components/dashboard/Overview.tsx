@@ -1,4 +1,3 @@
-import React from "react";
 import { motion } from "framer-motion";
 import {
 	XAxis,
@@ -9,271 +8,251 @@ import {
 	AreaChart,
 	Area,
 } from "recharts";
-import {
-	Building2,
-	Home,
-	Users,
-	TrendingUp,
-	Calendar,
-	AlertCircle,
-	ArrowUpRight,
-	ArrowDownRight,
-	DollarSign,
-} from "lucide-react";
-import type { DashboardStats, Contract } from "../../../../shared/types";
-
-interface SummaryCardProps {
-	label: string;
-	value: string | number;
-	icon: React.ReactNode;
-	iconWrapperClass: string;
-	trend?: {
-		value: number;
-		isUp: boolean;
-	};
-}
-
-const SummaryCard = ({ label, value, icon, iconWrapperClass, trend }: SummaryCardProps) => (
-	<motion.div
-		initial={{ opacity: 0, y: 10 }}
-		animate={{ opacity: 1, y: 0 }}
-		className="bg-white p-5 rounded-4xl border border-slate-100 shadow-sm hover:shadow-2xl hover:shadow-brand-ink/5 transition-all"
-	>
-		<div className="flex items-center justify-between mb-4">
-			<div className={`p-4 rounded-3xl ${iconWrapperClass}`}>
-				{icon}
-			</div>
-			{trend && (
-				<div
-					className={`flex items-center text-xs font-bold ${trend.isUp ? "text-emerald-500" : "text-rose-500"}`}
-				>
-					{trend.isUp ?
-						<ArrowUpRight className="w-3 h-3 mr-0.5" />
-					:	<ArrowDownRight className="w-3 h-3 mr-0.5" />}
-					{trend.value}%
-				</div>
-			)}
-		</div>
-		<div className="space-y-1">
-			<h3 className="text-3xl font-black text-brand-ink tracking-tight">{value}</h3>
-			<p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{label}</p>
-		</div>
-	</motion.div>
-);
+import { Home, Users, TrendingUp, Calendar, AlertCircle, DollarSign } from "lucide-react";
+import type { DashboardStats } from "../../../../shared/types";
+import { SmartosStatCard } from "./SmartosStatCard";
 
 interface OverviewProps {
 	stats: DashboardStats;
 }
 
 export const Overview = ({ stats }: OverviewProps) => {
-	// Mock data for occupancy chart (last 6 months)
-	const chartData = [
-		{ month: "T10", rate: 82 },
-		{ month: "T11", rate: 85 },
-		{ month: "T12", rate: 80 },
-		{ month: "T1", rate: 88 },
-		{ month: "T2", rate: 92 },
-		{ month: "T3", rate: Math.round(stats.occupancyRate) },
-	];
-
-	const formatPrice = (p: number) => {
-		return (
-			new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" })
-				.format(p)
-				.replace("₫", "")
-				.trim() + " ₫"
-		);
-	};
-
-	const revTrend =
-		stats.revenue.last > 0 ?
-			{
-				value: Math.round(
-					((stats.revenue.current - stats.revenue.last) / stats.revenue.last) * 100,
-				),
-				isUp: stats.revenue.current >= stats.revenue.last,
-			}
-		:	undefined;
+	const chartData =
+		stats.occupancyTrend && stats.occupancyTrend.length > 0 ?
+			stats.occupancyTrend
+		:	[{ day: "N/A", rate: 0 }];
 
 	return (
 		<div className="space-y-6">
-			{/* Quick Stats Grid */}
-			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-				<SummaryCard
-					label="Tổng phòng"
-					value={stats.totalRooms}
-					icon={<Building2 className="w-6 h-6" />}
-					iconWrapperClass="bg-brand-ink/10 text-brand-ink"
+			{/* Quick Stats Grid — Row 1 */}
+			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+				<SmartosStatCard
+					value={`${stats.statusCounts.occupied}/${stats.totalRooms}`}
+					icon={<Users className="w-5 h-5 text-emerald-600" />}
+					iconBg="bg-emerald-50"
+					subtitle="Phòng đang sử dụng"
 				/>
-				<SummaryCard
-					label="Đang sử dụng"
-					value={stats.statusCounts.occupied}
-					icon={<Users className="w-6 h-6" />}
-					iconWrapperClass="bg-brand-primary/10 text-brand-primary"
-					trend={{ value: 4, isUp: true }}
+				<SmartosStatCard
+					value={`${stats.statusCounts.available}/${stats.totalRooms}`}
+					icon={<Home className="w-5 h-5 text-slate-500" />}
+					iconBg="bg-slate-100"
+					subtitle="Phòng trống"
 				/>
-				<SummaryCard
-					label="Phòng trống"
-					value={stats.statusCounts.available}
-					icon={<Home className="w-6 h-6" />}
-					iconWrapperClass="bg-white border-2 border-brand-primary/20 text-brand-primary"
-				/>
-				<SummaryCard
-					label="Doanh thu dự kiến"
-					value={formatPrice(stats.revenue.current)}
-					icon={<DollarSign className="w-6 h-6" />}
-					iconWrapperClass="bg-brand-light/30 text-brand-ink"
-					trend={revTrend}
+				<SmartosStatCard
+					value={stats.quickStats?.roomsStartingToday || 0}
+					icon={<Calendar className="w-5 h-5 text-brand-primary" />}
+					iconBg="bg-brand-bg"
+					subtitle="Phòng sắp bắt đầu"
+					badge={{ text: "Hôm nay", type: "amber" }}
 				/>
 			</div>
 
-			<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-				{/* Occupancy Chart */}
-				<div className="lg:col-span-2 bg-white p-6 rounded-4xl border border-slate-100 shadow-sm">
-					<div className="flex items-center justify-between mb-8">
-						<div>
-							<h3 className="text-lg font-black text-brand-ink">Tỷ lệ lấp đầy</h3>
-							<p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">
-								Xu hướng 6 tháng gần nhất
-							</p>
-						</div>
-						<div className="flex items-center gap-2 px-4 py-2 bg-brand-primary/10 rounded-2xl">
-							<TrendingUp className="w-4 h-4 text-brand-primary" />
-							<span className="text-sm font-black text-brand-primary">
-								{Math.round(stats.occupancyRate)}%
-							</span>
-						</div>
-					</div>
+			{/* Row 2 */}
+			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+				<SmartosStatCard
+					value={stats.quickStats?.roomsDueReturnToday || 0}
+					icon={<TrendingUp className="w-5 h-5 text-blue-500" />}
+					iconBg="bg-blue-50"
+					subtitle="Phòng sắp đến hạn trả"
+					badge={{ text: "Hôm nay", type: "blue" }}
+				/>
+				<SmartosStatCard
+					value={stats.quickStats?.invoicesDueSoon3d || 0}
+					icon={<DollarSign className="w-5 h-5 text-orange-500" />}
+					iconBg="bg-orange-50"
+					subtitle="Hoá đơn sắp hết hạn"
+					badge={{ text: "3 ngày tới", type: "orange" }}
+				/>
+				<SmartosStatCard
+					value={stats.quickStats?.visaExpiringThisMonth || 0}
+					icon={<Users className="w-5 h-5 text-purple-500" />}
+					iconBg="bg-purple-50"
+					subtitle="Visa sắp hết hạn"
+					badge={{ text: "Tháng này", type: "purple" }}
+				/>
+			</div>
 
-					<div className="h-75 w-full min-w-0">
-						<ResponsiveContainer
-							width="100%"
-							height="100%"
-							minWidth={0}
-						>
-							<AreaChart
-								data={chartData}
-								margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-							>
-								<defs>
-									<linearGradient
-										id="colorRate"
-										x1="0"
-										y1="0"
-										x2="0"
-										y2="1"
-									>
-										<stop
-											offset="5%"
-											stopColor="#0f9b9b"
-											stopOpacity={0.15}
-										/>
-										<stop
-											offset="95%"
-											stopColor="#0f9b9b"
-											stopOpacity={0}
-										/>
-									</linearGradient>
-								</defs>
-								<CartesianGrid
-									strokeDasharray="3 3"
-									vertical={false}
-									stroke="#f1f5f9"
-								/>
-								<XAxis
-									dataKey="month"
-									axisLine={false}
-									tickLine={false}
-									tick={{ fill: "#94a3b8", fontSize: 12, fontWeight: 700 }}
-									dy={10}
-								/>
-								<YAxis
-									hide={true}
-									domain={[0, 100]}
-								/>
-								<Tooltip
-									contentStyle={{
-										borderRadius: "16px",
-										border: "none",
-										boxShadow: "0 20px 50px rgba(0,0,0,0.05)",
-										padding: "12px 16px",
-									}}
-									labelStyle={{ fontWeight: 800, marginBottom: "4px", color: "#1e293b" }}
-								/>
-								<Area
-									type="monotone"
-									dataKey="rate"
-									stroke="#0f9b9b"
-									strokeWidth={4}
-									fillOpacity={1}
-									fill="url(#colorRate)"
-									animationDuration={1500}
-								/>
-							</AreaChart>
-						</ResponsiveContainer>
-					</div>
-				</div>
-
-				{/* Expiring Contracts / Notifications */}
-				<div className="space-y-6">
-					<div className="bg-white p-6 rounded-4xl border border-slate-100 shadow-sm h-full">
-						<h3 className="text-lg font-black text-brand-ink mb-6 flex items-center gap-2">
-							<Calendar className="w-5 h-5 text-brand-primary" />
-							Sắp hết hạn
+			{/* Occupancy Chart - RESTORED */}
+			<motion.div
+				initial={{ opacity: 0, y: 10 }}
+				animate={{ opacity: 1, y: 0 }}
+				transition={{ delay: 0.15 }}
+				className="bg-white p-6 rounded-[24px] border border-slate-100 shadow-sm"
+			>
+				<div className="flex items-center justify-between mb-8">
+					<div>
+						<h3 className="text-sm font-black text-slate-800 uppercase tracking-tighter">
+							Tỷ lệ lấp đầy theo thời gian
 						</h3>
+						<p className="text-[10px] font-bold text-emerald-600 mt-0.5">
+							(trung bình {Math.round(stats.occupancyRate)}%)
+						</p>
+					</div>
+					<select className="text-[11px] font-bold border border-slate-200 rounded-xl px-3 py-1.5 text-slate-600 bg-white cursor-pointer hover:border-brand-primary/30 transition-all outline-none">
+						<option>Tháng này</option>
+						<option>Tháng trước</option>
+						<option>3 tháng</option>
+					</select>
+				</div>
 
-						<div className="space-y-4">
-							{stats.expiringContracts.d7.length > 0 && (
-								<div className="p-4 bg-rose-50 rounded-2xl border border-rose-100">
-									<div className="flex items-center justify-between mb-1">
-										<span className="text-[10px] font-black text-rose-600 uppercase tracking-widest">
-											Trong 7 ngày tới
-										</span>
-										<AlertCircle className="w-4 h-4 text-rose-500" />
-									</div>
-									<p className="text-sm font-black text-rose-900">
-										{stats.expiringContracts.d7.length} hợp đồng cần gia hạn
-									</p>
-								</div>
-							)}
+				<div className="h-64 w-full">
+					<ResponsiveContainer
+						width="100%"
+						height="100%"
+					>
+						<AreaChart data={chartData}>
+							<defs>
+								<linearGradient
+									id="colorO"
+									x1="0"
+									y1="0"
+									x2="0"
+									y2="1"
+								>
+									<stop
+										offset="5%"
+										stopColor="#0f9b9b"
+										stopOpacity={0.05}
+									/>
+									<stop
+										offset="95%"
+										stopColor="#0f9b9b"
+										stopOpacity={0}
+									/>
+								</linearGradient>
+							</defs>
+							<CartesianGrid
+								strokeDasharray="0"
+								vertical={false}
+								stroke="#f1f5f9"
+							/>
+							<XAxis
+								dataKey="day"
+								axisLine={false}
+								tickLine={false}
+								tick={{ fill: "#94a3b8", fontSize: 10, fontWeight: 700 }}
+							/>
+							<YAxis
+								axisLine={false}
+								tickLine={false}
+								tick={{ fill: "#94a3b8", fontSize: 10, fontWeight: 700 }}
+								tickFormatter={(v) => `${v}%`}
+							/>
+							<Tooltip
+								contentStyle={{
+									borderRadius: "12px",
+									border: "none",
+									boxShadow: "0 10px 25px rgba(0,0,0,0.05)",
+									padding: "8px 12px",
+								}}
+							/>
+							<Area
+								type="monotone"
+								dataKey="rate"
+								stroke="#0f9b9b"
+								strokeWidth={3}
+								fill="url(#colorO)"
+								dot={{ fill: "#0f9b9b", stroke: "#fff", strokeWidth: 2, r: 4 }}
+								activeDot={{ r: 6, strokeWidth: 0 }}
+							/>
+						</AreaChart>
+					</ResponsiveContainer>
+				</div>
+			</motion.div>
 
-							{stats.expiringContracts.d30.length > 0 ?
-								<div className="space-y-2">
-									{stats.expiringContracts.d30.slice(0, 4).map((c: Contract) => (
-										<div
-											key={c.id}
-											className="flex items-center justify-between p-3 rounded-xl border border-slate-50 hover:bg-slate-50 transition-colors"
-										>
-											<div>
-												<p className="text-sm font-bold text-slate-800">{c.tenant_name}</p>
-												<p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">
-													{c.end_date}
-												</p>
-											</div>
-											<button className="text-[10px] font-black text-brand-primary hover:text-brand-ink uppercase tracking-widest px-3 py-1 bg-brand-primary/10 rounded-lg transition-colors cursor-pointer">
-												Gia hạn
-											</button>
-										</div>
-									))}
-									{stats.expiringContracts.d30.length > 4 && (
-										<button className="w-full py-2 text-xs font-bold text-slate-400 hover:text-slate-600 transition-colors">
-											Xem tất cả ({stats.expiringContracts.d30.length})
-										</button>
-									)}
-								</div>
-							:	<div className="py-10 text-center space-y-3">
-									<div className="w-12 h-12 bg-slate-50 text-slate-300 rounded-2xl flex items-center justify-center mx-auto">
-										<Calendar className="w-6 h-6" />
-									</div>
-									<p className="text-sm font-bold text-slate-400">
-										Không có hợp đồng nào sắp hết hạn
-									</p>
-								</div>
-							}
+			<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+				{/* Section: Incidents */}
+				<motion.div
+					initial={{ opacity: 0, y: 20 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{ delay: 0.2 }}
+					className="bg-white rounded-[24px] border border-slate-100 shadow-sm overflow-hidden flex flex-col min-h-[400px]"
+				>
+					<div className="px-6 py-5 flex items-center justify-between border-b border-slate-50">
+						<h3 className="text-[14px] font-bold text-slate-900 tracking-tight">
+							Sự cố cần xử lý ({stats.upcomingStats?.incidents || 0})
+						</h3>
+						<div className="flex items-center gap-3">
+							<div className="relative">
+								<select className="text-[12px] font-bold border border-slate-200 rounded-xl px-3 py-1.5 text-slate-500 bg-white cursor-pointer hover:border-brand-primary/30 transition-all outline-none appearance-none pr-8">
+									<option>Hôm nay</option>
+									<option>3 ngày trước</option>
+									<option>7 ngày trước</option>
+								</select>
+								<Calendar className="w-3.5 h-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+							</div>
+							<div className="w-8 h-8 flex items-center justify-center text-slate-300 hover:text-slate-500 transition-colors cursor-pointer">
+								<TrendingUp className="w-4 h-4" />
+							</div>
 						</div>
 					</div>
-				</div>
+
+					<div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-[#fdfdfd]">
+						<div className="relative mb-8">
+							<div className="w-32 h-32 bg-linear-to-b from-slate-50 to-white rounded-full flex items-center justify-center relative z-10">
+								<div className="w-24 h-24 bg-white rounded-full shadow-lg shadow-slate-100 flex items-center justify-center">
+									<AlertCircle className="w-12 h-12 text-slate-100" />
+								</div>
+							</div>
+							<div className="absolute -bottom-2 -right-2 w-10 h-10 bg-brand-bg rounded-2xl flex items-center justify-center animate-bounce duration-3000">
+								<div className="w-2 h-2 bg-brand-primary rounded-full" />
+							</div>
+						</div>
+						<h4 className="text-[18px] font-black text-slate-800 mb-2">Không có sự cố nào cần xử lý</h4>
+						<p className="text-[13px] font-medium text-slate-400 max-w-64 leading-relaxed">
+							Khi có báo cáo về sự cố, bạn có thể kiểm tra và xử lý ở đây.
+						</p>
+					</div>
+				</motion.div>
+
+				{/* Section: Overdue Invoices */}
+				<motion.div
+					initial={{ opacity: 0, y: 20 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{ delay: 0.3 }}
+					className="bg-white rounded-[24px] border border-slate-100 shadow-sm overflow-hidden flex flex-col min-h-[400px]"
+				>
+					<div className="px-6 py-5 flex items-center justify-between border-b border-slate-50">
+						<h3 className="text-[14px] font-bold text-slate-900 tracking-tight">
+							Hoá đơn quá hạn chưa thanh toán ({stats.upcomingStats?.overdueInvoices || 0})
+						</h3>
+					</div>
+
+					<div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-[#fdfdfd]">
+						<div className="relative mb-8">
+							<div className="w-32 h-32 bg-linear-to-b from-slate-50 to-white rounded-full flex items-center justify-center relative z-10">
+								<div className="w-24 h-24 bg-white rounded-full shadow-lg shadow-slate-100 flex items-center justify-center">
+									<DollarSign className="w-12 h-12 text-slate-100" />
+								</div>
+							</div>
+						</div>
+						<h4 className="text-[18px] font-black text-slate-800 mb-2">Không hoá đơn quá hạn nào</h4>
+						<p className="text-[13px] font-medium text-slate-400 max-w-64 leading-relaxed">
+							Khi có hoá đơn quá hạn chưa thanh toán, bạn có thể kiểm tra và xử lý ở đây.
+						</p>
+					</div>
+				</motion.div>
 			</div>
+
+			{/* Section: Today's Appointments */}
+			<motion.div
+				initial={{ opacity: 0, y: 20 }}
+				animate={{ opacity: 1, y: 0 }}
+				transition={{ delay: 0.4 }}
+				className="bg-white rounded-[24px] border border-slate-100 shadow-sm overflow-hidden"
+			>
+				<div className="px-6 py-5 border-b border-slate-50">
+					<h3 className="text-[14px] font-bold text-slate-900 tracking-tight">
+						Xem phòng hôm nay ({stats.upcomingStats?.todayAppointments || 0})
+					</h3>
+				</div>
+				<div className="p-12 flex flex-col items-center justify-center text-center">
+					<div className="w-16 h-16 bg-slate-50 rounded-3xl flex items-center justify-center mb-4 text-slate-300">
+						<Calendar className="w-8 h-8" />
+					</div>
+					<p className="text-[13px] font-bold text-slate-400">Hôm nay chưa có lịch hẹn xem phòng nào.</p>
+				</div>
+			</motion.div>
 		</div>
 	);
 };

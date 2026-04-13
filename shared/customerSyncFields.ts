@@ -1,0 +1,25 @@
+export const CUSTOMER_SYNC_FIELDS = [
+	{ key: "building_name", label: "Tên tòa nhà" },
+	{ key: "room_number", label: "Số phòng" },
+	{ key: "tenant_name", label: "Tên khách hàng" },
+	{ key: "tenant_phone", label: "Số điện thoại" },
+	{ key: "tenant_email", label: "Email" },
+	{ key: "tenant_gender", label: "Giới tính" },
+	{ key: "tenant_dob", label: "Ngày sinh" },
+	{ key: "tenant_id_number", label: "CCCD/Hộ chiếu" },
+	{ key: "tenant_job", label: "Nghề nghiệp" },
+	{ key: "tenant_nationality", label: "Quốc tịch" },
+	{ key: "tenant_city", label: "Thành phố" },
+	{ key: "tenant_district", label: "Quận/Huyện" },
+	{ key: "tenant_ward", label: "Phường/Xã" },
+	{ key: "tenant_address", label: "Địa chỉ" },
+	{ key: "residence_status", label: "Trạng thái tạm trú" },
+	{ key: "start_date", label: "Ngày bắt đầu" },
+	{ key: "end_date", label: "Ngày kết thúc" },
+	{ key: "rent_amount", label: "Tiền thuê" },
+	{ key: "deposit_amount", label: "Tiền cọc" },
+	{ key: "tenant_notes", label: "Ghi chú" },
+	{ key: "tenant_avatar", label: "Ảnh đại diện URL" },
+] as const;
+
+export type CustomerSyncFieldKey = (typeof CUSTOMER_SYNC_FIELDS)[number]["key"];

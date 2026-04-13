@@ -1,162 +1,515 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-import { useState, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import {
+	AlertCircle,
+	ImagePlus,
+	MinusCircle,
+	PlusCircle,
+	Video,
+	X,
+} from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { api } from "../lib/api";
-import type { Amenity, BuildingWithRooms, Room } from "../../../shared/types";
-import { LayoutGrid, Home, AlertCircle } from "lucide-react";
+import type { Amenity, BuildingWithRooms, Listing, PropertyType } from "../../../shared/types";
+
+type UploadedImage = { url: string; order: number };
+
+interface ListingForm {
+	building_id: string;
+	room_id: string;
+	title: string;
+	description: string;
+	price: string;
+	contact_name: string;
+	contact_phone: string;
+	property_type: PropertyType;
+	amenity_ids: number[];
+	room_features: string[];
+	interior_features: string[];
+	custom_amenities: string[];
+	max_people: number;
+	max_vehicles: number;
+	length_m: string;
+	width_m: string;
+	area: string;
+	guest_note: string;
+	is_discounted: boolean;
+	is_newly_built: boolean;
+}
+
+const RENTAL_TYPES: Array<{ key: PropertyType; label: string }> = [
+	{ key: "can_ho_mini", label: "Căn hộ dịch vụ" },
+	{ key: "phong_tro", label: "KTX / Sleep Box" },
+	{ key: "nha_nguyen_can", label: "Nhà trọ" },
+];
+
+const ROOM_FEATURES = [
+	"Full nội thất",
+	"Không nội thất",
+	"Duplex",
+	"Phòng Studio",
+	"Ban công",
+	"Tách bếp",
+	"Cửa sổ trời",
+	"Cửa sổ hành lang",
+	"Giếng trời",
+	"1 Phòng Ngủ",
+	"2 Phòng Ngủ",
+	"3 Phòng Ngủ",
+	"View kính",
+	"Penthouse",
+];
+
+const INTERIOR_FEATURES = [
+	"Máy lạnh",
+	"Tủ lạnh",
+	"Máy giặt",
+	"Quạt điện",
+	"Tủ quần áo",
+	"Máy nước nóng",
+	"Kệ bếp",
+	"Ghế Sofa",
+	"Giường",
+	"Nệm",
+];
+
+const toVnd = (raw: string) => Number(raw.replace(/[^\d]/g, ""));
+
+const formatVnd = (raw: string) => {
+	const value = toVnd(raw);
+	return value > 0 ? value.toLocaleString("vi-VN") : "";
+};
+
+const getVideoDuration = (file: File) =>
+	new Promise<number>((resolve, reject) => {
+		const objectUrl = URL.createObjectURL(file);
+		const video = document.createElement("video");
+
+		video.preload = "metadata";
+		video.onloadedmetadata = () => {
+			URL.revokeObjectURL(objectUrl);
+			resolve(video.duration);
+		};
+		video.onerror = () => {
+			URL.revokeObjectURL(objectUrl);
+			reject(new Error("Không đọc được thời lượng video"));
+		};
+		video.src = objectUrl;
+	});
 
 export default function CreateListingPage() {
 	const navigate = useNavigate();
 	const [searchParams] = useSearchParams();
 	const roomIdParam = searchParams.get("room_id");
 	const buildingIdParam = searchParams.get("building_id");
+	const listingIdParam = searchParams.get("listing_id");
 	const { canPost, role, user } = useAuth();
-	const isBroker = role === "broker";
 
 	const [buildings, setBuildings] = useState<BuildingWithRooms[]>([]);
 	const [amenities, setAmenities] = useState<Amenity[]>([]);
-
+	const [imageUploads, setImageUploads] = useState<UploadedImage[]>([]);
+	const [videoUrl, setVideoUrl] = useState("");
 	const [loading, setLoading] = useState(false);
+	const [uploadingImages, setUploadingImages] = useState(false);
+	const [uploadingVideo, setUploadingVideo] = useState(false);
+	const [loadingInitialData, setLoadingInitialData] = useState(false);
+	const [didAutoRecover, setDidAutoRecover] = useState(false);
 	const [error, setError] = useState("");
 	const [success, setSuccess] = useState("");
-	const [step, setStep] = useState(1); // 1=building, 2=room, 3=details, 4=preview
+	const [customAmenityDraft, setCustomAmenityDraft] = useState("");
+	const [amenityKeyword, setAmenityKeyword] = useState("");
+	const [showCustomAmenityInput, setShowCustomAmenityInput] = useState(false);
 
-	// Form state
-	const [form, setForm] = useState({
+	const imageInputRef = useRef<HTMLInputElement | null>(null);
+	const videoInputRef = useRef<HTMLInputElement | null>(null);
+
+	const [form, setForm] = useState<ListingForm>({
 		building_id: buildingIdParam || "",
 		room_id: roomIdParam || "",
 		title: "",
 		description: "",
-		contact_phone: "",
-		contact_name: "",
-		available_date: "",
-		// Room info snapshot
 		price: "",
+		contact_name: "",
+		contact_phone: "",
+		property_type: "can_ho_mini",
+		amenity_ids: [],
+		room_features: [],
+		interior_features: [],
+		custom_amenities: [],
+		max_people: 1,
+		max_vehicles: 1,
+		length_m: "",
+		width_m: "",
 		area: "",
-		furniture: "none",
-		amenity_ids: [] as number[],
-		property_type: "phong_tro",
-		// Broker CRM fields
-		target_audience: "",
-		commission_rate: "",
-		booking_note: "",
+		guest_note: "",
+		is_discounted: false,
+		is_newly_built: false,
 	});
-	const [imageUrls, setImageUrls] = useState<string[]>([]);
 
 	useEffect(() => {
-		// Sync contact info
+		if (!canPost) return;
+		let mounted = true;
+		Promise.all([
+			api.get<{ buildings: BuildingWithRooms[] }>("/api/buildings"),
+			api.get<{ amenities: Amenity[] }>("/api/search/amenities"),
+		]).then(([buildingsRes, amenitiesRes]) => {
+			if (!mounted) return;
+			if (buildingsRes.data?.buildings) {
+				setBuildings(buildingsRes.data.buildings);
+			}
+			if (amenitiesRes.data?.amenities) {
+				setAmenities(amenitiesRes.data.amenities);
+			}
+		});
+
+		return () => {
+			mounted = false;
+		};
+	}, [canPost]);
+
+	useEffect(() => {
+		if (!canPost || !listingIdParam) return;
+		setLoadingInitialData(true);
+		api.get<{ listing: Listing }>(`/api/listings/${listingIdParam}`).then(({ data, error: listingError }) => {
+			if (listingError || !data?.listing) {
+				setError(listingError || "Không thể tải tin đăng để chỉnh sửa");
+				setLoadingInitialData(false);
+				return;
+			}
+			const listing = data.listing;
+			const customRoomFeatures = (listing.room_features || []).filter(
+				(feature) => !ROOM_FEATURES.includes(feature),
+			);
+			const builtInRoomFeatures = (listing.room_features || []).filter((feature) =>
+				ROOM_FEATURES.includes(feature),
+			);
+
+			setForm((prev) => ({
+				...prev,
+				building_id: prev.building_id || buildingIdParam || "",
+				room_id: listing.room_id || prev.room_id || roomIdParam || "",
+				title: listing.title || "",
+				description: listing.description || "",
+				price: listing.price ? String(listing.price) : "",
+				contact_name: listing.contact_name || "",
+				contact_phone: listing.contact_phone || "",
+				property_type: listing.property_type || "can_ho_mini",
+				amenity_ids: listing.amenity_ids || [],
+				room_features: builtInRoomFeatures,
+				interior_features: listing.interior_features || [],
+				custom_amenities: customRoomFeatures,
+				max_people: listing.max_people || 1,
+				max_vehicles: listing.max_vehicles || 1,
+				length_m: listing.length_m ? String(listing.length_m) : "",
+				width_m: listing.width_m ? String(listing.width_m) : "",
+				area: listing.area ? String(listing.area) : "",
+				guest_note: listing.guest_note || "",
+				is_discounted: Boolean(listing.is_discounted),
+				is_newly_built: Boolean(listing.is_newly_built),
+			}));
+
+			setImageUploads(
+				(listing.images || [])
+					.slice()
+					.sort((a, b) => a.order - b.order)
+					.map((img, index) => ({ url: img.url, order: index })),
+			);
+			setVideoUrl(listing.video_url || "");
+			setLoadingInitialData(false);
+		});
+	}, [buildingIdParam, canPost, listingIdParam, roomIdParam]);
+
+	useEffect(() => {
 		setForm((prev) => ({
 			...prev,
 			contact_name: prev.contact_name || user?.user_metadata?.full_name || "",
 			contact_phone: prev.contact_phone || user?.profile?.phone || "",
 		}));
+	}, [user]);
 
-		api.get<{ amenities: Amenity[] }>("/api/search/amenities").then(({ data }) => {
-			if (data) setAmenities(data.amenities);
-		});
+	const selectedRoomContext = (() => {
+		for (const building of buildings) {
+			const room = (building.rooms || []).find((item) => item.id === form.room_id);
+			if (room) return { building, room };
+		}
+		return null;
+	})();
 
-		if (canPost) {
-			api.get<{ buildings: BuildingWithRooms[] }>("/api/buildings").then(({ data }) => {
-				if (data && Array.isArray(data.buildings)) {
-					setBuildings(data.buildings);
+	const selectedBuilding =
+		selectedRoomContext?.building || buildings.find((b) => b.id === form.building_id) || null;
 
-					if (roomIdParam && buildingIdParam) {
-						const b = data.buildings.find((x) => x.id === buildingIdParam);
-						const r = b?.rooms?.find((x) => x.id === roomIdParam);
-						if (r) {
-							selectRoom(r);
-							setStep(3); // Jump to details
-						}
-					}
-				}
+	const selectedRoom = selectedRoomContext?.room || null;
+
+	useEffect(() => {
+		if (!roomIdParam || form.room_id === roomIdParam) return;
+		setForm((prev) => ({ ...prev, room_id: roomIdParam }));
+	}, [form.room_id, roomIdParam]);
+
+	useEffect(() => {
+		if (!selectedRoomContext || form.building_id === selectedRoomContext.building.id) return;
+		setForm((prev) => ({ ...prev, building_id: selectedRoomContext.building.id }));
+	}, [form.building_id, selectedRoomContext]);
+
+	useEffect(() => {
+		if (!canPost || didAutoRecover || loadingInitialData || buildings.length === 0) return;
+		if (listingIdParam && !form.room_id) return;
+		if (!form.room_id) {
+			setDidAutoRecover(true);
+			navigate("/my-listings", {
+				replace: true,
+				state: {
+					openPostRoomPicker: true,
+					notice: "Hãy chọn mã phòng trước khi tạo tin đăng.",
+				},
+			});
+			return;
+		}
+		if (!selectedRoom) {
+			setDidAutoRecover(true);
+			navigate("/my-listings", {
+				replace: true,
+				state: {
+					openPostRoomPicker: true,
+					notice: "Mã phòng đã chọn không còn hợp lệ, vui lòng chọn lại.",
+				},
 			});
 		}
-	}, [user, canPost]);
+	}, [
+		buildings.length,
+		canPost,
+		didAutoRecover,
+		form.room_id,
+		listingIdParam,
+		loadingInitialData,
+		navigate,
+		selectedRoom,
+	]);
 
-	const updateForm = useCallback((field: string, value: unknown) => {
-		setForm((prev) => ({ ...prev, [field]: value }));
-	}, []);
-
-	const selectRoom = (room: Room) => {
+	useEffect(() => {
+		if (!selectedRoom) return;
 		setForm((prev) => ({
 			...prev,
-			room_id: room.id,
-			price: room.price ? (room.price / 1_000_000).toString() : "",
-			area: room.area ? room.area.toString() : "",
-			furniture: room.furniture,
-			amenity_ids: room.amenity_ids || [],
-			description: prev.description || room.description || "", // init listing description with room description
-			property_type: room.furniture === "full" ? "can_ho_mini" : "phong_tro",
+			price: prev.price || (selectedRoom.price ? String(selectedRoom.price) : ""),
+			area: prev.area || (selectedRoom.area ? String(selectedRoom.area) : ""),
+			amenity_ids: prev.amenity_ids.length > 0 ? prev.amenity_ids : selectedRoom.amenity_ids || [],
+			description: prev.description || selectedRoom.description || "",
 		}));
-		setImageUrls(room.images || []);
-		setError("");
-		setStep(3);
+		if (imageUploads.length === 0 && selectedRoom.images && selectedRoom.images.length > 0) {
+			setImageUploads(
+				selectedRoom.images.map((url, index) => ({
+					url,
+					order: index,
+				})),
+			);
+		}
+	}, [imageUploads.length, selectedRoom]);
+
+	const computedArea = useMemo(() => {
+		const length = Number(form.length_m);
+		const width = Number(form.width_m);
+		if (Number.isFinite(length) && Number.isFinite(width) && length > 0 && width > 0) {
+			return Number((length * width).toFixed(2));
+		}
+		const area = Number(form.area);
+		return Number.isFinite(area) && area > 0 ? area : 0;
+	}, [form.length_m, form.width_m, form.area]);
+
+	const filteredAmenities = useMemo(() => {
+		const keyword = amenityKeyword.trim().toLowerCase();
+		if (!keyword) return amenities;
+		return amenities.filter((am) => am.name_vi.toLowerCase().includes(keyword));
+	}, [amenities, amenityKeyword]);
+
+	const toggleStringArray = (field: "room_features" | "interior_features", value: string) => {
+		setForm((prev) => ({
+			...prev,
+			[field]:
+				prev[field].includes(value) ?
+					prev[field].filter((item) => item !== value)
+				:	[...prev[field], value],
+		}));
 	};
 
-	const selectedBuilding = buildings.find((b) => b.id === form.building_id);
-	const selectedRoom = selectedBuilding?.rooms?.find((r) => r.id === form.room_id);
+	const toggleAmenity = (id: number) => {
+		setForm((prev) => ({
+			...prev,
+			amenity_ids:
+				prev.amenity_ids.includes(id) ?
+					prev.amenity_ids.filter((item) => item !== id)
+				:	[...prev.amenity_ids, id],
+		}));
+	};
+
+	const handleImageUpload = async (files: FileList | null) => {
+		if (!files || files.length === 0) return;
+		setError("");
+		setUploadingImages(true);
+		const formData = new FormData();
+		Array.from(files).forEach((file) => {
+			formData.append("images", file);
+		});
+		const { data, error: uploadError } = await api.upload<{ images: UploadedImage[] }>(
+			"/api/listings/upload-images",
+			formData,
+		);
+		setUploadingImages(false);
+		if (uploadError || !data) {
+			setError(uploadError || "Không thể tải ảnh lên");
+			return;
+		}
+		setImageUploads((prev) => {
+			const start = prev.length;
+			const merged = [...prev, ...data.images.map((img, idx) => ({ ...img, order: start + idx }))];
+			return merged.slice(0, 15);
+		});
+		if (imageInputRef.current) imageInputRef.current.value = "";
+	};
+
+	const handleVideoUpload = async (file: File | null) => {
+		if (!file) return;
+		setError("");
+		try {
+			const duration = await getVideoDuration(file);
+			if (duration > 60) {
+				setError("Video phải có thời lượng dưới 60 giây");
+				if (videoInputRef.current) videoInputRef.current.value = "";
+				return;
+			}
+		} catch {
+			setError("Không thể đọc video, vui lòng thử lại");
+			return;
+		}
+
+		setUploadingVideo(true);
+		const formData = new FormData();
+		formData.append("video", file);
+		const { data, error: uploadError } = await api.upload<{ video_url: string }>(
+			"/api/listings/upload-video",
+			formData,
+		);
+		setUploadingVideo(false);
+		if (uploadError || !data?.video_url) {
+			setError(uploadError || "Không thể tải video lên");
+			return;
+		}
+		setVideoUrl(data.video_url);
+		if (videoInputRef.current) videoInputRef.current.value = "";
+	};
+
+	const handleAddCustomAmenity = () => {
+		const trimmed = customAmenityDraft.trim();
+		if (!trimmed) return;
+		setForm((prev) => ({
+			...prev,
+			custom_amenities:
+				prev.custom_amenities.includes(trimmed) ? prev.custom_amenities : [...prev.custom_amenities, trimmed],
+		}));
+		setCustomAmenityDraft("");
+		setShowCustomAmenityInput(false);
+	};
+
+	const handleRemoveImage = (url: string) => {
+		setImageUploads((prev) =>
+			prev
+				.filter((img) => img.url !== url)
+				.map((img, index) => ({
+					...img,
+					order: index,
+				})),
+		);
+	};
 
 	const handleSubmit = async () => {
 		setError("");
-		if (!form.building_id || !form.room_id) {
-			setError("Vui lòng chọn tòa nhà và phòng");
+		setSuccess("");
+		if (!form.room_id) {
+			setError("Vui lòng chọn mã phòng");
 			return;
 		}
-		if (!form.title || !form.contact_phone) {
-			setError("Vui lòng điền đủ tiêu đề và số điện thoại liên hệ");
+		if (!form.title.trim()) {
+			setError("Vui lòng nhập tiêu đề tin đăng");
 			return;
 		}
-		if (!form.price || !form.area) {
-			setError("Phòng này thiếu thông tin giá thuê hoặc diện tích. Vui lòng cập nhật phòng trước.");
+		if (!form.contact_phone.trim()) {
+			setError("Vui lòng nhập số điện thoại liên hệ");
 			return;
 		}
-		if (imageUrls.length < 3) {
-			setError("Phòng này cần ít nhất 3 ảnh. Vui lòng vào trang quản lý phòng để thêm ảnh.");
+		if (toVnd(form.price) <= 0) {
+			setError("Phí thuê không hợp lệ");
+			return;
+		}
+		if (computedArea <= 0) {
+			setError("Vui lòng nhập kích thước hoặc diện tích hợp lệ");
+			return;
+		}
+		if (imageUploads.length < 1) {
+			setError("Cần ít nhất 1 hình ảnh");
 			return;
 		}
 
-		setLoading(true);
+		const bedroomsFromFeatures = form.room_features.find((feature) => feature.includes("Phòng Ngủ"));
+		const bedrooms = bedroomsFromFeatures ? Number(bedroomsFromFeatures.match(/\d+/)?.[0] || "1") : 0;
+		const furniture =
+			form.room_features.includes("Full nội thất") ? "full"
+			: form.room_features.includes("Không nội thất") ? "none"
+			: "basic";
+
 		const payload = {
-			...form,
-			price: Number(form.price) * 1000000,
-			area: Number(form.area),
-			bedrooms: 1, // default for room
-			bathrooms: 1, // default for room
-			images: imageUrls.map((url, i) => ({ url, order: i })),
-
-			// Auto-fill address parts from selected building
-			address: selectedBuilding?.address || "",
+			room_id: form.room_id,
+			title: form.title.trim(),
+			description: form.description.trim(),
+			price: toVnd(form.price),
+			area: computedArea,
+			bedrooms,
+			bathrooms: 1,
+			property_type: form.property_type,
+			furniture,
+			address: selectedBuilding?.address || null,
 			ward: selectedBuilding?.ward || null,
 			district: selectedBuilding?.district || null,
 			city: selectedBuilding?.city || null,
 			lat: selectedBuilding?.lat || null,
 			lng: selectedBuilding?.lng || null,
+			contact_phone: form.contact_phone.trim(),
+			contact_name: form.contact_name.trim() || null,
+			images: imageUploads.map((img, order) => ({ url: img.url, order })),
+			video_url: videoUrl || null,
+			amenity_ids: form.amenity_ids,
+			room_features: [...form.room_features, ...form.custom_amenities],
+			interior_features: form.interior_features,
+			is_discounted: form.is_discounted,
+			is_newly_built: form.is_newly_built,
+			max_people: form.max_people,
+			max_vehicles: form.max_vehicles,
+			length_m: form.length_m ? Number(form.length_m) : null,
+			width_m: form.width_m ? Number(form.width_m) : null,
+			guest_note: form.guest_note.trim() || null,
+			available_date: selectedRoom?.available_from || null,
+			target_audience: null,
+			commission_rate: null,
+			booking_note: null,
 		};
 
-		const { data, error: apiError } = await api.post<{ listing: unknown; message?: string }>(
-			"/api/listings",
-			payload,
-		);
+		setLoading(true);
+		const { data, error: apiError } =
+			listingIdParam ?
+				await api.put<{ message?: string }>(`/api/listings/${listingIdParam}`, payload)
+			:	await api.post<{ message?: string }>("/api/listings", payload);
 		setLoading(false);
-
 		if (apiError) {
 			setError(apiError);
-		} else if (data) {
-			setSuccess(data.message || "Tin đăng đã được gửi!");
-			setTimeout(() => navigate("/my-listings"), 2500);
+			return;
 		}
+		setSuccess(data?.message || (listingIdParam ? "Cập nhật tin thành công" : "Tạo tin thành công"));
+		setTimeout(() => navigate("/my-listings"), 1200);
 	};
 
 	if (!canPost) {
 		return (
 			<div className="flex-1 overflow-y-auto bg-slate-50">
-				<div className="max-w-4xl mx-auto p-6">
+				<div className="max-w-3xl mx-auto p-6">
 					<div className="bg-white rounded-2xl border border-slate-200 p-6 md:p-8">
-						<h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 mb-2">
-							Đăng tin cho thuê
-						</h1>
+						<h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 mb-2">Đăng tin cho thuê</h1>
 						<p className="text-slate-500 mb-6">Để đăng tin, bạn cần mua gói Chủ trọ/Môi giới.</p>
 						<div className="flex flex-wrap gap-3">
 							<button
@@ -166,7 +519,7 @@ export default function CreateListingPage() {
 								Mua ngay
 							</button>
 							<Link
-								to="/search"
+								to="/"
 								className="px-5 py-2.5 border border-slate-300 text-slate-700 rounded-xl font-semibold hover:bg-slate-50 transition-colors"
 							>
 								Xem danh sách phòng
@@ -180,485 +533,466 @@ export default function CreateListingPage() {
 
 	return (
 		<div className="flex-1 overflow-y-auto bg-slate-50">
-			<div className="max-w-3xl mx-auto p-6 pb-20">
-				<motion.div
-					initial={{ opacity: 0, y: 20 }}
-					animate={{ opacity: 1, y: 0 }}
-					className="mb-8"
-				>
-					<h1 className="text-3xl font-extrabold text-slate-900">Đăng tin cho thuê</h1>
-					<p className="text-slate-500 mt-1">
-						Chọn phòng từ các Tòa nhà của bạn để đăng tải nhanh chóng
-					</p>
-				</motion.div>
+			<div className="max-w-7xl mx-auto p-4 sm:p-6 pb-28 lg:pb-10">
+				<div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+					<div className="px-5 sm:px-6 py-4 border-b border-slate-100 sticky top-0 bg-white z-10">
+						<h1 className="text-[20px] font-bold text-slate-900 tracking-tight">
+							{listingIdParam ? "Sửa tin đăng" : "Tạo tin đăng"}
+						</h1>
+					</div>
 
-				<div className="flex gap-2 mb-8">
-					{["Chọn Tòa nhà", "Chọn Phòng", "Thông tin tin đăng", "Xem trước"].map((label, i) => (
-						<button
-							key={i}
-							onClick={() => {
-								if (i + 1 > step && !form.building_id && i > 0)
-									return setError("Vui lòng chọn Tòa nhà");
-								if (i + 1 > step && !form.room_id && i > 1) return setError("Vui lòng chọn Phòng");
-								setStep(i + 1);
-							}}
-							className={`flex-1 py-2 rounded-xl text-[10px] md:text-xs font-bold transition-all uppercase tracking-widest cursor-pointer ${step === i + 1 ? "bg-teal-700 text-white shadow-lg shadow-teal-900/20"
-								: step > i + 1 ? "bg-teal-100 text-teal-700"
-									: "bg-slate-200 text-slate-500"
-								}`}
-						>
-							<span className="hidden md:inline">{label}</span>
-							<span className="md:hidden">{i + 1}</span>
-						</button>
-					))}
-				</div>
-
-				<AnimatePresence>
-					{error && (
-						<motion.div
-							initial={{ opacity: 0, y: -10 }}
-							animate={{ opacity: 1, y: 0 }}
-							exit={{ opacity: 0 }}
-							className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600 flex items-center gap-2"
-						>
-							<AlertCircle className="w-5 h-5" /> {error}
-						</motion.div>
-					)}
-					{success && (
-						<motion.div
-							initial={{ opacity: 0, y: -10 }}
-							animate={{ opacity: 1, y: 0 }}
-							exit={{ opacity: 0 }}
-							className="mb-4 p-4 bg-teal-50 border border-teal-200 rounded-xl text-sm text-teal-700"
-						>
-							✅ {success}
-						</motion.div>
-					)}
-				</AnimatePresence>
-
-				{/* Step 1: Select Building */}
-				{step === 1 && (
-					<motion.div
-						initial={{ opacity: 0, x: 20 }}
-						animate={{ opacity: 1, x: 0 }}
-						className="space-y-5"
-					>
-						<div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm space-y-4">
-							<div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-								<div>
-									<h3 className="text-xl font-black text-slate-800 tracking-tight flex items-center gap-2">
-										<Home className="w-6 h-6 text-teal-500" />
-										Tòa nhà của bạn
-									</h3>
-									<p className="text-sm text-slate-400 font-medium">
-										Bắt đầu bằng việc chọn tòa nhà chứa phòng cần đăng
-									</p>
-								</div>
-								<Link
-									to="/create-building"
-									className="px-4 py-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl text-xs text-teal-700 font-bold uppercase tracking-widest transition-colors flex shrink-0"
-								>
-									+ Tạo mới
-								</Link>
+					<div className="p-5 sm:p-6 lg:p-8 space-y-8 lg:space-y-10">
+						{error && (
+							<div className="p-3 rounded-xl border border-red-200 bg-red-50 text-sm text-red-600 flex items-center gap-2">
+								<AlertCircle className="w-4 h-4" /> {error}
 							</div>
-
-							{buildings.length === 0 ?
-								<div className="p-8 text-center border-2 border-dashed border-slate-200 rounded-3xl text-slate-500 bg-slate-50">
-									<p className="mb-4 font-bold text-slate-600">Bạn chưa có tòa nhà nào.</p>
-									<Link
-										to="/create-building"
-										className="px-6 py-3 bg-teal-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-teal-600/20 inline-block uppercase tracking-widest"
-									>
-										Tạo Tòa nhà đầu tiên
-									</Link>
-								</div>
-								: <div className="grid sm:grid-cols-2 gap-4">
-									{buildings.map((b) => (
-										<div
-											key={b.id}
-											onClick={() => {
-												updateForm("building_id", b.id);
-												setForm((prev) => ({ ...prev, room_id: "" })); // reset room
-												setError("");
-											}}
-											className={`p-5 rounded-2xl border-2 cursor-pointer transition-all ${form.building_id === b.id ?
-												"border-teal-600 bg-teal-50 shadow-md shadow-teal-900/5"
-												: "border-slate-100 bg-white hover:border-teal-200 hover:bg-slate-50"
-												}`}
-										>
-											<h4
-												className={`font-black text-lg tracking-tight ${form.building_id === b.id ? "text-teal-800" : "text-slate-800"}`}
-											>
-												{b.name}
-											</h4>
-											<p className="text-xs font-semibold text-slate-400 mt-2 flex items-center gap-1 opacity-80">
-												{b.address}, {b.district}
-											</p>
-											<div className="mt-3 inline-flex px-2 py-1 bg-white border border-slate-200 rounded-md text-[10px] font-bold text-slate-500 uppercase tracking-widest">
-												{(b.rooms || []).filter((r) => r.status === "available").length} phòng trống
-											</div>
-										</div>
-									))}
-								</div>
-							}
-						</div>
-						<button
-							onClick={() => {
-								if (!form.building_id) setError("Vui lòng chọn 1 tòa nhà");
-								else setStep(2);
-							}}
-							className="w-full h-14 bg-teal-700 text-white rounded-2xl text-sm font-black uppercase tracking-widest shadow-xl shadow-teal-900/10 cursor-pointer hover:bg-teal-800 hover:-translate-y-0.5 transition-all"
-						>
-							Tiếp theo
-						</button>
-					</motion.div>
-				)}
-
-				{/* Step 2: Select Room */}
-				{step === 2 && (
-					<motion.div
-						initial={{ opacity: 0, x: 20 }}
-						animate={{ opacity: 1, x: 0 }}
-						className="space-y-5"
-					>
-						<div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm space-y-6">
-							<div>
-								<h3 className="text-xl font-black text-slate-800 tracking-tight flex items-center gap-2">
-									<LayoutGrid className="w-6 h-6 text-indigo-500" />
-									Phòng trống tại {selectedBuilding?.name}
-								</h3>
-								<p className="text-sm text-slate-400 font-medium">
-									Bạn có thể quản lý chi tiết phòng trong Dashboard
-								</p>
-							</div>
-
-							{(
-								!selectedBuilding?.rooms ||
-								selectedBuilding.rooms.filter((r) => r.status === "available").length === 0
-							) ?
-								<div className="p-8 text-center border-2 border-dashed border-slate-200 rounded-3xl text-slate-500 bg-slate-50">
-									<p className="mb-4 font-bold text-slate-600">Không có phòng nào đang trống.</p>
-									<Link
-										to={`/dashboard`}
-										className="px-6 py-3 bg-indigo-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-indigo-600/20 inline-block uppercase tracking-widest"
-									>
-										Vào Dashboard để quản lý
-									</Link>
-								</div>
-								: <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-									{selectedBuilding.rooms
-										.filter((r) => r.status === "available")
-										.map((room) => (
-											<div
-												key={room.id}
-												onClick={() => selectRoom(room)}
-												className={`p-4 rounded-2xl border-2 cursor-pointer transition-all ${form.room_id === room.id ?
-													"border-indigo-500 bg-indigo-50 shadow-md shadow-indigo-500/10"
-													: "border-slate-100 bg-white hover:border-indigo-200"
-													}`}
-											>
-												<div className="flex justify-between items-start mb-2">
-													<span
-														className={`text-xl font-black ${form.room_id === room.id ? "text-indigo-700" : "text-slate-800"}`}
-													>
-														{room.room_number}
-													</span>
-													{(room.images || []).length > 0 ?
-														<span className="text-xs bg-emerald-100 text-emerald-700 font-bold px-1.5 py-0.5 rounded">
-															📸
-														</span>
-														: <span className="text-[9px] bg-amber-100 text-amber-700 font-bold px-1.5 py-0.5 rounded uppercase">
-															Thiếu ảnh
-														</span>
-													}
-												</div>
-												<p className="text-xs font-semibold text-slate-500">
-													{room.area}m² • {room.price ? room.price / 1000000 : "?"} Tr
-												</p>
-											</div>
-										))}
-								</div>
-							}
-						</div>
-						<div className="flex gap-3">
-							<button
-								onClick={() => setStep(1)}
-								className="flex-1 h-14 border-2 border-slate-200 text-slate-500 rounded-2xl text-xs font-black uppercase tracking-widest cursor-pointer hover:bg-slate-50 transition-colors"
-							>
-								Quay lại
-							</button>
-						</div>
-					</motion.div>
-				)}
-
-				{/* Step 3: Details */}
-				{step === 3 && (
-					<motion.div
-						initial={{ opacity: 0, x: 20 }}
-						animate={{ opacity: 1, x: 0 }}
-						className="space-y-6"
-					>
-						<div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm space-y-6">
-							<div>
-								<h3 className="font-black text-slate-800 text-lg">Thông tin hiển thị tin đăng</h3>
-								<p className="text-xs text-slate-400 font-medium">
-									Tin đăng đã kế thừa: {form.price} Triệu, {form.area}m², {imageUrls.length} ảnh từ
-									thông tin phòng.
-								</p>
-							</div>
-
-							<div>
-								<label className="block text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-2 mb-2">
-									Tiêu đề tin đăng <span className="text-red-400">*</span>
-								</label>
-								<input
-									type="text"
-									maxLength={100}
-									value={form.title}
-									onChange={(e) => updateForm("title", e.target.value)}
-									placeholder="VD: Căn hộ studio trung tâm, tiện nghi cao cấp..."
-									className="w-full h-14 px-5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold focus:outline-none focus:border-teal-500 focus:bg-white transition-colors"
-								/>
-								<p className="text-xs text-slate-400 mt-2 font-medium">
-									{form.title.length}/100 ký tự
-								</p>
-							</div>
-
-							<div>
-								<label className="block text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-2 mb-2">
-									Mô tả bán hàng / giới thiệu chung
-								</label>
-								<textarea
-									rows={5}
-									value={form.description}
-									onChange={(e) => updateForm("description", e.target.value)}
-									placeholder="Mô tả các ưu điểm cực tốt thu hút người thuê (Gần trường, giờ giấc, an ninh...)"
-									className="w-full p-5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold focus:outline-none focus:border-teal-500 focus:bg-white transition-colors resize-none"
-								/>
-							</div>
-
-							<div className="grid grid-cols-2 gap-4">
-								<div>
-									<label className="block text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-2 mb-2">
-										Tên liên hệ
-									</label>
-									<input
-										type="text"
-										value={form.contact_name}
-										onChange={(e) => updateForm("contact_name", e.target.value)}
-										className="w-full h-14 px-5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold focus:outline-none focus:border-teal-500 focus:bg-white transition-colors"
-									/>
-								</div>
-								<div>
-									<label className="block text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 ml-2 mb-2">
-										Điện thoại <span className="text-red-400">*</span>
-									</label>
-									<input
-										type="tel"
-										value={form.contact_phone}
-										onChange={(e) => updateForm("contact_phone", e.target.value)}
-										className="w-full h-14 px-5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold focus:outline-none focus:border-teal-500 focus:bg-white transition-colors"
-									/>
-								</div>
-							</div>
-						</div>
-
-						{/* Broker CRM Fields */}
-						{isBroker && (
-							<div className="bg-linear-to-br from-indigo-50 to-blue-50 rounded-3xl p-8 border border-indigo-100 shadow-sm space-y-6">
-								<div>
-									<h3 className="font-black text-indigo-900 text-lg flex items-center gap-2">
-										🤝 Công cụ Môi giới
-									</h3>
-									<p className="text-xs text-indigo-500/70 font-bold uppercase tracking-widest mt-1">
-										Thông tin quản lý nội bộ
-									</p>
-								</div>
-								<div>
-									<label className="block text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400 ml-2 mb-2">
-										Đối tượng khách hàng
-									</label>
-									<input
-										type="text"
-										value={form.target_audience}
-										onChange={(e) => updateForm("target_audience", e.target.value)}
-										placeholder="VD: Sinh viên, gia đình trẻ..."
-										className="w-full h-14 px-5 bg-white border border-indigo-200 rounded-2xl text-sm font-semibold focus:outline-none focus:border-indigo-500 transition-colors"
-									/>
-								</div>
-								<div className="grid grid-cols-2 gap-4">
-									<div>
-										<label className="block text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400 ml-2 mb-2">
-											Hoa hồng (%)
-										</label>
-										<input
-											type="number"
-											step="0.5"
-											value={form.commission_rate}
-											onChange={(e) => updateForm("commission_rate", e.target.value)}
-											placeholder="5"
-											className="w-full h-14 px-5 bg-white border border-indigo-200 rounded-2xl text-sm font-semibold focus:outline-none focus:border-indigo-500 transition-colors"
-										/>
-									</div>
-									<div>
-										<label className="block text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400 ml-2 mb-2">
-											Ghi chú đặt cọc
-										</label>
-										<input
-											type="text"
-											value={form.booking_note}
-											onChange={(e) => updateForm("booking_note", e.target.value)}
-											placeholder="VD: Cọc 1 tháng"
-											className="w-full h-14 px-5 bg-white border border-indigo-200 rounded-2xl text-sm font-semibold focus:outline-none focus:border-indigo-500 transition-colors"
-										/>
-									</div>
-								</div>
+						)}
+						{success && (
+							<div className="p-3 rounded-xl border border-emerald-200 bg-emerald-50 text-sm text-emerald-700">
+								{success}
 							</div>
 						)}
 
-						<div className="flex gap-3">
-							<button
-								onClick={() => setStep(2)}
-								className="flex-1 h-14 border-2 border-slate-200 text-slate-500 rounded-2xl text-xs font-black uppercase tracking-widest cursor-pointer hover:bg-slate-50 transition-colors"
-							>
-								Quay lại
-							</button>
-							<button
-								onClick={() => {
-									if (!form.title) setError("Vui lòng nhập tiêu đề");
-									else setStep(4);
-								}}
-								className="flex-1 h-14 bg-teal-700 text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl shadow-teal-900/10 cursor-pointer hover:bg-teal-800 transition-colors"
-							>
-								Xem trước
-							</button>
-						</div>
-					</motion.div>
-				)}
-
-				{/* Step 4: Preview */}
-				{step === 4 && (
-					<motion.div
-						initial={{ opacity: 0, x: 20 }}
-						animate={{ opacity: 1, x: 0 }}
-						className="space-y-6"
-					>
-						<div className="bg-white rounded-3xl p-8 border border-slate-100 shadow-sm space-y-6">
-							<h3 className="font-black text-slate-800 text-xl border-b border-slate-100 pb-4">
-								Kiểm tra tin trước khi đăng
-							</h3>
-
-							{imageUrls.length > 0 ?
-								<div className="relative aspect-21/9 rounded-2xl overflow-hidden shadow-inner">
-									<img
-										src={imageUrls[0]}
-										alt="Preview"
-										className="w-full h-full object-cover"
-									/>
-									<div className="absolute inset-0 bg-linear-to-t from-slate-900/60 to-transparent" />
-									<div className="absolute bottom-4 left-6">
-										<span className="px-2 py-1 bg-white/20 backdrop-blur-md rounded-lg text-xs font-black text-white tracking-widest uppercase">
-											{imageUrls.length} Hình ảnh
-										</span>
-									</div>
-								</div>
-								: <div className="aspect-21/9 rounded-2xl bg-amber-50 text-amber-600 border border-amber-200 flex flex-col items-center justify-center font-bold">
-									Phòng này chưa được gán hình ảnh trong hệ thống!
-								</div>
-							}
-
-							<div>
-								<h2 className="text-2xl font-black text-slate-900 leading-tight">
-									{form.title || "Chưa có tiêu đề"}
-								</h2>
-								<p className="text-sm font-bold text-slate-500 mt-2 flex items-center gap-2">
-									📍 {selectedBuilding?.name} — Phòng {selectedRoom?.room_number} <br />
-									<span className="opacity-70">
-										{selectedBuilding?.address}, {selectedBuilding?.ward},{" "}
-										{selectedBuilding?.district}
-									</span>
+						<section className="space-y-4">
+							<h2 className="text-[20px] font-bold text-slate-900">Hình ảnh và video</h2>
+							<div className="grid gap-6 lg:grid-cols-2">
+								<div>
+								<p className="text-lg font-bold mb-2">
+									Hình ảnh <span className="text-red-500">*</span>
 								</p>
-							</div>
-
-							<div className="flex flex-wrap gap-4 text-sm">
-								<div className="px-4 py-3 rounded-2xl bg-teal-50 border border-teal-100">
-									<p className="text-[10px] font-black uppercase text-teal-600 tracking-widest opacity-70 mb-0.5">
-										Giá cho thuê
-									</p>
-									<span className="text-teal-700 font-black text-lg">
-										{form.price ? `${form.price} Triệu` : "Thỏa thuận"}
-									</span>
-								</div>
-								{form.area && (
-									<div className="px-4 py-3 rounded-2xl bg-slate-50 border border-slate-100">
-										<p className="text-[10px] font-black uppercase text-slate-500 tracking-widest opacity-70 mb-0.5">
-											Diện tích
-										</p>
-										<span className="text-slate-800 font-black text-lg">{form.area} m²</span>
+								<input
+									ref={imageInputRef}
+									type="file"
+									multiple
+									accept="image/png,image/jpeg,image/webp"
+									className="hidden"
+									onChange={(e) => handleImageUpload(e.target.files)}
+								/>
+								<button
+									onClick={() => imageInputRef.current?.click()}
+									disabled={uploadingImages || imageUploads.length >= 15}
+									className="w-40 h-40 border border-dashed border-slate-300 rounded-xl flex flex-col items-center justify-center gap-2 text-slate-500 hover:border-brand-primary hover:text-brand-primary transition-all disabled:opacity-50 cursor-pointer"
+								>
+									<ImagePlus className="w-8 h-8" />
+									<span className="font-semibold">{uploadingImages ? "Đang tải..." : "Thêm ảnh"}</span>
+								</button>
+								{imageUploads.length > 0 && (
+									<div className="mt-3 grid grid-cols-3 sm:grid-cols-5 gap-3">
+										{imageUploads.map((img) => (
+											<div key={img.url} className="relative aspect-square rounded-xl overflow-hidden border border-slate-200">
+												<img src={img.url} alt="listing" className="w-full h-full object-cover" />
+												<button
+													onClick={() => handleRemoveImage(img.url)}
+													className="absolute top-1 right-1 bg-black/50 text-white rounded-full p-1 cursor-pointer"
+												>
+													<X className="w-3 h-3" />
+												</button>
+											</div>
+										))}
 									</div>
 								)}
-							</div>
-
-							{form.description && (
-								<div className="p-5 rounded-2xl bg-slate-50 border border-slate-100">
-									<p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-3">
-										Thông tin mô tả
-									</p>
-									<p className="text-sm text-slate-700 font-semibold leading-relaxed whitespace-pre-wrap">
-										{form.description}
-									</p>
 								</div>
-							)}
 
-							{form.amenity_ids.length > 0 && (
 								<div>
-									<p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-3 ml-1">
-										Tiện nghi sẵn có (kế thừa từ phòng)
-									</p>
+								<p className="text-lg font-bold mb-2">Video</p>
+								<input
+									ref={videoInputRef}
+									type="file"
+									accept="video/mp4,video/webm,video/quicktime"
+									className="hidden"
+									onChange={(e) => handleVideoUpload(e.target.files?.[0] || null)}
+								/>
+								<button
+									onClick={() => videoInputRef.current?.click()}
+									disabled={uploadingVideo}
+									className="w-full max-w-lg border border-dashed border-slate-300 rounded-xl py-4 px-4 text-left flex items-center gap-3 hover:border-brand-primary transition-all disabled:opacity-50 cursor-pointer"
+								>
+									<Video className="w-6 h-6 text-slate-500" />
+									<span className="font-semibold text-slate-700">
+										{uploadingVideo ?
+											"Đang tải video..."
+										: videoUrl ?
+											"Đã tải video thành công"
+										:	"Thêm video quay thực tế (thời gian dưới 60 giây)"}
+									</span>
+								</button>
+								</div>
+							</div>
+						</section>
+
+						<section className="space-y-4">
+							<h2 className="text-[20px] font-bold text-slate-900">Mã phòng chung giá</h2>
+							<p className="text-slate-500">Chọn mã phòng giống nhau về hình ảnh và giá</p>
+							{loadingInitialData ?
+								<div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-slate-500 font-semibold">
+									Đang tải thông tin tin đăng...
+								</div>
+							: selectedRoom ?
+								<div className="rounded-xl border border-slate-200 bg-slate-50 p-4 flex flex-wrap items-center gap-3">
+									<span className="inline-flex px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-base font-bold text-slate-800">
+										{selectedRoom.room_number}
+									</span>
+									<span className="text-sm font-semibold text-slate-500">{selectedBuilding?.name}</span>
+									<button
+										onClick={() => navigate("/my-listings")}
+										className="ml-auto px-4 py-2 rounded-xl bg-white border border-slate-300 text-slate-700 font-bold cursor-pointer"
+									>
+										Chọn mã khác
+									</button>
+								</div>
+							:	<div className="rounded-xl border border-brand-primary/30 bg-brand-bg p-4 space-y-3">
+									<p className="text-brand-dark font-bold">Bạn chưa chọn mã phòng để đăng tin.</p>
 									<div className="flex flex-wrap gap-2">
-										{form.amenity_ids.map((id) => {
-											const am = amenities.find((a) => a.id === id);
-											return am ?
-												<span
-													key={id}
-													className="px-3 py-1.5 bg-white border border-slate-200 text-slate-600 text-xs font-bold rounded-xl shadow-sm"
-												>
-													{am.name_vi}
-												</span>
-												: null;
-										})}
+										<button
+											onClick={() => navigate("/my-listings")}
+											className="px-4 py-2 rounded-lg bg-brand-primary text-white text-sm font-bold cursor-pointer hover:bg-brand-dark"
+										>
+											Chọn phòng để đăng tin
+										</button>
+										<button
+											onClick={() => navigate("/my-listings")}
+											className="px-4 py-2 rounded-lg border border-brand-primary/30 text-brand-primary bg-white text-sm font-bold cursor-pointer hover:bg-brand-bg"
+										>
+											Thêm mã phòng
+										</button>
 									</div>
 								</div>
-							)}
+							}
+						</section>
 
-							<div className="pt-4 border-t border-slate-100">
-								<p className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2 ml-1">
-									Liên hệ
-								</p>
-								<p className="text-base font-black text-slate-800 flex items-center gap-2">
-									📞 {form.contact_phone}{" "}
-									<span className="text-sm font-semibold opacity-60">({form.contact_name})</span>
-								</p>
+						<section className="space-y-4">
+							<input
+								value={form.title}
+								onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
+								placeholder="Tiêu đề tin đăng *"
+								className="w-full h-12 rounded-xl border border-slate-300 px-4 text-base font-semibold focus:outline-none focus:border-brand-primary"
+								maxLength={100}
+							/>
+							<div className="relative">
+								<input
+									value={formatVnd(form.price)}
+									onChange={(e) => setForm((prev) => ({ ...prev, price: e.target.value }))}
+									placeholder="Phí thuê *"
+									className="w-full h-14 rounded-xl border border-slate-300 px-4 text-2xl font-bold tracking-tight text-slate-800 focus:outline-none focus:border-brand-primary"
+								/>
+								<span className="absolute right-5 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">VNĐ/tháng</span>
 							</div>
-						</div>
-						<div className="flex gap-3">
-							<button
-								onClick={() => setStep(3)}
-								className="flex-1 h-14 border-2 border-slate-200 text-slate-500 rounded-2xl text-xs font-black uppercase tracking-widest cursor-pointer hover:bg-slate-50 transition-colors"
-							>
-								Chỉnh sửa
-							</button>
-							<button
-								onClick={handleSubmit}
-								disabled={loading}
-								className="flex-1 h-14 bg-indigo-600 text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl shadow-indigo-900/10 cursor-pointer hover:bg-indigo-700 hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-							>
-								{loading ? "Đang xuất bản..." : "🚀 Xuất bản ngay"}
-							</button>
-						</div>
-					</motion.div>
-				)}
+							<label className="flex items-center gap-2.5 text-base font-semibold text-slate-800">
+								<input
+									type="checkbox"
+									checked={form.is_discounted}
+									onChange={(e) => setForm((prev) => ({ ...prev, is_discounted: e.target.checked }))}
+									className="w-4 h-4 rounded border-slate-300"
+								/>
+								Đang có giảm giá tiền thuê
+							</label>
+							<label className="flex items-center gap-2.5 text-base font-semibold text-slate-800">
+								<input
+									type="checkbox"
+									checked={form.is_newly_built}
+									onChange={(e) => setForm((prev) => ({ ...prev, is_newly_built: e.target.checked }))}
+									className="w-4 h-4 rounded border-slate-300"
+								/>
+								Mới xây chưa qua sử dụng
+							</label>
+						</section>
+
+						<section className="space-y-4">
+							<h2 className="text-[20px] font-bold text-slate-900">Loại hình</h2>
+							<div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+								{RENTAL_TYPES.map((type) => (
+									<button
+										key={type.key}
+										onClick={() => setForm((prev) => ({ ...prev, property_type: type.key }))}
+										className={`h-14 rounded-xl border text-sm font-semibold transition-all cursor-pointer ${
+											form.property_type === type.key ?
+												"bg-brand-primary text-white border-brand-primary"
+											:	"bg-white border-slate-200 text-slate-700 hover:border-slate-300"
+										}`}
+									>
+										{type.label}
+									</button>
+								))}
+							</div>
+						</section>
+
+						<section className="space-y-4">
+							<div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-5 md:p-6 space-y-6">
+								<div className="flex flex-wrap items-start justify-between gap-3">
+									<div>
+										<h2 className="text-[20px] font-bold text-slate-900">Chi tiết phòng</h2>
+										<p className="text-sm font-medium text-slate-500 mt-1">
+											Chọn thông tin giúp khách lọc phòng nhanh và chính xác hơn.
+										</p>
+									</div>
+									<span className="px-3 py-1.5 rounded-full border border-brand-primary/20 bg-brand-bg text-brand-primary text-xs font-bold">
+										{form.room_features.length + form.interior_features.length + form.amenity_ids.length + form.custom_amenities.length} mục đã chọn
+									</span>
+								</div>
+
+								<div className="space-y-3">
+									<div className="flex items-center justify-between">
+										<h3 className="text-base font-bold text-slate-800">Loại phòng</h3>
+										<span className="text-xs font-bold text-slate-500">
+											{form.room_features.length} đã chọn
+										</span>
+									</div>
+									<div className="flex flex-wrap gap-2.5">
+										{ROOM_FEATURES.map((feature) => (
+											<button
+												key={feature}
+												type="button"
+												onClick={() => toggleStringArray("room_features", feature)}
+												className={`px-3.5 py-2 rounded-xl border text-sm font-semibold cursor-pointer transition-colors ${
+													form.room_features.includes(feature) ?
+														"bg-brand-bg border-brand-primary/40 text-brand-dark"
+													:	"bg-white border-slate-200 text-slate-700 hover:border-slate-300"
+												}`}
+											>
+												{feature}
+											</button>
+										))}
+									</div>
+								</div>
+
+								<div className="space-y-3">
+									<div className="flex items-center justify-between">
+										<h3 className="text-base font-bold text-slate-800">Nội thất</h3>
+										<span className="text-xs font-bold text-slate-500">
+											{form.interior_features.length} đã chọn
+										</span>
+									</div>
+									<div className="flex flex-wrap gap-2.5">
+										{INTERIOR_FEATURES.map((feature) => (
+											<button
+												key={feature}
+												type="button"
+												onClick={() => toggleStringArray("interior_features", feature)}
+												className={`px-3.5 py-2 rounded-xl border text-sm font-semibold cursor-pointer transition-colors ${
+													form.interior_features.includes(feature) ?
+														"bg-brand-bg border-brand-primary/40 text-brand-dark"
+													:	"bg-white border-slate-200 text-slate-700 hover:border-slate-300"
+												}`}
+											>
+												{feature}
+											</button>
+										))}
+									</div>
+								</div>
+
+								<div className="space-y-3">
+									<div className="flex flex-wrap items-center justify-between gap-2">
+										<h3 className="text-base font-bold text-slate-800">Tiện ích</h3>
+										<span className="text-xs font-bold text-slate-500">
+											{form.amenity_ids.length + form.custom_amenities.length} đã chọn
+										</span>
+									</div>
+
+									<input
+										value={amenityKeyword}
+										onChange={(e) => setAmenityKeyword(e.target.value)}
+										placeholder="Tìm nhanh tiện ích..."
+										className="w-full h-11 rounded-xl border border-slate-300 px-4 text-sm font-medium bg-white"
+									/>
+
+									<div className="flex flex-wrap gap-2.5">
+										{filteredAmenities.map((am) => (
+											<button
+												key={am.id}
+												type="button"
+												onClick={() => toggleAmenity(am.id)}
+												className={`px-3.5 py-2 rounded-xl border text-sm font-semibold cursor-pointer transition-colors ${
+													form.amenity_ids.includes(am.id) ?
+														"bg-brand-bg border-brand-primary/40 text-brand-dark"
+													:	"bg-white border-slate-200 text-slate-700 hover:border-slate-300"
+												}`}
+											>
+												{am.name_vi}
+											</button>
+										))}
+										{filteredAmenities.length === 0 && (
+											<p className="text-sm text-slate-500">Không tìm thấy tiện ích phù hợp.</p>
+										)}
+									</div>
+
+									<div className="space-y-2">
+										<button
+											type="button"
+											onClick={() => setShowCustomAmenityInput((prev) => !prev)}
+											className="px-4 py-2.5 rounded-xl border border-brand-primary/40 text-brand-primary text-sm font-bold flex items-center gap-1.5 hover:bg-brand-bg cursor-pointer"
+										>
+											<PlusCircle className="w-4 h-4" />
+											Thêm tiện ích tùy chỉnh
+										</button>
+										{showCustomAmenityInput && (
+											<div className="flex gap-2">
+												<input
+													value={customAmenityDraft}
+													onChange={(e) => setCustomAmenityDraft(e.target.value)}
+													placeholder="Nhập tiện ích mới..."
+													className="flex-1 h-11 rounded-xl border border-slate-300 px-4 text-sm font-medium bg-white"
+												/>
+												<button
+													type="button"
+													onClick={handleAddCustomAmenity}
+													className="px-4 rounded-xl border border-slate-300 text-slate-700 text-sm font-semibold cursor-pointer hover:bg-slate-100"
+												>
+													Thêm
+												</button>
+											</div>
+										)}
+									</div>
+
+									{form.custom_amenities.length > 0 && (
+										<div className="flex flex-wrap gap-2">
+											{form.custom_amenities.map((item) => (
+												<span
+													key={item}
+													className="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-sm font-semibold flex items-center gap-1.5"
+												>
+													{item}
+													<button
+														type="button"
+														onClick={() =>
+															setForm((prev) => ({
+																...prev,
+																custom_amenities: prev.custom_amenities.filter((x) => x !== item),
+															}))
+														}
+														className="cursor-pointer text-slate-400 hover:text-rose-500"
+													>
+														<MinusCircle className="w-3.5 h-3.5" />
+													</button>
+												</span>
+											))}
+										</div>
+									)}
+								</div>
+							</div>
+						</section>
+
+						<section className="space-y-4">
+							<h2 className="text-[20px] font-bold text-slate-900">Số người tối đa</h2>
+							<div className="flex flex-wrap gap-3">
+								{Array.from({ length: 10 }).map((_, idx) => {
+									const value = idx + 1;
+									return (
+										<button
+											key={value}
+											onClick={() => setForm((prev) => ({ ...prev, max_people: value }))}
+											className={`w-12 h-12 rounded-xl border text-base font-bold cursor-pointer ${
+												form.max_people === value ?
+													"bg-brand-bg border-brand-primary/40 text-brand-dark"
+												:	"border-slate-200 text-slate-700 hover:border-slate-300"
+											}`}
+										>
+											{value}
+										</button>
+									);
+								})}
+							</div>
+						</section>
+
+						<section className="space-y-4">
+							<h2 className="text-[20px] font-bold text-slate-900">Số xe tối đa</h2>
+							<div className="flex flex-wrap gap-3">
+								{Array.from({ length: 10 }).map((_, idx) => {
+									const value = idx + 1;
+									return (
+										<button
+											key={value}
+											onClick={() => setForm((prev) => ({ ...prev, max_vehicles: value }))}
+											className={`w-12 h-12 rounded-xl border text-base font-bold cursor-pointer ${
+												form.max_vehicles === value ?
+													"bg-brand-bg border-brand-primary/40 text-brand-dark"
+												:	"border-slate-200 text-slate-700 hover:border-slate-300"
+											}`}
+										>
+											{value}
+										</button>
+									);
+								})}
+							</div>
+						</section>
+
+						<section className="space-y-4">
+							<h2 className="text-[20px] font-bold text-slate-900">Diện tích</h2>
+							<div className="grid grid-cols-[1fr_auto_1fr] gap-3 items-center">
+								<input
+									value={form.length_m}
+									onChange={(e) => setForm((prev) => ({ ...prev, length_m: e.target.value }))}
+									placeholder="Chiều dài (m)"
+									className="h-12 rounded-xl border border-slate-300 px-4 text-base font-semibold focus:outline-none focus:border-brand-primary"
+								/>
+								<span className="text-xl font-bold text-slate-700">x</span>
+								<input
+									value={form.width_m}
+									onChange={(e) => setForm((prev) => ({ ...prev, width_m: e.target.value }))}
+									placeholder="Chiều rộng (m)"
+									className="h-12 rounded-xl border border-slate-300 px-4 text-base font-semibold focus:outline-none focus:border-brand-primary"
+								/>
+							</div>
+							<div className="max-w-sm rounded-2xl border border-slate-300 px-4 py-3">
+								<p className="text-sm font-semibold text-slate-500">Tổng diện tích</p>
+								<p className="text-2xl font-bold text-slate-800">{computedArea.toFixed(2)} m²</p>
+							</div>
+						</section>
+
+						<section className="space-y-4">
+							<h2 className="text-[20px] font-bold text-slate-900">Lưu ý cho khách</h2>
+							<textarea
+								rows={4}
+								value={form.guest_note}
+								onChange={(e) => setForm((prev) => ({ ...prev, guest_note: e.target.value }))}
+								placeholder="Thông tin dành cho khách thuê, ví dụ: giảm giá nếu ở 1 mình..."
+								className="w-full rounded-xl border border-slate-300 p-4 text-sm focus:outline-none focus:border-brand-primary"
+							/>
+							<textarea
+								rows={4}
+								value={form.description}
+								onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
+								placeholder="Mô tả chi tiết thêm..."
+								className="w-full rounded-xl border border-slate-300 p-4 text-sm focus:outline-none focus:border-brand-primary"
+							/>
+						</section>
+
+						<section className="space-y-3">
+							<h2 className="text-[20px] font-bold text-slate-900">Thông tin liên hệ</h2>
+							<div className="grid sm:grid-cols-2 gap-3">
+								<input
+									value={form.contact_name}
+									onChange={(e) => setForm((prev) => ({ ...prev, contact_name: e.target.value }))}
+									placeholder="Họ và tên"
+									className="h-12 rounded-xl border border-slate-300 px-4 text-base font-semibold focus:outline-none focus:border-brand-primary"
+								/>
+								<input
+									value={form.contact_phone}
+									onChange={(e) => setForm((prev) => ({ ...prev, contact_phone: e.target.value }))}
+									placeholder="Số điện thoại *"
+									className="h-12 rounded-xl border border-slate-300 px-4 text-base font-semibold focus:outline-none focus:border-brand-primary"
+								/>
+							</div>
+						</section>
+					</div>
+				</div>
+
+				<div className="fixed bottom-0 left-0 right-0 z-20 bg-slate-50/95 backdrop-blur border-t border-slate-200 p-4 lg:static lg:bg-transparent lg:border-t-0 lg:backdrop-blur-none lg:p-0 lg:mt-6">
+					<div className="max-w-3xl mx-auto lg:max-w-none">
+						<button
+							onClick={handleSubmit}
+							disabled={loading}
+							className="w-full h-12 rounded-xl bg-brand-primary text-white text-lg lg:text-base font-bold tracking-tight disabled:opacity-60 cursor-pointer hover:bg-brand-dark transition-colors"
+						>
+							{loading ?
+								(listingIdParam ? "Đang cập nhật..." : "Đang tạo...")
+							: listingIdParam ?
+								"Cập nhật tin"
+							:	"Tạo tin"}
+						</button>
+					</div>
+				</div>
 			</div>
 		</div>
 	);
 }
+

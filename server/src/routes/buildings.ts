@@ -5,15 +5,20 @@ import type { AuthRequest } from '../middleware/auth';
 
 const router = Router();
 
-// GET /api/buildings — List buildings for current user (landlord/broker)
+// GET /api/buildings — List buildings by role
 router.get('/', authenticate, async (req: AuthRequest, res: Response) => {
   if (!req.user) { res.status(401).json({ error: 'Chưa xác thực' }); return; }
 
-  const { data, error } = await getSupabase()
+  let query = getSupabase()
     .from('buildings')
     .select('*, rooms(*)')
-    .eq('owner_id', req.user.id)
     .order('created_at', { ascending: false });
+
+  if (req.user.role !== 'admin') {
+    query = query.eq('owner_id', req.user.id);
+  }
+
+  const { data, error } = await query;
 
   if (error) { res.status(400).json({ error: error.message }); return; }
   res.json({ buildings: data });
@@ -37,7 +42,13 @@ router.get('/:id', async (req: AuthRequest, res: Response) => {
 router.post('/', authenticate, requireRole('landlord', 'broker', 'admin'), async (req: AuthRequest, res: Response) => {
   if (!req.user) { res.status(401).json({ error: 'Chưa xác thực' }); return; }
 
-  const { name, address, ward, district, city, lat, lng, floors, description, images } = req.body;
+  const { 
+    name, address, ward, district, city, lat, lng, 
+    floors, description, images, phone, status, 
+    services, website, rental_type, structure_type, 
+    amenities, metered_services, fixed_services,
+    rooms, structure_data
+  } = req.body;
 
   if (!name || !address) {
     res.status(400).json({ error: 'Tên và địa chỉ tòa nhà là bắt buộc' });
@@ -58,11 +69,42 @@ router.post('/', authenticate, requireRole('landlord', 'broker', 'admin'), async
       floors: floors || 1,
       description: description || null,
       images: images || [],
+      phone: phone || null,
+      status: status || 'active',
+      services: services || [],
+      website: website || null,
+      rental_type: rental_type || null,
+      structure_type: structure_type || null,
+      amenities: amenities || [],
+      metered_services: metered_services || [],
+      fixed_services: fixed_services || [],
+      structure_data: structure_data || {}
     })
     .select()
     .single();
 
   if (error) { res.status(400).json({ error: error.message }); return; }
+
+  // Handle room creation if building created successfully
+  if (rooms && Array.isArray(rooms) && rooms.length > 0) {
+    const roomsToInsert = rooms.map((r: any) => ({
+      building_id: data.id,
+      room_number: r.name,
+      floor_name: r.floor_name || "Trệt",
+      floor: parseInt(r.floor_name?.match(/\d+/)?.[0] || "1", 10),
+      status: 'available'
+    }));
+
+    const { error: roomsError } = await getSupabase()
+      .from('rooms')
+      .insert(roomsToInsert);
+
+    if (roomsError) {
+      console.error('Error creating rooms:', roomsError);
+      // We don't fail the whole request but maybe log it
+    }
+  }
+
   res.status(201).json({ building: data });
 });
 
@@ -83,7 +125,14 @@ router.put('/:id', authenticate, async (req: AuthRequest, res: Response) => {
     return;
   }
 
-  const { name, address, ward, district, city, lat, lng, floors, description, images } = req.body;
+  const { 
+    name, address, ward, district, city, lat, lng, 
+    floors, description, images, phone, status, 
+    services, website, rental_type, structure_type, 
+    amenities, metered_services, fixed_services,
+    rooms, structure_data
+  } = req.body;
+
   const updates: Record<string, unknown> = {};
   if (name !== undefined) updates.name = name;
   if (address !== undefined) updates.address = address;
@@ -95,6 +144,16 @@ router.put('/:id', authenticate, async (req: AuthRequest, res: Response) => {
   if (floors !== undefined) updates.floors = floors;
   if (description !== undefined) updates.description = description;
   if (images !== undefined) updates.images = images;
+  if (phone !== undefined) updates.phone = phone;
+  if (status !== undefined) updates.status = status;
+  if (services !== undefined) updates.services = services;
+  if (website !== undefined) updates.website = website;
+  if (rental_type !== undefined) updates.rental_type = rental_type;
+  if (structure_type !== undefined) updates.structure_type = structure_type;
+  if (amenities !== undefined) updates.amenities = amenities;
+  if (metered_services !== undefined) updates.metered_services = metered_services;
+  if (fixed_services !== undefined) updates.fixed_services = fixed_services;
+  if (structure_data !== undefined) updates.structure_data = structure_data;
 
   const { data, error } = await getSupabase()
     .from('buildings')
@@ -104,6 +163,26 @@ router.put('/:id', authenticate, async (req: AuthRequest, res: Response) => {
     .single();
 
   if (error) { res.status(400).json({ error: error.message }); return; }
+
+  // Sync rooms if provided
+  if (rooms && Array.isArray(rooms)) {
+    // Basic sync: Upsert incoming rooms
+    const roomsToUpsert = rooms.map((r: any) => ({
+      building_id: id,
+      room_number: r.name,
+      floor_name: r.floor_name || "Trệt",
+      floor: parseInt(r.floor_name?.match(/\d+/)?.[0] || "1", 10),
+    }));
+
+    const { error: roomsError } = await getSupabase()
+      .from('rooms')
+      .upsert(roomsToUpsert, { onConflict: 'building_id,room_number' });
+
+    if (roomsError) {
+      console.error('Error syncing rooms:', roomsError);
+    }
+  }
+
   res.json({ building: data });
 });
 
@@ -131,7 +210,7 @@ router.delete('/:id', authenticate, async (req: AuthRequest, res: Response) => {
     .eq('building_id', id);
 
   if (count && count > 0) {
-    res.status(400).json({ error: 'Không thể xóa tòa nhà khi còn phòng. Vui lòng xóa hết phòng trước.' });
+    res.status(400).json({ error: `Toà nhà đang có ${count} phòng, không thể xoá. Vui lòng xoá hết phòng/sơ đồ trước.` });
     return;
   }
 

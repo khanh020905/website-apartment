@@ -8,7 +8,7 @@ export type UserRole = 'user' | 'landlord' | 'broker' | 'admin';
 
 export type SubscriptionTier = 'free' | 'broker_basic' | 'broker_pro' | 'landlord_basic' | 'landlord_pro';
 
-export type RoomStatus = 'available' | 'occupied' | 'maintenance';
+export type RoomStatus = 'available' | 'reserved' | 'occupied' | 'maintenance';
 
 export type ListingStatus = 'draft' | 'pending' | 'approved' | 'rejected';
 
@@ -16,7 +16,7 @@ export type PropertyType = 'phong_tro' | 'can_ho_mini' | 'chung_cu' | 'nha_nguye
 
 export type FurnitureStatus = 'full' | 'basic' | 'none';
 
-export type ContractStatus = 'active' | 'expired' | 'terminated' | 'pending';
+export type ContractStatus = 'active' | 'expired' | 'terminated' | 'pending' | 'confirmed' | 'completed' | 'cancelled';
 
 export type ReviewAction = 'approved' | 'rejected';
 
@@ -40,6 +40,7 @@ export const FURNITURE_LABELS: Record<FurnitureStatus, string> = {
 
 export const ROOM_STATUS_LABELS: Record<RoomStatus, string> = {
   available: 'Còn trống',
+  reserved: 'Đã cọc',
   occupied: 'Đang sử dụng',
   maintenance: 'Đang bảo trì',
 };
@@ -96,6 +97,10 @@ export interface Building {
   floors: number;
   description: string | null;
   images: string[];
+  phone: string | null;
+  status: 'active' | 'inactive';
+  services: string[];
+  website: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -114,6 +119,9 @@ export interface Room {
   amenity_ids: number[];
   images: string[];
   description: string | null;
+  available_from: string | null;
+  deposit_meta: Record<string, unknown> | null;
+  rental_meta: Record<string, unknown> | null;
   created_at: string;
   updated_at: string;
 }
@@ -144,7 +152,17 @@ export interface Listing {
   contact_phone: string;
   contact_name: string | null;
   images: ListingImage[];
+  video_url: string | null;
   amenity_ids: number[];
+  room_features: string[];
+  interior_features: string[];
+  is_discounted: boolean;
+  is_newly_built: boolean;
+  max_people: number | null;
+  max_vehicles: number | null;
+  length_m: number | null;
+  width_m: number | null;
+  guest_note: string | null;
   status: ListingStatus;
   available_date: string | null;
   direction: HomeDirection | null;
@@ -174,6 +192,8 @@ export interface ListingReview {
   reviewed_at: string;
 }
 
+export type ResidenceStatus = 'pending' | 'completed' | 'not_registered';
+
 export interface Contract {
   id: string;
   room_id: string;
@@ -181,6 +201,9 @@ export interface Contract {
   tenant_name: string;
   tenant_phone: string | null;
   tenant_email: string | null;
+  tenant_gender: 'male' | 'female' | 'other' | null;
+  tenant_id_number: string | null;
+  residence_status: ResidenceStatus | null;
   start_date: string;
   end_date: string | null;
   rent_amount: number;
@@ -198,6 +221,91 @@ export interface QRCode {
   generated_by: string;
   is_active: boolean;
   created_at: string;
+}
+
+export interface Vehicle {
+  id: string;
+  room_id: string;
+  customer_name: string | null;
+  license_plate: string;
+  vehicle_type: string; // xe_may, xe_hoi, etc.
+  vehicle_name: string | null;
+  color: string | null;
+  status: 'active' | 'inactive';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Appointment {
+  id: string;
+  room_id: string;
+  customer_name: string;
+  customer_phone: string | null;
+  schedule_time: string;
+  status: 'pending' | 'viewed' | 'cancelled';
+  notes: string | null;
+  assigned_to: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ContractTemplate {
+  id: string;
+  owner_id: string;
+  name: string;
+  short_name: string | null;
+  prefix_code: string | null;
+  reminder_days: number;
+  content: string | null;
+  status: 'active' | 'inactive';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Invoice {
+  id: string;
+  code: string;
+  room_id: string;
+  customer_name: string | null;
+  total: number;
+  due_date: string;
+  extra_charge: number;
+  discount: number;
+  has_vat: boolean;
+  status: 'paid' | 'pending' | 'overdue' | 'cancelled';
+  creator: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Transaction {
+  id: string;
+  code: string;
+  room_id: string | null;
+  customer: string | null;
+  amount: number;
+  flow: 'income' | 'expense';
+  category: string;
+  pay_type: string;
+  date: string;
+  status: 'confirmed' | 'pending' | 'cancelled';
+  note: string | null;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Incident {
+  id: string;
+  room_id: string;
+  type: string;
+  priority: 'low' | 'medium' | 'high' | 'urgent';
+  description: string | null;
+  reported_by: string | null;
+  assigned_to: string | null;
+  status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
+  created_at: string;
+  updated_at: string;
 }
 
 
@@ -247,6 +355,9 @@ export interface CreateRoomInput {
   amenity_ids?: number[];
   images?: string[];
   description?: string;
+  available_from?: string;
+  deposit_meta?: Record<string, unknown> | null;
+  rental_meta?: Record<string, unknown> | null;
 }
 
 export interface CreateListingInput {
@@ -267,6 +378,16 @@ export interface CreateListingInput {
   contact_phone: string;
   contact_name?: string;
   amenity_ids?: number[];
+  video_url?: string;
+  room_features?: string[];
+  interior_features?: string[];
+  is_discounted?: boolean;
+  is_newly_built?: boolean;
+  max_people?: number;
+  max_vehicles?: number;
+  length_m?: number;
+  width_m?: number;
+  guest_note?: string;
   available_date?: string;
   room_id?: string;
 }
@@ -310,4 +431,19 @@ export interface DashboardStats {
   };
   occupancyRate: number;
   buildingCount: number;
+  quickStats?: {
+    roomsStartingToday: number;
+    roomsDueReturnToday: number;
+    invoicesDueSoon3d: number;
+    visaExpiringThisMonth: number;
+  };
+  occupancyTrend?: Array<{
+    day: string;
+    rate: number;
+  }>;
+  upcomingStats?: {
+    incidents: number;
+    overdueInvoices: number;
+    todayAppointments: number;
+  };
 }

@@ -23,12 +23,20 @@ router.get('/', authenticate, async (req: AuthRequest, res: Response) => {
 router.post('/', authenticate, async (req: AuthRequest, res: Response) => {
   if (!req.user) { res.status(401).json({ error: 'Chưa xác thực' }); return; }
   const { 
-    room_id, tenant_name, tenant_phone, tenant_email, 
+    room_id, tenant_name, tenant_phone, tenant_email, tenant_gender,
+    tenant_dob, tenant_job, tenant_nationality, tenant_city,
+    tenant_district, tenant_ward, tenant_address, tenant_avatar,
+    tenant_notes, tenant_id_number, residence_status,
     start_date, end_date, rent_amount, deposit_amount, notes 
   } = req.body;
 
   if (!room_id || !tenant_name || !start_date || !rent_amount) {
     res.status(400).json({ error: 'Thiếu thông tin bắt buộc (phòng, tên khách, ngày bắt đầu, tiền thuê)' });
+    return;
+  }
+
+  if (residence_status && !['pending', 'completed', 'not_registered'].includes(residence_status)) {
+    res.status(400).json({ error: 'Trạng thái tạm trú không hợp lệ' });
     return;
   }
 
@@ -55,11 +63,23 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response) => {
       tenant_name,
       tenant_phone: tenant_phone || null,
       tenant_email: tenant_email || null,
+      tenant_gender: tenant_gender || null,
+      tenant_dob: tenant_dob || null,
+      tenant_job: tenant_job || null,
+      tenant_nationality: tenant_nationality || 'Việt Nam',
+      tenant_city: tenant_city || null,
+      tenant_district: tenant_district || null,
+      tenant_ward: tenant_ward || null,
+      tenant_address: tenant_address || null,
+      tenant_avatar: tenant_avatar || null,
+      tenant_notes: tenant_notes || null,
+      tenant_id_number: tenant_id_number || null,
+      residence_status: residence_status || 'not_registered',
       start_date,
       end_date: end_date || null,
       rent_amount,
       deposit_amount: deposit_amount || 0,
-      notes: notes || null,
+      notes: notes || tenant_notes || null,
       status: 'active'
     })
     .select()

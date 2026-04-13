@@ -144,7 +144,27 @@ router.get('/:code', async (req: Request, res: Response) => {
   // Get building with all rooms
   const { data: building, error: buildingError } = await getSupabase()
     .from('buildings')
-    .select('id, name, address, floors, rooms(id, room_number, floor, status, price, area, max_occupants, current_occupants)')
+    .select(`
+      id,
+      name,
+      address,
+      ward,
+      district,
+      city,
+      floors,
+      description,
+      phone,
+      rooms(
+        id,
+        room_number,
+        floor,
+        status,
+        price,
+        area,
+        max_occupants,
+        current_occupants
+      )
+    `)
     .eq('id', qr.building_id)
     .single();
 
@@ -156,7 +176,7 @@ router.get('/:code', async (req: Request, res: Response) => {
   // Get owner contact info
   const { data: owner } = await getSupabase()
     .from('buildings')
-    .select('profiles!owner_id(full_name, phone)')
+    .select('profiles!owner_id(full_name, phone, email, avatar_url)')
     .eq('id', qr.building_id)
     .single();
 
