@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Calendar, Home, Bed, Phone, X } from "lucide-react";
 import { PROPERTY_TYPE_LABELS, type Listing } from "../../../shared/types";
+import { maskAddress } from "../lib/utils";
 
 interface ListingInfoPanelProps {
 	listing: Listing;
@@ -34,7 +35,7 @@ const formatPrice = (value: number) => `${(Number(value) / 1_000_000).toFixed(1)
 
 const ListingInfoPanel = ({ listing, listings, onClose, onSelectListing }: ListingInfoPanelProps) => {
 	const coverImage = listing.images?.[0]?.url || FALLBACK_IMAGE;
-	const displayAddress = [listing.address, listing.ward, listing.district, listing.city]
+	const displayAddress = [maskAddress(listing.address || ""), listing.ward, listing.district, listing.city]
 		.filter(Boolean)
 		.join(", ");
 
@@ -145,7 +146,7 @@ const ListingInfoPanel = ({ listing, listings, onClose, onSelectListing }: Listi
 						<div className="mt-4 space-y-4">
 							{recentListings.map((item) => {
 								const itemImage = item.images?.[0]?.url || FALLBACK_IMAGE;
-								const itemAddress = [item.address, item.ward, item.district, item.city]
+								const itemAddress = [maskAddress(item.address || ""), item.ward, item.district, item.city]
 									.filter(Boolean)
 									.join(", ");
 								return (

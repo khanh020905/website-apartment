@@ -22,6 +22,7 @@ import { api } from "../lib/api";
 import { useAuth } from "../contexts/AuthContext";
 import Modal from "../components/modals/Modal";
 import type { Listing, Amenity } from "../../../shared/types";
+import { maskAddress } from "../lib/utils";
 import "leaflet/dist/leaflet.css";
 
 const DefaultIcon = L.icon({
@@ -239,7 +240,8 @@ export default function ListingDetailPage() {
 			listing.images.map((img: { url: string } | string) => (typeof img === "string" ? img : img.url))
 		:	[FALLBACK_IMAGE];
 	const listingAmenities = amenities.filter((a) => listing.amenity_ids?.includes(a.id));
-	const fullAddress = [listing.address, listing.ward, listing.district, listing.city].filter(Boolean).join(", ");
+	const maskedAddressBase = maskAddress(listing.address || "");
+	const fullAddress = [maskedAddressBase, listing.ward, listing.district, listing.city].filter(Boolean).join(", ");
 	const contactPhone = listing.contact_phone || listing.profiles?.phone || "";
 	const activeTileUrl = mapMode === "satellite" ? SATELLITE_URL : ROADMAP_URL;
 

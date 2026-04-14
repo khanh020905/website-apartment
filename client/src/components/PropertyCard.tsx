@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import type { Listing } from "../../../shared/types";
+import { maskAddress } from "../lib/utils";
 
 interface PropertyCardProps {
 	listing: Listing;
@@ -13,7 +14,7 @@ const PropertyCard = ({ listing, index, isActive = false, onSelect }: PropertyCa
 	const imageUrl =
 		listing.images?.[0]?.url ||
 		"https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=300&h=200&fit=crop";
-	const displayAddress = [listing.address, listing.ward, listing.district, listing.city]
+	const displayAddress = [maskAddress(listing.address || ""), listing.ward, listing.district, listing.city]
 		.filter(Boolean)
 		.join(", ");
 	const createdAt = listing.created_at ? new Date(listing.created_at) : null;

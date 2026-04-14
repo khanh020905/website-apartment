@@ -4,6 +4,7 @@ import type { Marker as LeafletMarker } from "leaflet";
 import { Clock } from "lucide-react";
 import { createPriceIcon } from "./PriceMarker";
 import type { Listing } from "../../../shared/types";
+import { maskAddress } from "../lib/utils";
 import "leaflet/dist/leaflet.css";
 
 const formatTimeAgo = (dateStr: string) => {
@@ -377,7 +378,7 @@ const MapView = ({ listings, selectedListingId = null, onSelectListing }: MapVie
 							<div className="min-w-[200px] overflow-hidden rounded-[24px] bg-white shadow-2xl border border-slate-50">
 								<div className="bg-gradient-to-br from-brand-primary to-brand-dark px-5 py-3">
 									<p className="text-[14px] font-extrabold text-white tracking-tight line-clamp-1">
-										{listing.address?.split(",")[0] || "Địa chỉ"}
+										{maskAddress(listing.address?.split(",")[0] || "Địa chỉ")}
 									</p>
 								</div>
 								<div className="flex items-center gap-2.5 px-5 py-4 bg-white">
