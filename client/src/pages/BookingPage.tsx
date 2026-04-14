@@ -178,7 +178,7 @@ const BookingPage = () => {
     <div className="flex flex-col h-full bg-white text-slate-800 font-['Plus_Jakarta_Sans',sans-serif]">
       {/* Page Header */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
-        <h1 className="text-xl font-bold">Đặt phòng</h1>
+        <h1 className="text-xl font-bold">Danh sách phòng</h1>
         <div className="flex items-center gap-2">
           <button className="p-2 border border-slate-200 rounded text-slate-500 hover:bg-slate-50 bg-slate-100 shadow-sm transition-all active:scale-95">
             <Globe className="w-4 h-4 text-slate-700" />

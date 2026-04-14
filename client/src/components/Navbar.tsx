@@ -212,16 +212,7 @@ const Navbar = () => {
 									</motion.button>
 								</Link>
 							)}
-							<Link to="/my-listings?action=create">
-								<motion.button
-									whileHover={{ scale: 1.05 }}
-									whileTap={{ scale: 0.95 }}
-									className={`${compactActionButtonClass} bg-brand-dark text-white shadow-md shadow-brand-dark/20 hover:shadow-brand-dark/35`}
-								>
-									<PlusCircle className="w-4 h-4" />
-									<span>Đăng tin</span>
-								</motion.button>
-							</Link>
+
 							{role !== "user" && (
 								<>
 									<motion.button
