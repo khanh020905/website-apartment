@@ -17,6 +17,7 @@ import CreateListingPage from "./pages/CreateListingPage";
 import MyListingsPage from "./pages/MyListingsPage";
 import DashboardPage from "./pages/DashboardPage";
 import CustomerPage from "./pages/CustomerPage";
+import CustomerDetailPage from "./pages/CustomerDetailPage";
 import VehiclePage from "./pages/VehiclePage";
 import BookingPage from "./pages/BookingPage";
 import BookingHistoryPage from "./pages/BookingHistoryPage";
@@ -58,6 +59,7 @@ import type { Listing, Amenity } from "../../shared/types";
 import AppSidebar from "./components/AppSidebar";
 import { BuildingProvider } from "./contexts/BuildingContext";
 import { applyBusinessThemeFromSettings, applyDefaultAppTheme } from "./lib/brandTheme";
+import { ToastProvider } from "./components/Toast";
 
 function HomePage() {
 	const [listings, setListings] = useState<Listing[]>([]);
@@ -241,6 +243,7 @@ function App() {
 		<Router>
 			<AuthProvider>
 				<BuildingProvider>
+                    <ToastProvider>
 					<div className="h-screen w-screen flex overflow-hidden font-sans bg-white">
 						<Routes>
 							{/* QR Status page — no navbar/sidebar, standalone  */}
@@ -329,6 +332,14 @@ function App() {
 														element={
 															<ProtectedRoute roles={["landlord", "broker", "admin"]}>
 																<CustomerPage />
+															</ProtectedRoute>
+														}
+													/>
+													<Route
+														path="/customers/:id/show"
+														element={
+															<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+																<CustomerDetailPage />
 															</ProtectedRoute>
 														}
 													/>
@@ -537,6 +548,7 @@ function App() {
 							/>
 						</Routes>
 					</div>
+                    </ToastProvider>
 				</BuildingProvider>
 			</AuthProvider>
 		</Router>

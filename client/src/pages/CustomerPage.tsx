@@ -9,11 +9,17 @@ import {
 	Home,
 	Building2,
 	Settings,
-	Edit3,
 	Download,
 	Upload,
 	FileSpreadsheet,
+	Users,
+	CheckCircle2,
+	UserCheck,
+	UserX,
+	ChevronDown,
+	Trash2,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useBuilding } from "../contexts/BuildingContext";
 import { api } from "../lib/api";
 import * as XLSX from "xlsx";
@@ -46,6 +52,7 @@ interface Customer {
 	deposit_amount: number;
 	status: string;
 	created_at: string;
+	tenant_avatar?: string | null;
 	room: CustomerRoom;
 }
 
@@ -53,6 +60,7 @@ interface CustomerStats {
 	total: number;
 	active: number;
 	terminated: number;
+    transient: number;
 }
 
 interface CustomerResponse {
@@ -135,8 +143,10 @@ export default function CustomerPage() {
 	const [filterStatus, setFilterStatus] = useState("");
 	const [filterResidency, setFilterResidency] = useState("");
 	const [filterGender, setFilterGender] = useState("");
+	const [stats, setStats] = useState<CustomerStats>({ total: 0, active: 0, terminated: 0, transient: 0 });
 
 	const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
+	const [editingResidenceId, setEditingResidenceId] = useState<string | null>(null);
 
 	useEffect(() => {
 		const query = selectedBuildingId ? `?building_id=${selectedBuildingId}` : "";
@@ -162,6 +172,20 @@ export default function CustomerPage() {
 		selectedBuildingId,
 	]);
 
+	const navigate = useNavigate();
+
+	const handleResidenceUpdate = async (customerId: string, status: string) => {
+		try {
+			const normalizedStatus = status === "none" ? "not_registered" : status;
+			const { error } = await api.put(`/api/customers/${customerId}`, { residence_status: normalizedStatus });
+			if (!error) {
+				setCustomers((prev) => prev.map((c) => (c.id === customerId ? { ...c, residence_status: normalizedStatus as any } : c)));
+			}
+		} catch (err) {
+			console.error(err);
+		}
+	};
+
 	const fetchCustomers = useCallback(async () => {
 		setLoading(true);
 		const params = new URLSearchParams({
@@ -181,6 +205,7 @@ export default function CustomerPage() {
 			if (data) {
 				setCustomers(data.customers);
 				setTotal(data.total);
+				setStats(data.stats);
 			}
 		} catch (err) {
 			console.error(err);
@@ -349,39 +374,15 @@ export default function CustomerPage() {
 	};
 
 	const handleSaveCustomer = async (formData: any) => {
-		const dataToSave = {
-			room_id: formData.room_id || editingCustomer?.room?.id,
-			tenant_name: formData.tenant_name,
-			tenant_phone: formData.tenant_phone || null,
-			tenant_email: formData.tenant_email || null,
-			tenant_gender: formData.tenant_gender || null,
-			tenant_dob: formData.tenant_dob || null,
-			tenant_id_number: formData.tenant_id_number || null,
-			tenant_job: formData.tenant_job || null,
-			tenant_nationality: formData.tenant_nationality || 'Việt Nam',
-			tenant_city: formData.tenant_city || null,
-			tenant_district: formData.tenant_district || null,
-			tenant_ward: formData.tenant_ward || null,
-			tenant_address: formData.tenant_address || null,
-			residence_status: formData.residence_status || "not_registered",
-			tenant_avatar: formData.tenant_avatar || null,
-			tenant_notes: formData.tenant_notes || null,
-			start_date: formData.start_date,
-			end_date: formData.end_date || null,
-			rent_amount: parseInt(formData.rent_amount) || 0,
-			deposit_amount: parseInt(formData.deposit_amount) || 0,
-			notes: formData.tenant_notes || null,
-		};
-
 		try {
 			if (editingCustomer) {
-				const result = await api.put(`/api/contracts/${editingCustomer.id}`, dataToSave);
+				const result = await api.put(`/api/customers/${editingCustomer.id}`, formData);
 				if (result.error) {
 					alert(result.error);
 					return;
 				}
 			} else {
-				const result = await api.post("/api/contracts", dataToSave);
+				const result = await api.post("/api/customers", formData);
 				if (result.error) {
 					alert(result.error);
 					return;
@@ -446,6 +447,49 @@ export default function CustomerPage() {
 					/>
 				</div>
 
+				{/* Summary Cards */}
+				<div className="px-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+					<div className="bg-[#fcfdfe] border border-slate-200 p-4 rounded-xl shadow-sm flex items-center gap-4">
+						<div className="w-12 h-12 rounded-xl bg-blue-50 flex items-center justify-center">
+							<Users className="w-6 h-6 text-blue-600" />
+						</div>
+						<div>
+							<p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Tổng khách hàng</p>
+							<p className="text-2xl font-black text-slate-900">{stats.total}</p>
+						</div>
+					</div>
+
+					<div className="bg-[#fcfdfe] border border-slate-200 p-4 rounded-xl shadow-sm flex items-center gap-4">
+						<div className="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center">
+							<CheckCircle2 className="w-6 h-6 text-emerald-600" />
+						</div>
+						<div>
+							<p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Đang ở</p>
+							<p className="text-2xl font-black text-slate-900">{stats.active}</p>
+						</div>
+					</div>
+
+					<div className="bg-[#fcfdfe] border border-slate-200 p-4 rounded-xl shadow-sm flex items-center gap-4">
+						<div className="w-12 h-12 rounded-xl bg-rose-50 flex items-center justify-center">
+							<UserX className="w-6 h-6 text-rose-600" />
+						</div>
+						<div>
+							<p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Đã dời đi</p>
+							<p className="text-2xl font-black text-slate-900">{stats.terminated}</p>
+						</div>
+					</div>
+
+					<div className="bg-[#fcfdfe] border border-slate-200 p-4 rounded-xl shadow-sm flex items-center gap-4">
+						<div className="w-12 h-12 rounded-xl bg-amber-50 flex items-center justify-center">
+							<UserCheck className="w-6 h-6 text-amber-600" />
+						</div>
+						<div>
+							<p className="text-xs font-bold text-slate-500 uppercase tracking-wider">Khách vãng lai</p>
+							<p className="text-2xl font-black text-slate-900">{stats.transient}</p>
+						</div>
+					</div>
+				</div>
+
 				{/* Toolbar */}
 				<div className="px-6 pb-4 flex flex-col sm:flex-row items-center gap-3">
 					<div className="relative w-full sm:w-70 shrink-0">
@@ -459,41 +503,14 @@ export default function CustomerPage() {
 						/>
 					</div>
 
-					<div className="w-full sm:w-40 shrink-0">
-						<select
-							value={filterRoom}
-							onChange={(e) => setFilterRoom(e.target.value)}
-							className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 bg-white focus:outline-none focus:border-brand-primary hover:border-slate-300 transition-all cursor-pointer appearance-none"
-						>
-							<option value="">Tất cả phòng</option>
-							{rooms.map(r => (
-								<option key={r.id} value={r.id}>
-									{r.room_number} - {r.buildings?.name || "Không rõ tòa"}
-								</option>
-							))}
-						</select>
-					</div>
-
-					<div className="w-full sm:w-44 shrink-0">
-						<select
-							value={filterStatus}
-							onChange={(e) => setFilterStatus(e.target.value)}
-							className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-600 bg-white focus:outline-none focus:border-brand-primary hover:border-slate-300 transition-all cursor-pointer appearance-none"
-						>
-							<option value="">Trạng thái khách hàng</option>
-							<option value="active">Đang ở</option>
-							<option value="terminated">Đã chuyển đi</option>
-						</select>
-					</div>
-
 					<button
 						onClick={() => setIsFilterOpen(true)}
 						className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50 transition-colors shadow-sm cursor-pointer relative"
 					>
 						<Settings2 className="w-4 h-4" />
 						Bộ lọc
-						{(filterGender || filterResidency) && (
-							<span className="absolute top-1.5 right-1.5 w-2 h-2 bg-brand-bg0 rounded-full" />
+						{(filterGender || filterResidency || filterRoom || filterStatus) && (
+							<span className="absolute top-1.5 right-1.5 w-2 h-2 bg-brand-primary rounded-full shadow-sm" />
 						)}
 					</button>
 
@@ -501,7 +518,7 @@ export default function CustomerPage() {
 						onClick={() => setIsAddModalOpen(true)}
 						className="flex items-center gap-2 px-5 py-2 bg-brand-primary text-white rounded-lg text-sm font-bold transition-colors hover:bg-brand-dark shadow-sm ml-auto cursor-pointer"
 					>
-						+ Nhập tay
+						+ Khách hàng
 					</button>
 				</div>
 				<div className="px-6 pb-4">
@@ -513,9 +530,9 @@ export default function CustomerPage() {
 			</div>
 
 			{/* Table Area */}
-			<div className="flex-1 overflow-auto bg-[#f8f9fa] p-6">
-				<div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm h-full flex flex-col">
-					<div className="overflow-x-auto">
+			<div className="flex-1 bg-[#f8f9fa] p-6">
+				<div className="bg-white border border-slate-200 rounded-xl shadow-sm h-fit flex flex-col">
+					<div>
 						<table className="w-full">
 							<thead className="bg-[#f8f9fa] border-b border-slate-200">
 								<tr>
@@ -591,17 +608,24 @@ export default function CustomerPage() {
 													className="rounded border-slate-300 text-brand-primary focus:ring-brand-primary/20 w-4 h-4"
 												/>
 											</td>
-											<td className="px-5 py-3">
+											<td 
+                                                className="px-5 py-3 cursor-pointer group"
+                                                onClick={() => navigate(`/customers/${c.id}/show`)}
+                                            >
 												<div className="flex items-center gap-3">
 													<div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center border border-slate-200 overflow-hidden shrink-0">
-														<img
-															src={`https://ui-avatars.com/api/?name=${encodeURIComponent(c.tenant_name)}&background=random`}
-															alt={c.tenant_name}
-															className="w-full h-full object-cover"
-														/>
+														{c.tenant_avatar ? (
+                                                            <img src={c.tenant_avatar} alt={c.tenant_name} className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            <img
+                                                                src={`https://ui-avatars.com/api/?name=${encodeURIComponent(c.tenant_name)}&background=random`}
+                                                                alt={c.tenant_name}
+                                                                className="w-full h-full object-cover"
+                                                            />
+                                                        )}
 													</div>
-													<div>
-														<p className="text-sm font-bold text-slate-900 truncate max-w-37.5">
+													<div className="flex flex-col">
+														<p className="text-sm font-bold text-slate-700 group-hover:text-brand-primary transition-colors truncate max-w-37.5">
 															{c.tenant_name}
 														</p>
 														<p className="text-[11px] text-slate-500 font-medium">
@@ -610,31 +634,47 @@ export default function CustomerPage() {
 													</div>
 												</div>
 											</td>
-											<td className="px-5 py-3">
+											<td className="px-5 py-3 cursor-pointer" onClick={() => navigate(`/customers/${c.id}/show`)}>
 												<div className="flex items-center gap-2 text-sm font-bold text-slate-700">
-													<Home className="w-4 h-4 text-slate-400" />
-													{c.room?.room_number}
+													{c.room?.room_number && (
+                                                        <>
+                                                            <Home className="w-4 h-4 text-slate-400" />
+                                                            {c.room.room_number}
+                                                        </>
+                                                    )}
 												</div>
 											</td>
-											<td className="px-5 py-3">
+											<td className="px-5 py-3 cursor-pointer" onClick={() => navigate(`/customers/${c.id}/show`)}>
 												<span
 													className={`inline-flex px-2 py-1 rounded-md text-[11px] font-bold whitespace-nowrap ${
-														c.status === "active" ?
+														!c.room?.room_number ?
+															"bg-slate-100 text-slate-600"
+														: c.status === "active" ?
 															"bg-emerald-100 text-emerald-700"
 														:	"bg-slate-100 text-slate-600"
 													}`}
 												>
-													{c.status === "active" ? "Đang ở" : "Đã dời đi"}
+													{!c.room?.room_number ?
+														"Vãng lai"
+													: c.status === "active" ? 
+														"Đang ở" 
+													: "Đã dời đi"}
 												</span>
 											</td>
-											<td className="px-5 py-3">
+											<td className="px-5 py-3 cursor-pointer" onClick={() => navigate(`/customers/${c.id}/show`)}>
 												<div className="flex items-center gap-2 text-xs font-semibold text-slate-600">
 													<Building2 className="w-4 h-4 text-slate-400" />
-													<span className="truncate max-w-30">{c.room?.building?.name}</span>
+													<span className="truncate max-w-30">{c.room?.building?.name || "-"}</span>
 												</div>
 											</td>
-											<td className="px-5 py-3">
-												<div className="flex items-center gap-1.5">
+											<td className="px-5 py-3 relative group/res">
+												<div 
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        setEditingResidenceId(editingResidenceId === c.id ? null : c.id);
+                                                    }}
+                                                    className="flex items-center gap-1.5 cursor-pointer hover:bg-slate-100 px-2 py-1 rounded-md transition-colors w-fit"
+                                                >
 													<span
 														className={`w-2 h-2 rounded-full ${
 															c.residence_status === "completed" ? "bg-emerald-500"
@@ -649,9 +689,45 @@ export default function CustomerPage() {
 															"Đang chờ"
 														:	"Chưa đăng ký"}
 													</span>
+                                                    <ChevronDown className="w-3 h-3 text-slate-400 opacity-0 group-hover/res:opacity-100 transition-opacity" />
 												</div>
+
+                                                <AnimatePresence>
+                                                    {editingResidenceId === c.id && (
+                                                        <>
+                                                            <div className="fixed inset-0 z-[60]" onClick={() => setEditingResidenceId(null)} />
+                                                            <motion.div 
+                                                                initial={{ opacity: 0, y: 5 }}
+                                                                animate={{ opacity: 1, y: 0 }}
+                                                                exit={{ opacity: 0, y: 5 }}
+                                                                className="absolute left-0 mt-2 w-48 bg-white rounded-xl shadow-2xl border border-slate-100 p-2.5 z-[70]"
+                                                            >
+                                                                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2 mb-2.5">Chọn trạng thái</p>
+                                                                <div className="space-y-1.5">
+                                                                    {[
+                                                                        { id: "completed", label: "Đã đăng ký", bg: "bg-emerald-50", text: "text-emerald-600" },
+                                                                        { id: "pending", label: "Đang chờ duyệt", bg: "bg-amber-50", text: "text-amber-600" },
+                                                                        { id: "none", label: "Chưa đăng ký", bg: "bg-slate-50", text: "text-slate-600" }
+                                                                    ].map(opt => (
+                                                                        <button 
+                                                                            key={opt.id}
+                                                                            onClick={(e) => {
+                                                                                e.stopPropagation();
+                                                                                handleResidenceUpdate(c.id, opt.id);
+                                                                                setEditingResidenceId(null);
+                                                                            }}
+                                                                            className={`w-full text-left px-4 py-2 ${opt.bg} ${opt.text} rounded-lg text-xs font-bold hover:brightness-95 transition-all outline-none`}
+                                                                        >
+                                                                            {opt.label}
+                                                                        </button>
+                                                                    ))}
+                                                                </div>
+                                                            </motion.div>
+                                                        </>
+                                                    )}
+                                                </AnimatePresence>
 											</td>
-											<td className="px-5 py-3 text-sm text-slate-600 font-medium whitespace-nowrap">
+											<td className="px-5 py-3 text-sm text-slate-600 font-medium whitespace-nowrap cursor-pointer" onClick={() => navigate(`/customers/${c.id}/show`)}>
 												{c.tenant_gender === "male" ?
 													"Nam"
 												: c.tenant_gender === "female" ?
@@ -660,19 +736,26 @@ export default function CustomerPage() {
 													"Khác"
 												:	"-"}
 											</td>
-											<td className="px-5 py-3 text-sm text-slate-600 font-medium whitespace-nowrap">
+											<td className="px-5 py-3 text-sm text-slate-600 font-medium whitespace-nowrap cursor-pointer" onClick={() => navigate(`/customers/${c.id}/show`)}>
 												{c.tenant_id_number || "-"}
 											</td>
 											<td className="px-5 py-3 text-right">
 												<div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
 													<button 
-														onClick={() => {
-															setEditingCustomer(c);
-															setIsAddModalOpen(true);
+														onClick={async (e) => {
+                                                            e.stopPropagation();
+                                                            if (window.confirm("Bạn có chắc chắn muốn xóa khách hàng này?")) {
+                                                                const { error } = await api.delete(`/api/customers/${c.id}`);
+                                                                if (!error) {
+                                                                    fetchCustomers();
+                                                                } else {
+                                                                    alert("Lỗi khi xóa: " + JSON.stringify(error));
+                                                                }
+                                                            }
 														}}
-														className="p-1.5 hover:bg-white rounded-lg text-slate-400 hover:text-brand-dark transition-colors shadow-sm"
+														className="p-1.5 hover:bg-white rounded-lg text-slate-400 hover:text-rose-600 transition-colors shadow-sm"
 													>
-														<Edit3 className="w-4 h-4" />
+														<Trash2 className="w-4 h-4" />
 													</button>
 												</div>
 											</td>
@@ -714,8 +797,10 @@ export default function CustomerPage() {
 							}}
 							className="px-2 py-1 outline-none border border-slate-200 rounded cursor-pointer text-slate-600 bg-white hover:border-slate-300 appearance-none"
 						>
+							<option value={10}>10 / trang</option>
 							<option value={20}>20 / trang</option>
 							<option value={50}>50 / trang</option>
+							<option value={100}>100 / trang</option>
 						</select>
 					</div>
 				</div>
@@ -740,7 +825,7 @@ export default function CustomerPage() {
 							className="absolute top-0 right-0 w-100 h-full bg-white shadow-2xl z-50 flex flex-col border-l border-slate-200"
 						>
 							<div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-white shrink-0">
-								<h2 className="text-lg font-bold text-slate-900">Lọc nâng cao</h2>
+								<h2 className="text-xl font-bold text-slate-900">Lọc</h2>
 								<button
 									onClick={() => setIsFilterOpen(false)}
 									className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-500 transition-colors"
@@ -749,52 +834,63 @@ export default function CustomerPage() {
 								</button>
 							</div>
 
-							<div className="flex-1 overflow-y-auto p-5 space-y-6">
-								<div>
-									<h3 className="text-sm font-semibold text-slate-800 mb-3">Trạng thái tạm trú</h3>
-									<div className="grid grid-cols-2 gap-2">
-										{[
-											{ value: "", label: "Tất cả" },
-											{ value: "completed", label: "Đã đăng ký" },
-											{ value: "pending", label: "Đang chờ" },
-											{ value: "not_registered", label: "Chưa đăng ký" },
-										].map((opt) => (
-											<button
-												key={opt.value}
-												onClick={() => setFilterResidency(opt.value)}
-												className={`px-3 py-2 rounded-lg text-[13px] font-medium transition-all ${
-													filterResidency === opt.value ?
-														"bg-brand-primary text-white shadow-sm"
-													:	"bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200"
-												}`}
-											>
-												{opt.label}
-											</button>
-										))}
-									</div>
-								</div>
+							<div className="flex-1 overflow-y-auto p-5">
+								<div className="grid grid-cols-2 gap-4">
+                                    {/* Phòng */}
+                                    <div className="space-y-1.5">
+                                        <select
+                                            value={filterRoom}
+                                            onChange={(e) => setFilterRoom(e.target.value)}
+                                            className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-600 focus:border-brand-primary outline-none transition-all appearance-none"
+                                        >
+                                            <option value="">Phòng</option>
+                                            {rooms.map(r => (
+                                                <option key={r.id} value={r.id}>{r.room_number}</option>
+                                            ))}
+                                        </select>
+                                    </div>
 
-								<div>
-									<h3 className="text-sm font-semibold text-slate-800 mb-3">Giới tính</h3>
-									<div className="grid grid-cols-2 gap-2">
-										{[
-											{ value: "", label: "Tất cả" },
-											{ value: "male", label: "Nam" },
-											{ value: "female", label: "Nữ" },
-										].map((opt) => (
-											<button
-												key={opt.value}
-												onClick={() => setFilterGender(opt.value)}
-												className={`px-3 py-2 rounded-lg text-[13px] font-medium transition-all ${
-													filterGender === opt.value ?
-														"bg-brand-primary text-white shadow-sm"
-													:	"bg-slate-50 text-slate-600 hover:bg-slate-100 border border-slate-200"
-												}`}
-											>
-												{opt.label}
-											</button>
-										))}
-									</div>
+                                    {/* Trạng thái khách */}
+                                    <div className="space-y-1.5">
+                                        <select
+                                            value={filterStatus}
+                                            onChange={(e) => setFilterStatus(e.target.value)}
+                                            className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-600 focus:border-brand-primary outline-none transition-all appearance-none"
+                                        >
+                                            <option value="">Trạng thái khách</option>
+                                            <option value="active">Đang ở</option>
+                                            <option value="terminated">Đã chuyển đi</option>
+                                            <option value="transient">Khách vãng lai</option>
+                                        </select>
+                                    </div>
+
+                                    {/* Trạng thái tạm trú */}
+                                    <div className="space-y-1.5">
+                                        <select
+                                            value={filterResidency}
+                                            onChange={(e) => setFilterResidency(e.target.value)}
+                                            className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-600 focus:border-brand-primary outline-none transition-all appearance-none"
+                                        >
+                                            <option value="">Trạng thái tạm trú</option>
+                                            <option value="completed">Đã đăng ký</option>
+                                            <option value="pending">Đang chờ</option>
+                                            <option value="not_registered">Chưa đăng ký</option>
+                                        </select>
+                                    </div>
+
+                                    {/* Giới tính */}
+                                    <div className="space-y-1.5">
+                                        <select
+                                            value={filterGender}
+                                            onChange={(e) => setFilterGender(e.target.value)}
+                                            className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-600 focus:border-brand-primary outline-none transition-all appearance-none"
+                                        >
+                                            <option value="">Giới tính</option>
+                                            <option value="male">Nam</option>
+                                            <option value="female">Nữ</option>
+                                            <option value="other">Khác</option>
+                                        </select>
+                                    </div>
 								</div>
 							</div>
 
@@ -826,7 +922,7 @@ export default function CustomerPage() {
 					setEditingCustomer(null);
 				}}
 				title={editingCustomer ? "Chỉnh sửa thông tin chung" : "Nhập tay thông tin khách hàng"}
-				size="lg"
+				size="xl"
 			>
 				<CustomerForm
 					onSubmit={handleSaveCustomer}
@@ -835,7 +931,6 @@ export default function CustomerPage() {
 						setEditingCustomer(null);
 					}}
 					initialData={editingCustomer}
-					rooms={rooms}
 				/>
 			</Modal>
 		</div>

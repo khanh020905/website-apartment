@@ -7,9 +7,15 @@ interface InvoiceFormProps {
 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	onSubmit: (data: any) => void;
 	onCancel: () => void;
+	initialData?: {
+		customer_id?: string;
+		room_id?: string;
+		customer_name?: string;
+		room_number?: string;
+	};
 }
 
-const InvoiceForm = ({ onSubmit, onCancel }: InvoiceFormProps) => {
+const InvoiceForm = ({ onSubmit, onCancel, initialData }: InvoiceFormProps) => {
 	const { selectedBuildingId } = useBuilding();
 	const [rooms, setRooms] = useState<any[]>([]);
 	const [customers, setCustomers] = useState<any[]>([]);
@@ -25,6 +31,16 @@ const InvoiceForm = ({ onSubmit, onCancel }: InvoiceFormProps) => {
 		hasVat: false,
 		notes: "",
 	});
+
+	useEffect(() => {
+		if (initialData) {
+			setFormData(prev => ({
+				...prev,
+				roomNumber: initialData.room_number || prev.roomNumber,
+				customerName: initialData.customer_name || prev.customerName,
+			}));
+		}
+	}, [initialData]);
 
 	useEffect(() => {
 		const fetchData = async () => {

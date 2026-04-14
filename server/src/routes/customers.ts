@@ -216,6 +216,12 @@ router.get("/", authenticate, async (req: AuthRequest, res: Response) => {
         tenant_avatar,
         tenant_notes,
         tenant_id_number,
+        tenant_id_issue_date,
+        tenant_id_expiry_date,
+        tenant_id_issue_place,
+        tenant_id_front_url,
+        tenant_id_back_url,
+        tenant_residence_url,
         residence_status,
         start_date,
         end_date,
@@ -223,12 +229,13 @@ router.get("/", authenticate, async (req: AuthRequest, res: Response) => {
         deposit_amount,
         status,
         created_at,
-        rooms!inner(
+        landlord_id,
+        rooms(
           id,
           room_number,
           floor,
           building_id,
-          buildings!inner(
+          buildings(
             id,
             name,
             owner_id
@@ -238,11 +245,13 @@ router.get("/", authenticate, async (req: AuthRequest, res: Response) => {
 				{ count: "exact" },
 			)
 		if (req.user.role !== "admin") {
-			query = query.eq("rooms.buildings.owner_id", req.user.id);
+			query = query.eq("landlord_id", req.user.id);
 		}
 
 		// Apply filters
-		if (status) {
+		if (status === "transient") {
+            query = query.is("room_id", null);
+        } else if (status) {
 			query = query.eq("status", status);
 		}
 
@@ -280,20 +289,13 @@ router.get("/", authenticate, async (req: AuthRequest, res: Response) => {
 			return;
 		}
 
-		// Get stats (total, active, terminated)
+		// Get stats (total, active, terminated, transient)
 		let statsQuery = supabase
 			.from("contracts")
-			.select(
-				`
-        status,
-        rooms!inner(
-          buildings!inner(owner_id)
-        )
-      `,
-			);
+			.select("status, landlord_id, room_id");
 
 		if (req.user.role !== "admin") {
-			statsQuery = statsQuery.eq("rooms.buildings.owner_id", req.user.id);
+			statsQuery = statsQuery.eq("landlord_id", req.user.id);
 		}
 
 		const { data: allContracts } = await statsQuery;
@@ -302,6 +304,7 @@ router.get("/", authenticate, async (req: AuthRequest, res: Response) => {
 			total: allContracts?.length || 0,
 			active: allContracts?.filter((c) => c.status === "active").length || 0,
 			terminated: allContracts?.filter((c) => c.status === "terminated").length || 0,
+            transient: allContracts?.filter((c) => !c.room_id).length || 0,
 		};
 
 		// Transform data for frontend
@@ -329,16 +332,16 @@ router.get("/", authenticate, async (req: AuthRequest, res: Response) => {
 				deposit_amount: c.deposit_amount,
 				status: c.status,
 				created_at: c.created_at,
-				room: {
+				room: c.rooms ? {
 					id: (c.rooms as any).id,
 					room_number: (c.rooms as any).room_number,
 					floor: (c.rooms as any).floor,
 					building_id: (c.rooms as any).building_id,
-					building: {
+					building: (c.rooms as any).buildings ? {
 						id: (c.rooms as any).buildings.id,
 						name: (c.rooms as any).buildings.name,
-					},
-				},
+					} : null,
+				} : null,
 			})) || [];
 
 		res.json({
@@ -352,6 +355,258 @@ router.get("/", authenticate, async (req: AuthRequest, res: Response) => {
 	} catch (err) {
 		console.error("Error fetching customers:", err);
 		res.status(500).json({ error: "Lỗi server khi lấy danh sách khách hàng" });
+	}
+});
+
+// GET /api/customers/:id — Get a single customer profile
+router.get("/:id", authenticate, async (req: AuthRequest, res: Response) => {
+	if (!req.user) {
+		res.status(401).json({ error: "Chưa xác thực" });
+		return;
+	}
+
+	const { id } = req.params;
+	const supabase = getSupabase();
+
+	try {
+		const { data: customer, error } = await supabase
+			.from("contracts")
+			.select(`
+        id,
+        tenant_name,
+        tenant_phone,
+        tenant_email,
+        tenant_gender,
+        tenant_dob,
+        tenant_job,
+        tenant_nationality,
+        tenant_city,
+        tenant_district,
+        tenant_ward,
+        tenant_address,
+        tenant_avatar,
+        tenant_notes,
+        tenant_id_number,
+        tenant_id_issue_date,
+        tenant_id_expiry_date,
+        tenant_id_issue_place,
+        tenant_id_front_url,
+        tenant_id_back_url,
+        tenant_residence_url,
+        residence_status,
+        start_date,
+        end_date,
+        rent_amount,
+        deposit_amount,
+        status,
+        created_at,
+        landlord_id,
+        rooms(
+          id,
+          room_number,
+          floor,
+          building_id,
+          buildings(
+            id,
+            name,
+            owner_id
+          )
+        ),
+        vehicles(
+          id,
+          vehicle_type,
+          license_plate,
+          vehicle_name,
+          color
+        )
+      `)
+			.eq("id", id)
+			.eq("landlord_id", req.user.id)
+			.single();
+
+		if (error) {
+            console.error("Supabase error fetching customer detail:", error);
+			res.status(error.code === 'PGRST116' ? 404 : 500).json({ 
+                error: error.code === 'PGRST116' ? "Không tìm thấy khách hàng" : "Lỗi truy vấn dữ liệu",
+                details: error 
+            });
+			return;
+		}
+
+		// Transform for frontend
+        // Fetch Real Stats for this customer
+        const { data: reservations } = await supabase
+            .from("reservations")
+            .select("id")
+            .eq("customer_phone", (customer as any).tenant_phone);
+
+        const { data: invoices } = await supabase
+            .from("invoices")
+            .select("status, total_amount")
+            .eq("room_id", (customer as any).room_id)
+            .eq("customer_name", (customer as any).tenant_name);
+
+        const stats = {
+            totalBookings: reservations?.length || 0,
+            paidInvoices: invoices?.filter((i: any) => i.status === 'paid').length || 0,
+            totalDebt: invoices?.filter((i: any) => i.status !== 'paid').reduce((sum: number, i: any) => sum + (Number(i.total_amount) || 0), 0) || 0,
+            totalRevenue: invoices?.filter((i: any) => i.status === 'paid').reduce((sum: number, i: any) => sum + (Number(i.total_amount) || 0), 0) || 0,
+            depositAmount: Number((customer as any).deposit_amount) || 0,
+            prepayments: 0 // Placeholder
+        };
+
+		const transformed = {
+			...customer,
+            stats,
+			room: (customer as any).rooms ? {
+				id: (customer as any).rooms.id,
+				room_number: (customer as any).rooms.room_number,
+				floor: (customer as any).rooms.floor,
+				building_id: (customer as any).rooms.building_id,
+				building: (customer as any).rooms.buildings ? {
+					id: (customer as any).rooms.buildings.id,
+					name: (customer as any).rooms.buildings.name,
+				} : null,
+			} : null,
+		};
+
+		res.json({ customer: transformed });
+	} catch (err) {
+		console.error("Error fetching customer detail:", err);
+		res.status(500).json({ error: "Lỗi server" });
+	}
+});
+
+// POST /api/customers — Create a new customer profile (stored as a contract record)
+router.post("/", authenticate, async (req: AuthRequest, res: Response) => {
+	if (!req.user) {
+		res.status(401).json({ error: "Chưa xác thực" });
+		return;
+	}
+
+	const {
+		tenant_name,
+      tenant_phone,
+      tenant_email,
+      tenant_gender,
+      tenant_dob,
+      tenant_job,
+      tenant_nationality,
+      tenant_city,
+      tenant_district,
+      tenant_ward,
+      tenant_address,
+      tenant_notes,
+      tenant_avatar,
+      tenant_id_number,
+	} = req.body;
+
+	if (!tenant_name) {
+		res.status(400).json({ error: "Thiếu tên khách hàng" });
+		return;
+	}
+
+	const supabase = getSupabase();
+
+	try {
+		const { data: customer, error } = await supabase
+			.from("contracts")
+			.insert({
+				landlord_id: req.user.id,
+				tenant_name,
+				tenant_phone: tenant_phone || null,
+				tenant_email: tenant_email || null,
+				tenant_gender: tenant_gender || null,
+				tenant_dob: tenant_dob || null,
+				tenant_job: tenant_job || null,
+				tenant_nationality: tenant_nationality || "Vietnam",
+				tenant_city: tenant_city || null,
+				tenant_district: tenant_district || null,
+				tenant_ward: tenant_ward || null,
+				tenant_address: tenant_address || null,
+				tenant_avatar: tenant_avatar || null,
+				tenant_notes: tenant_notes || null,
+				tenant_id_number: tenant_id_number || null,
+				status: "active", // Default status
+				residence_status: "not_registered",
+				start_date: new Date().toISOString().split("T")[0], // Default start date
+				rent_amount: 0, // Default rent
+				room_id: null, // No room assigned by default
+			})
+			.select()
+			.single();
+
+		if (error) {
+			res.status(400).json({ error: error.message });
+			return;
+		}
+
+		res.json({ message: "Đã tạo khách hàng thành công", customer });
+	} catch (err) {
+		console.error("Error creating customer:", err);
+		res.status(500).json({ error: "Lỗi server khi tạo khách hàng" });
+	}
+});
+
+// PUT /api/customers/:id — Update customer profile
+router.put("/:id", authenticate, async (req: AuthRequest, res: Response) => {
+	if (!req.user) {
+		res.status(401).json({ error: "Chưa xác thực" });
+		return;
+	}
+
+	const { id } = req.params;
+	const updates = req.body;
+
+	const supabase = getSupabase();
+
+	try {
+		const { data: customer, error } = await supabase
+			.from("contracts")
+			.update(updates)
+			.eq("id", id)
+			.eq("landlord_id", req.user.id)
+			.select()
+			.single();
+
+		if (error) {
+			res.status(400).json({ error: error.message });
+			return;
+		}
+
+		res.json({ message: "Đã cập nhật thông tin khách hàng", customer });
+	} catch (err) {
+		console.error("Error updating customer:", err);
+		res.status(500).json({ error: "Lỗi server khi cập nhật khách hàng" });
+	}
+});
+
+// DELETE /api/customers/:id — Delete a customer profile
+router.delete("/:id", authenticate, async (req: AuthRequest, res: Response) => {
+	if (!req.user) {
+		res.status(401).json({ error: "Chưa xác thực" });
+		return;
+	}
+
+	const { id } = req.params;
+	const supabase = getSupabase();
+
+	try {
+		const { error } = await supabase
+			.from("contracts")
+			.delete()
+			.eq("id", id)
+			.eq("landlord_id", req.user.id);
+
+		if (error) {
+			res.status(400).json({ error: error.message });
+			return;
+		}
+
+		res.json({ message: "Đã xóa khách hàng thành công" });
+	} catch (err) {
+		console.error("Error deleting customer:", err);
+		res.status(500).json({ error: "Lỗi server khi xóa khách hàng" });
 	}
 });
 

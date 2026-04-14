@@ -102,38 +102,42 @@ router.get("/:id", authenticate, async (req: AuthRequest, res: Response) => {
   }
 });
 
-// POST /api/vehicles - Mapping UI form "Thêm phương tiện"
+// POST /api/vehicles - Bulk create or single create
 router.post("/", authenticate, async (req: AuthRequest, res: Response) => {
-  const { customer_id, room_id, building_id, vehicle_type, license_plate, vehicle_name, color, status } = req.body;
-  
-  if (!customer_id || !room_id || !building_id || !vehicle_type || !license_plate) {
-    return res.status(400).json({ error: "Thiếu thông tin bắt buộc" });
+  const body = req.body;
+  const vehiclesToInsert = Array.isArray(body) ? body : [body];
+
+  if (vehiclesToInsert.length === 0) {
+    return res.status(400).json({ error: "Thiếu thông tin phương tiện" });
+  }
+
+  // Validate presence of required fields for all items
+  for (const v of vehiclesToInsert) {
+    if (!v.customer_id || !v.room_id || !v.building_id || !v.vehicle_type || !v.license_plate) {
+      return res.status(400).json({ error: "Thiếu thông tin bắt buộc trong một hoặc nhiều phương tiện" });
+    }
   }
 
   const supabase = getSupabase();
   try {
-    // Validate: biển số không trùng (Requirement 11)
-    const { data: existing } = await supabase.from("vehicles").select("id").eq("license_plate", license_plate).maybeSingle();
-    if (existing) return res.status(400).json({ error: "Biển số xe đã tồn tại trong hệ thống" });
-
     const { data, error } = await supabase
       .from("vehicles")
-      .insert({
-        customer_id,
-        room_id,
-        building_id,
-        vehicle_type,
-        license_plate,
-        vehicle_name,
-        color,
-        status: status || 'active'
-      })
-      .select()
-      .single();
+      .insert(vehiclesToInsert.map(v => ({
+        customer_id: v.customer_id,
+        room_id: v.room_id,
+        building_id: v.building_id,
+        vehicle_type: v.vehicle_type,
+        license_plate: v.license_plate,
+        vehicle_name: v.vehicle_name,
+        color: v.color,
+        status: v.status || 'active'
+      })))
+      .select();
 
     if (error) throw error;
     res.status(201).json(data);
   } catch (err) {
+    console.error("Vehicle creation error:", err);
     res.status(500).json({ error: "Lỗi server khi tạo phương tiện" });
   }
 });
