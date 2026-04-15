@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import Modal from "../components/modals/Modal";
 import IncidentForm from "../components/modals/IncidentForm";
+import * as XLSX from 'xlsx';
 
 interface Incident {
 	id: string;
@@ -133,6 +134,60 @@ export default function IncidentsPage() {
 		}
 	};
 
+	const handleExportExcel = () => {
+		const excelData = filteredData.map((row, index) => ({
+			"STT": index + 1,
+			"Loại sự cố": typeof row.type === 'object' ? row.type?.name : row.type,
+			"Ưu tiên": row.priority === "emergency" ? "Khẩn cấp" : row.priority === "high" ? "Cao" : row.priority === "medium" ? "Trung bình" : "Thấp",
+			"Vị trí": row.building?.name || "—",
+			"Vị trí sự cố": row.room?.room_number ? `P${row.room.room_number}` : row.location || "—",
+			"Trạng thái": row.status === "pending" ? "Cần thực hiện" : row.status === "completed" ? "Đã hoàn thành" : "Đã huỷ",
+			"Báo cáo bởi": row.reportedBy || "Hệ thống",
+			"Người đảm nhận": row.assignee || "—",
+			"Ngày đến hạn": row.due_date ? new Date(row.due_date).toLocaleDateString('vi-VN') : "—",
+			"Mô tả": row.description || "—",
+			"Tạo lúc": row.created_at ? new Date(row.created_at).toLocaleDateString('vi-VN') : "—",
+			"Cập nhật lúc": new Date().toLocaleDateString('vi-VN'),
+			"Tạo bởi": "Quản trị viên"
+		}));
+
+		const worksheet = XLSX.utils.json_to_sheet(excelData, { origin: "A4" });
+		
+		// Add title and metadata
+		XLSX.utils.sheet_add_aoa(worksheet, [
+			["Danh sách sự cố"],
+			[`Thời gian báo cáo: ${new Date().toLocaleDateString('vi-VN')}`]
+		], { origin: "A1" });
+
+		// Manual Merge (roughly for 15 columns)
+		worksheet['!merges'] = [
+			{ s: { r: 0, c: 0 }, e: { r: 0, c: 14 } }, // Title
+			{ s: { r: 1, c: 0 }, e: { r: 1, c: 14 } }  // Subtitle
+		];
+
+		const workbook = XLSX.utils.book_new();
+		XLSX.utils.book_append_sheet(workbook, worksheet, "Incidents");
+
+		// Set column widths for a "beautiful" look
+		worksheet['!cols'] = [
+			{ wch: 6 },   // STT
+			{ wch: 18 },  // Loại sự cố
+			{ wch: 12 },  // Ưu tiên
+			{ wch: 15 },  // Vị trí (Building)
+			{ wch: 15 },  // Vị trí sự cố (Room)
+			{ wch: 15 },  // Trạng thái
+			{ wch: 20 },  // Báo cáo bởi
+			{ wch: 20 },  // Người đảm nhận
+			{ wch: 15 },  // Ngày đến hạn
+			{ wch: 45 },  // Mô tả
+			{ wch: 15 },  // Tạo lúc
+			{ wch: 15 },  // Cập nhật lúc
+			{ wch: 15 }   // Tạo bởi
+		];
+
+		XLSX.writeFile(workbook, `Danh_sach_su_co_${new Date().getTime()}.xlsx`);
+	};
+
 	const filteredData = incidents.filter((t) => {
 		if (
 			search &&
@@ -216,7 +271,10 @@ export default function IncidentsPage() {
 					</div>
 
 					<div className="flex items-center gap-2 ml-auto">
-						<button className="flex items-center justify-center w-9 h-9 border border-slate-200 bg-white text-slate-600 rounded-[8px] hover:bg-slate-50 transition-colors">
+						<button 
+							onClick={handleExportExcel}
+							className="flex items-center justify-center w-9 h-9 border border-slate-200 bg-white text-slate-600 rounded-[8px] hover:bg-slate-50 transition-colors cursor-pointer"
+						>
 							<FileSpreadsheet className="w-5 h-5" />
 						</button>
 						<button
