@@ -32,9 +32,9 @@ router.get("/", authenticate, async (req: AuthRequest, res: Response) => {
 router.post("/", authenticate, async (req: AuthRequest, res: Response) => {
   if (!req.user) return res.status(401).json({ error: "Chưa xác thực" });
   
-  const { building_id, name, icon, default_assignee } = req.body;
-  if (!building_id || !name) {
-    return res.status(400).json({ error: "Thiếu dữ liệu: building_id, name" });
+  const { building_id, name, name_en, description, icon, default_assignee } = req.body;
+  if (!name) {
+    return res.status(400).json({ error: "Thiếu dữ liệu: name" });
   }
 
   const supabase = getSupabase();
@@ -44,6 +44,8 @@ router.post("/", authenticate, async (req: AuthRequest, res: Response) => {
       .insert({
         building_id,
         name,
+        name_en,
+        description,
         icon,
         default_assignee,
         status: "active"

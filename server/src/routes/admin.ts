@@ -126,7 +126,10 @@ router.get('/listings/all', authenticate, requireAdmin, async (req: AuthRequest,
 });
 
 // GET /api/admin/staff — List staff users for assignment
-router.get('/staff', authenticate, requireAdmin, async (_req: AuthRequest, res: Response) => {
+router.get('/staff', authenticate, async (req: AuthRequest, res: Response) => {
+  if (!req.user || !['admin', 'broker', 'landlord'].includes(req.user.role)) {
+    return res.status(403).json({ error: 'Bạn không có quyền xem danh sách nhân viên' });
+  }
   const { data, error } = await getSupabase()
     .from('profiles')
     .select('id, full_name, email, role')

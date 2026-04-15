@@ -222,7 +222,7 @@ const Navbar = () => {
 										className={`${compactActionButtonClass} bg-brand-primary text-white shadow-sm shadow-brand-primary/20 hover:bg-brand-dark`}
 									>
 										<PlusCircle className="w-4 h-4" />
-										<span>Nạp</span>
+										<span>+ Thu nhập</span>
 									</motion.button>
 									<motion.button
 										whileHover={{ scale: 1.02 }}
@@ -231,7 +231,7 @@ const Navbar = () => {
 										className={`${compactActionButtonClass} bg-brand-primary text-white shadow-sm shadow-brand-primary/20 hover:bg-brand-dark`}
 									>
 										<MinusCircle className="w-4 h-4" />
-										<span>Rút</span>
+										<span>- Chi phí</span>
 									</motion.button>
 								</>
 							)}
