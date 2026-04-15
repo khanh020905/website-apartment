@@ -434,11 +434,16 @@ router.get("/:id", authenticate, async (req: AuthRequest, res: Response) => {
 		}
 
 		// Transform for frontend
-        // Fetch Real Stats for this customer
+		// Fetch Real Stats & Reservations for this customer
         const { data: reservations } = await supabase
             .from("reservations")
-            .select("id")
-            .eq("customer_phone", (customer as any).tenant_phone);
+            .select(`
+                *,
+                room:room_id (id, room_number, floor, status, room_type:room_types(*)),
+                building:building_id (id, name)
+            `)
+            .eq("customer_phone", (customer as any).tenant_phone)
+            .order("created_at", { ascending: false });
 
         const { data: invoices } = await supabase
             .from("invoices")
@@ -458,6 +463,7 @@ router.get("/:id", authenticate, async (req: AuthRequest, res: Response) => {
 		const transformed = {
 			...customer,
             stats,
+            reservations: reservations || [],
 			room: (customer as any).rooms ? {
 				id: (customer as any).rooms.id,
 				room_number: (customer as any).rooms.room_number,

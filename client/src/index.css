@@ -168,3 +168,57 @@ body {
 .leaflet-tooltip-top.custom-map-tooltip::before {
 	display: none !important;
 }
+
+/* Custom Scrollbar for Tabs/Tables */
+.custom-tab-scrollbar::-webkit-scrollbar {
+    height: 8px;
+    width: 6px;
+}
+
+.custom-tab-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.custom-tab-scrollbar::-webkit-scrollbar-thumb {
+    background: #e2e8f0;
+    border-radius: 10px;
+    transition: background 0.3s;
+}
+
+.custom-tab-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #cbd5e1;
+}
+
+.custom-tab-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #e2e8f0 transparent;
+}
+/* Date Input Styling */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    background: transparent;
+    bottom: 0;
+    color: transparent;
+    cursor: pointer;
+    height: auto;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: auto;
+}
+
+input[type="date"] {
+    position: relative;
+}
+
+input[type="date"]::before {
+    content: attr(placeholder);
+    position: absolute;
+    color: #94a3b8;
+    left: 0;
+}
+
+input[type="date"]:focus::before,
+input[type="date"]:valid::before {
+    content: "";
+}

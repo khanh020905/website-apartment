@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -16,6 +16,11 @@ import {
     Wallet,
     Banknote,
     CheckCircle,
+    ArrowRight,
+    Filter,
+    FileSpreadsheet,
+    Check,
+    X,
 } from "lucide-react";
 import { api } from "../lib/api";
 import { format } from "date-fns";
@@ -24,6 +29,32 @@ import CustomerForm from "../components/modals/CustomerForm";
 import VehicleForm from "../components/modals/VehicleForm";
 import IdentityDocumentForm from "../components/modals/IdentityDocumentForm";
 import { useToast } from "../components/Toast";
+
+interface Reservation {
+    id: string;
+    reservation_code: string;
+    room_id: string;
+    building_id: string;
+    customer_name: string;
+    customer_phone: string;
+    status: 'confirmed' | 'active' | 'completed' | 'cancelled';
+    payment_status: 'unpaid' | 'partial' | 'paid';
+    package_type: 'day' | 'month';
+    deposit_amount: number;
+    rent_amount: number;
+    check_in_date: string;
+    expected_check_out: string | null;
+    created_at: string;
+    room?: {
+        room_number: string;
+        room_type?: {
+            name: string;
+        };
+    };
+    building?: {
+        name: string;
+    };
+}
 
 interface CustomerDetail {
 	id: string;
@@ -66,7 +97,8 @@ interface CustomerDetail {
         color: string;
         notes?: string;
     }[];
-    stats?: SummaryStats;
+    stats: SummaryStats;
+    reservations: Reservation[];
 }
 
 interface SummaryStats {
@@ -86,6 +118,180 @@ export default function CustomerDetailPage() {
 	const [loading, setLoading] = useState(true);
 	const [customer, setCustomer] = useState<CustomerDetail | null>(null);
     const [limit, setLimit] = useState(20);
+    const [statusFilter, setStatusFilter] = useState("");
+    const [dateRange, setDateRange] = useState({ start: "", end: "" });
+    const [isColumnCustomizerOpen, setIsColumnCustomizerOpen] = useState(false);
+
+    const [visibleColumns, setVisibleColumns] = useState<Record<string, boolean>>({
+        code: true,
+        room: true,
+        type: true,
+        package: true,
+        customer: true,
+        status: true,
+        start: true,
+        end: true,
+        price: true,
+        deposit: true,
+        payment: true,
+        checkIn: true,
+        checkOut: true,
+        creator: true,
+        createdAt: true,
+        actions: true,
+    });
+
+    const columns = [
+        { id: "code", label: "Mã đặt phòng" },
+        { id: "room", label: "Phòng" },
+        { id: "type", label: "Loại phòng" },
+        { id: "package", label: "Gói" },
+        { id: "customer", label: "Khách hàng đại diện" },
+        { id: "status", label: "Trạng thái" },
+        { id: "start", label: "Ngày bắt đầu" },
+        { id: "end", label: "Ngày kết thúc" },
+        { id: "price", label: "Tiền phòng" },
+        { id: "deposit", label: "Tiền cọc" },
+        { id: "payment", label: "Trạng thái thanh toán" },
+        { id: "checkIn", label: "Ngày nhận phòng" },
+        { id: "checkOut", label: "Ngày trả phòng" },
+        { id: "creator", label: "Người tạo" },
+        { id: "createdAt", label: "Ngày tạo" },
+        { id: "actions", label: "Thao tác" },
+    ];
+
+    const toggleColumn = (id: string) => {
+        setVisibleColumns(prev => ({ ...prev, [id]: !prev[id] }));
+    };
+
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const [advancedFilters, setAdvancedFilters] = useState({
+        services: [] as string[],
+        statuses: [] as string[],
+        paymentStatuses: [] as string[],
+        packages: [] as string[],
+        stayRange: { start: "", end: "" },
+        createRange: { start: "", end: "" },
+        creator: "",
+        taxOnly: false,
+        priceRange: [0, 10000000]
+    });
+
+    const handleExportExcel = () => {
+        const title = "Danh sách đặt phòng";
+        const timeInfo = `Thời gian: ${format(new Date(), "dd/MM/yyyy")}`;
+        
+        const excelColumns = [
+            { label: "STT", id: "stt" },
+            { label: "Mã đặt phòng", id: "code" },
+            { label: "Địa điểm", id: "location" },
+            { label: "Phòng", id: "room" },
+            { label: "Loại phòng", id: "type" },
+            { label: "Gói", id: "package" },
+            { label: "Khách hàng", id: "customer" },
+            { label: "Trạng thái", id: "status" },
+            { label: "Ngày bắt đầu", id: "start" },
+            { label: "Ngày kết thúc", id: "end" },
+            { label: "Giá phòng", id: "price" },
+            { label: "Tiền đã cọc", id: "depositPaid" },
+            { label: "Tiền cọc", id: "deposit" },
+            { label: "Trạng thái thanh toán", id: "payment" },
+            { label: "Ngày nhận phòng", id: "checkIn" },
+            { label: "Ngày trả phòng", id: "checkOut" },
+            { label: "Người tạo", id: "creator" },
+            { label: "Ngày tạo", id: "createdAt" }
+        ];
+
+        let totalVal = 0;
+        const rowsHtml = filteredBookings.map((b, index) => {
+            totalVal += b.rent_amount;
+            return `
+                <tr>
+                    <td style="text-align: center;">${index + 1}</td>
+                    <td>${b.reservation_code}</td>
+                    <td>${b.building?.name || "N/A"}</td>
+                    <td>${b.room?.room_number || "N/A"}</td>
+                    <td>${(b.room as any)?.room_type?.name || "N/A"}</td>
+                    <td>${b.package_type === 'month' ? "Tháng" : "Ngày"}</td>
+                    <td>${b.customer_name}</td>
+                    <td>${b.status === "active" ? "Đang sử dụng" : b.status === "confirmed" ? "Đã xác nhận" : b.status === "completed" ? "Đã hoàn thành" : "Đã huỷ"}</td>
+                    <td>${b.check_in_date}</td>
+                    <td>${b.expected_check_out || "--"}</td>
+                    <td style="text-align: right;">${b.rent_amount.toLocaleString()} VND</td>
+                    <td style="text-align: right;">${b.deposit_amount.toLocaleString()} VND</td>
+                    <td style="text-align: right;">${b.deposit_amount.toLocaleString()} VND</td>
+                    <td>${b.payment_status === "unpaid" ? "Chưa thanh toán" : b.payment_status === "partial" ? "Một phần" : "Đã thanh toán"}</td>
+                    <td>${b.check_in_date}</td>
+                    <td>${b.expected_check_out || "--"}</td>
+                    <td>N/A</td>
+                    <td>${format(new Date(b.created_at), "dd/MM/yyyy")}</td>
+                </tr>
+            `;
+        }).join("");
+
+        const tableHtml = `
+            <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+            <head>
+                <meta http-equiv="content-type" content="text/plain; charset=UTF-8"/>
+                <!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Danh sách</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->
+                <style>
+                    td, th { border: 0.5pt solid #ccc; padding: 5px; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 10pt; }
+                    th { background-color: #f8fafc; font-weight: bold; color: #475569; }
+                    .title { font-size: 16pt; font-weight: bold; color: #1e293b; text-align: center; }
+                    .time { font-size: 10pt; color: #64748b; text-align: center; }
+                    .total-row td { font-weight: bold; background-color: #f1f5f9; }
+                </style>
+            </head>
+            <body>
+                <table>
+                    <tr><td colspan="${excelColumns.length}" class="title">${title}</td></tr>
+                    <tr><td colspan="${excelColumns.length}" class="time">${timeInfo}</td></tr>
+                    <tr></tr>
+                    <thead>
+                        <tr>
+                            ${excelColumns.map(c => `<th>${c.label}</th>`).join("")}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${rowsHtml}
+                        <tr class="total-row">
+                            <td colspan="10" style="text-align: right;">Tổng</td>
+                            <td style="text-align: right;">${totalVal.toLocaleString()} VND</td>
+                            <td colspan="7"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </body>
+            </html>
+        `;
+
+        const blob = new Blob([tableHtml], { type: 'application/vnd.ms-excel' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `Danh_sach_dat_phong_${format(new Date(), "ddMMyyyy")}.xls`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        showToast("Đã xuất file dữ liệu thành công!");
+    };
+
+    const filteredBookings = (customer?.reservations || []).filter(b => {
+        const matchesMainStatus = !statusFilter || b.status === statusFilter;
+        const matchesAdvancedStatus = advancedFilters.statuses.length === 0 || advancedFilters.statuses.includes(
+            b.status === "active" ? "Đang sử dụng" : 
+            b.status === "confirmed" ? "Đã xác nhận" : 
+            b.status === "completed" ? "Đã hoàn thành" : "Đã huỷ"
+        );
+        const matchesPayment = advancedFilters.paymentStatuses.length === 0 || advancedFilters.paymentStatuses.includes(
+            b.payment_status === "unpaid" ? "Chưa thanh toán" : 
+            b.payment_status === "partial" ? "Một phần" : "Đã thanh toán"
+        );
+        const matchesPackage = advancedFilters.packages.length === 0 || advancedFilters.packages.includes(b.package_type === 'month' ? "Tháng" : "Ngày");
+        const matchesPrice = b.rent_amount >= advancedFilters.priceRange[0] && b.rent_amount <= advancedFilters.priceRange[1];
+        
+        return matchesMainStatus && matchesAdvancedStatus && matchesPayment && matchesPackage && matchesPrice;
+    });
     
     // Derived stats from backend
     const stats = customer?.stats || {
@@ -114,6 +320,17 @@ export default function CustomerDetailPage() {
 				.finally(() => setLoading(false));
 		}
 	}, [id]);
+
+    const tableRef = useRef<HTMLDivElement>(null);
+    const startDateRef = useRef<HTMLInputElement>(null);
+    const endDateRef = useRef<HTMLInputElement>(null);
+
+    const handleWheel = (e: React.WheelEvent) => {
+        if (e.deltaY !== 0 && tableRef.current) {
+            // Chỉ cuộn ngang khi có lăn dọc và đang ở trong bảng
+            tableRef.current.scrollLeft += e.deltaY;
+        }
+    };
 
 	const tabs = [
 		{ id: "bookings", label: "Đặt phòng" },
@@ -245,7 +462,7 @@ export default function CustomerDetailPage() {
 				</div>
 
 				{/* Main Content Area */}
-				<div className="flex-1 flex flex-col gap-6">
+				<div className="flex-1 flex flex-col gap-6 min-w-0">
 					{/* Finance Stats Grid */}
 					<div className="grid grid-cols-3 gap-4 shrink-0">
 						{/* Card 1: Tổng đặt phòng */}
@@ -334,7 +551,7 @@ export default function CustomerDetailPage() {
 
 
                         {/* Table Area */}
-                        <div className="flex-1 bg-[#fdfdfd]">
+                        <div className="flex-1 bg-[#fdfdfd] flex flex-col overflow-hidden">
                             <AnimatePresence mode="wait">
                                 {activeTab === "bookings" && (
                                     <motion.div
@@ -342,46 +559,247 @@ export default function CustomerDetailPage() {
                                         initial={{ opacity: 0 }}
                                         animate={{ opacity: 1 }}
                                         exit={{ opacity: 0 }}
-                                        className="flex flex-col"
+                                        className="flex flex-col h-full overflow-hidden"
                                     >
-                                        <table className="w-full text-left border-collapse">
-                                            <thead className="bg-[#fcfcfc] border-b border-slate-50 sticky top-0 z-10">
-                                                <tr>
-                                                    <th className="px-5 py-4 text-[13px] font-bold text-slate-400 uppercase tracking-wider">Mã đặt phòng</th>
-                                                    <th className="px-5 py-4 text-[13px] font-bold text-slate-400 uppercase tracking-wider">Phòng</th>
-                                                    <th className="px-5 py-4 text-[13px] font-bold text-slate-400 uppercase tracking-wider">Loại phòng</th>
-                                                    <th className="px-5 py-4 text-[13px] font-bold text-slate-400 uppercase tracking-wider">Gói</th>
-                                                    <th className="px-5 py-4 text-[13px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">Khách hàng đại diện</th>
-                                                    <th className="px-5 py-4 text-center">
-                                                        <Settings className="w-4 h-4 text-slate-400 mx-auto" />
-                                                    </th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className="divide-y divide-slate-50">
-                                                <tr className="hover:bg-slate-50/50 transition-colors group">
-                                                    <td className="px-5 py-5 text-[14px] font-bold text-blue-600 underline decoration-blue-200 underline-offset-4 cursor-pointer">D2604E3B050</td>
-                                                    <td className="px-5 py-5 text-[14px] font-bold text-slate-700">{customer.room?.room_number || "P102"}</td>
-                                                    <td className="px-5 py-5 text-[14px] font-medium text-slate-500">Duplex</td>
-                                                    <td className="px-5 py-5 text-[14px] font-medium text-slate-500">Tháng</td>
-                                                    <td className="px-5 py-5">
-                                                        <div className="flex items-center gap-3">
-                                                            <div className="w-9 h-9 rounded-full border border-slate-200 overflow-hidden shrink-0">
-                                                                <img src={customer.tenant_avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(customer.tenant_name)}&background=random`} className="w-full h-full object-cover" />
+                                        {/* Table Toolbar */}
+                                        <div className="px-6 py-4 flex items-center justify-between bg-white border-b border-slate-100 shrink-0">
+                                            <div className="flex items-center gap-3">
+                                                <div className="flex items-center gap-3 px-3 py-1.5 border border-slate-200 rounded-lg bg-white group hover:border-slate-300 transition-all">
+                                                    <div 
+                                                        className="relative cursor-pointer"
+                                                        onClick={() => startDateRef.current?.showPicker()}
+                                                    >
+                                                        <input 
+                                                            ref={startDateRef}
+                                                            type="date" 
+                                                            className="absolute inset-0 opacity-0 pointer-events-none"
+                                                            value={dateRange.start}
+                                                            onChange={(e) => setDateRange(prev => ({ ...prev, start: e.target.value }))}
+                                                        />
+                                                        <span className="text-[13px] font-bold text-slate-700">
+                                                            {dateRange.start ? format(new Date(dateRange.start), "dd/MM/yyyy") : "Bắt đầu"}
+                                                        </span>
+                                                    </div>
+                                                    <ArrowRight className="w-3.5 h-3.5 text-slate-300" />
+                                                    <div 
+                                                        className="relative cursor-pointer"
+                                                        onClick={() => endDateRef.current?.showPicker()}
+                                                    >
+                                                        <input 
+                                                            ref={endDateRef}
+                                                            type="date" 
+                                                            className="absolute inset-0 opacity-0 pointer-events-none"
+                                                            value={dateRange.end}
+                                                            onChange={(e) => setDateRange(prev => ({ ...prev, end: e.target.value }))}
+                                                        />
+                                                        <span className={`text-[13px] font-bold ${dateRange.end ? 'text-slate-700' : 'text-slate-300'}`}>
+                                                            {dateRange.end ? format(new Date(dateRange.end), "dd/MM/yyyy") : "Kết thúc"}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <div className="relative group">
+                                                    <select 
+                                                        className="absolute inset-0 opacity-0 cursor-pointer z-10 w-full"
+                                                        value={statusFilter}
+                                                        onChange={(e) => setStatusFilter(e.target.value)}
+                                                    >
+                                                        <option value="">Trạng thái</option>
+                                                        <option value="confirmed">Đã xác nhận</option>
+                                                        <option value="completed">Đã hoàn thành</option>
+                                                        <option value="active">Đang sử dụng</option>
+                                                        <option value="cancelled">Đã huỷ</option>
+                                                    </select>
+                                                    <div className="flex items-center justify-between gap-6 px-3 py-2 border border-amber-400 rounded-lg bg-white min-w-[170px] group-hover:bg-slate-50 transition-all shadow-sm">
+                                                        <span className={`text-[13px] font-bold ${statusFilter ? 'text-slate-800' : 'text-slate-300'}`}>
+                                                            {statusFilter === "confirmed" ? "Đã xác nhận" : 
+                                                             statusFilter === "completed" ? "Đã hoàn thành" :
+                                                             statusFilter === "active" ? "Đang sử dụng" : 
+                                                             statusFilter === "cancelled" ? "Đã huỷ" : "Trạng thái"}
+                                                        </span>
+                                                        <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+                                                    </div>
+                                                </div>
+                                                
+                                                <button 
+                                                    onClick={() => setIsFilterOpen(true)}
+                                                    className="flex items-center gap-2 px-4 py-2 border border-slate-300 rounded-lg bg-white text-[13px] font-bold text-slate-600 hover:bg-slate-50 hover:border-slate-400 transition-all shadow-sm"
+                                                >
+                                                    <Filter className="w-3.5 h-3.5" />
+                                                    Bộ lọc
+                                                </button>
+                                            </div>
+                                            <button 
+                                                onClick={handleExportExcel}
+                                                className="p-2 border border-slate-200 rounded-lg bg-white hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm"
+                                            >
+                                                <div className="w-5 h-5 bg-emerald-50 rounded flex items-center justify-center">
+                                                    <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-600" />
+                                                </div>
+                                            </button>
+                                        </div>
+
+                                        <div 
+                                            ref={tableRef}
+                                            onWheel={handleWheel}
+                                            className="overflow-x-auto overflow-y-auto flex-1 custom-tab-scrollbar"
+                                        >
+                                            <table className="w-full text-left border-collapse min-w-[1600px]">
+                                                <thead className="bg-[#f5f5f5] border-b border-slate-200 sticky top-0 z-10">
+                                                    <tr>
+                                                        {visibleColumns.code && <th className="px-5 py-4 text-[13px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">Mã đặt phòng</th>}
+                                                        {visibleColumns.room && <th className="px-5 py-4 text-[13px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">Phòng</th>}
+                                                        {visibleColumns.type && <th className="px-5 py-4 text-[13px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">Loại phòng</th>}
+                                                        {visibleColumns.package && <th className="px-5 py-4 text-[13px] font-bold text-slate-400 uppercase tracking-wider text-center whitespace-nowrap">Gói</th>}
+                                                        {visibleColumns.customer && <th className="px-5 py-4 text-[13px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">Khách hàng đại diện</th>}
+                                                        {visibleColumns.status && <th className="px-5 py-4 text-[13px] font-bold text-slate-400 uppercase tracking-wider text-center whitespace-nowrap">Trạng thái</th>}
+                                                        {visibleColumns.start && <th className="px-5 py-4 text-[13px] font-bold text-slate-400 uppercase tracking-wider text-center whitespace-nowrap">Ngày bắt đầu</th>}
+                                                        {visibleColumns.end && <th className="px-5 py-4 text-[13px] font-bold text-slate-400 uppercase tracking-wider text-center whitespace-nowrap">Ngày kết thúc</th>}
+                                                        {visibleColumns.price && <th className="px-5 py-4 text-[13px] font-bold text-slate-400 uppercase tracking-wider text-right whitespace-nowrap">Tiền phòng</th>}
+                                                        {visibleColumns.deposit && <th className="px-5 py-4 text-[13px] font-bold text-slate-400 uppercase tracking-wider text-center whitespace-nowrap">Tiền cọc</th>}
+                                                        {visibleColumns.payment && <th className="px-5 py-4 text-[13px] font-bold text-slate-400 uppercase tracking-wider text-center whitespace-nowrap">Trạng thái thanh toán</th>}
+                                                        {visibleColumns.checkIn && <th className="px-5 py-4 text-[13px] font-bold text-slate-400 uppercase tracking-wider text-center whitespace-nowrap">Ngày nhận phòng</th>}
+                                                        {visibleColumns.checkOut && <th className="px-5 py-4 text-[13px] font-bold text-slate-400 uppercase tracking-wider text-center whitespace-nowrap">Ngày trả phòng</th>}
+                                                        {visibleColumns.creator && <th className="px-5 py-4 text-[13px] font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">Người tạo</th>}
+                                                        {visibleColumns.createdAt && <th className="px-5 py-4 text-[13px] font-bold text-slate-400 uppercase tracking-wider text-center whitespace-nowrap">Ngày tạo</th>}
+                                                        {visibleColumns.actions && <th className="px-5 py-4 text-center sticky right-0 bg-[#f5f5f5] z-10 shadow-[-2px_0_5px_rgba(0,0,0,0.02)] whitespace-nowrap">
+                                                            <div className="relative">
+                                                                <button 
+                                                                    onClick={() => setIsColumnCustomizerOpen(!isColumnCustomizerOpen)}
+                                                                    className="p-1 hover:bg-slate-200/50 rounded transition-colors"
+                                                                >
+                                                                    <Settings className="w-4 h-4 text-slate-400 mx-auto" />
+                                                                </button>
+
+                                                                <AnimatePresence>
+                                                                    {isColumnCustomizerOpen && (
+                                                                        <>
+                                                                            <div 
+                                                                                className="fixed inset-0 z-20" 
+                                                                                onClick={() => setIsColumnCustomizerOpen(false)} 
+                                                                            />
+                                                                            <motion.div
+                                                                                initial={{ opacity: 0, x: 20, scale: 0.95 }}
+                                                                                animate={{ opacity: 1, x: 0, scale: 1 }}
+                                                                                exit={{ opacity: 0, x: 20, scale: 0.95 }}
+                                                                                className="absolute right-0 mt-2 w-[600px] bg-white rounded-2xl border border-slate-200 shadow-2xl z-30 py-6 overflow-hidden text-left"
+                                                                            >
+                                                                                <div className="px-6 pb-4 border-b border-slate-50 mb-4">
+                                                                                    <h3 className="text-[15px] font-bold text-slate-800">Tuỳ chỉnh hiển thị cột</h3>
+                                                                                </div>
+                                                                                <div className="grid grid-cols-3 gap-x-4 gap-y-1 px-4 max-h-[500px] overflow-y-auto custom-tab-scrollbar">
+                                                                                    {columns.map(col => (
+                                                                                        <label 
+                                                                                            key={col.id}
+                                                                                            className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors group"
+                                                                                        >
+                                                                                            <div className={`w-5 h-5 rounded flex items-center justify-center border-2 transition-all ${
+                                                                                                visibleColumns[col.id] 
+                                                                                                    ? 'bg-emerald-500 border-emerald-500 text-white shadow-lg shadow-emerald-500/20' 
+                                                                                                    : 'bg-white border-slate-200 text-transparent'
+                                                                                            }`}>
+                                                                                                <Check className="w-3.5 h-3.5 stroke-[3.5]" />
+                                                                                            </div>
+                                                                                            <span className={`text-[14px] font-medium transition-colors ${
+                                                                                                visibleColumns[col.id] ? 'text-slate-700' : 'text-slate-400'
+                                                                                            }`}>
+                                                                                                {col.label}
+                                                                                            </span>
+                                                                                            <input 
+                                                                                                type="checkbox"
+                                                                                                className="hidden"
+                                                                                                checked={visibleColumns[col.id]}
+                                                                                                onChange={() => toggleColumn(col.id)}
+                                                                                            />
+                                                                                        </label>
+                                                                                    ))}
+                                                                                </div>
+                                                                            </motion.div>
+                                                                        </>
+                                                                    )}
+                                                                </AnimatePresence>
                                                             </div>
-                                                            <div>
-                                                                <p className="text-[14px] font-bold text-slate-800">{customer.tenant_name}</p>
-                                                                <p className="text-[12px] text-slate-400 font-medium">{customer.tenant_phone}</p>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-5 py-5 text-center">
-                                                        <button className="p-1 px-2 text-slate-400 hover:bg-slate-100 rounded-md transition-all">
-                                                            <MoreHorizontal className="w-4 h-4" />
-                                                        </button>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
+                                                        </th>}
+                                                    </tr>
+                                                </thead>
+                                                <tbody className="divide-y divide-slate-50">
+                                                    {filteredBookings.length > 0 ? (
+                                                        filteredBookings.map((b) => (
+                                                            <tr key={b.id} className="bg-white hover:bg-slate-50/50 transition-colors group">
+                                                                {visibleColumns.code && <td className="px-5 py-5 text-[14px] font-bold text-blue-600 underline decoration-blue-200 underline-offset-4 cursor-pointer">{b.reservation_code}</td>}
+                                                                {visibleColumns.room && <td className="px-5 py-5 text-[14px] font-bold text-slate-700">{b.room?.room_number || "N/A"}</td>}
+                                                                {visibleColumns.type && <td className="px-5 py-5 text-[14px] font-medium text-slate-500">{(b.room as any)?.room_type?.name || "N/A"}</td>}
+                                                                {visibleColumns.package && <td className="px-5 py-5 text-[14px] font-medium text-slate-500 text-center">{b.package_type === 'month' ? "Tháng" : "Ngày"}</td>}
+                                                                {visibleColumns.customer && <td className="px-5 py-5">
+                                                                    <div className="flex items-center gap-3">
+                                                                        <div className="w-9 h-9 rounded-full border border-slate-200 overflow-hidden shrink-0">
+                                                                            <img src={`https://ui-avatars.com/api/?name=${encodeURIComponent(b.customer_name)}&background=random`} className="w-full h-full object-cover" />
+                                                                        </div>
+                                                                        <div>
+                                                                            <p className="text-[14px] font-bold text-slate-800">{b.customer_name}</p>
+                                                                            <p className="text-[12px] text-slate-400 font-medium">{b.customer_phone}</p>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>}
+                                                                {visibleColumns.status && <td className="px-5 py-5 text-center">
+                                                                    <span className={`px-3 py-1 rounded-full text-[12px] font-bold border whitespace-nowrap ${
+                                                                        b.status === "active" ? "bg-orange-50 text-orange-600 border-orange-100/50" :
+                                                                        b.status === "confirmed" ? "bg-blue-50 text-blue-600 border-blue-100/50" :
+                                                                        b.status === "completed" ? "bg-emerald-50 text-emerald-600 border-emerald-100/50" :
+                                                                        "bg-rose-50 text-rose-500 border-rose-100/50"
+                                                                    }`}>
+                                                                        {b.status === "active" ? "Đang sử dụng" : 
+                                                                         b.status === "confirmed" ? "Đã xác nhận" : 
+                                                                         b.status === "completed" ? "Đã hoàn thành" : "Đã huỷ"}
+                                                                    </span>
+                                                                </td>}
+                                                                {visibleColumns.start && <td className="px-5 py-5 text-[14px] font-medium text-slate-600 text-center whitespace-nowrap">{b.check_in_date}</td>}
+                                                                {visibleColumns.end && <td className="px-5 py-5 text-[14px] font-medium text-slate-600 text-center whitespace-nowrap">{b.expected_check_out || "--"}</td>}
+                                                                {visibleColumns.price && <td className="px-5 py-5 text-[14px] font-bold text-slate-800 text-right whitespace-nowrap">₫ {b.rent_amount.toLocaleString()}</td>}
+                                                                {visibleColumns.deposit && <td className="px-5 py-5 text-center">
+                                                                    <div className="flex flex-col items-center whitespace-nowrap">
+                                                                        <span className="text-[14px] font-bold text-slate-800">₫ {b.deposit_amount.toLocaleString()}</span>
+                                                                        <span className="text-[11px] font-medium text-slate-400">/ ₫ {b.deposit_amount.toLocaleString()}</span>
+                                                                    </div>
+                                                                </td>}
+                                                                {visibleColumns.payment && <td className="px-5 py-5 text-center">
+                                                                    <span className={`px-3 py-1 rounded-full text-[12px] font-bold border whitespace-nowrap ${
+                                                                        b.payment_status === "unpaid" ? "bg-rose-50 text-rose-600 border-rose-100/50" :
+                                                                        b.payment_status === "paid" ? "bg-emerald-50 text-emerald-600 border-emerald-100/50" :
+                                                                        "bg-slate-100 text-slate-500 border-slate-200"
+                                                                    }`}>
+                                                                        {b.payment_status === "unpaid" ? "Chưa thanh toán" : 
+                                                                         b.payment_status === "partial" ? "Một phần" : "Đã thanh toán"}
+                                                                    </span>
+                                                                </td>}
+                                                                {visibleColumns.checkIn && <td className="px-5 py-5 text-[14px] font-medium text-slate-600 text-center">{b.check_in_date}</td>}
+                                                                {visibleColumns.checkOut && <td className="px-5 py-5 text-[14px] font-medium text-slate-600 text-center">{b.expected_check_out || "--"}</td>}
+                                                                {visibleColumns.creator && <td className="px-5 py-5">
+                                                                    <div className="flex items-center gap-3">
+                                                                        <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-[12px] font-bold text-slate-500 uppercase">AD</div>
+                                                                        <div>
+                                                                            <p className="text-[13px] font-bold text-slate-700">Admin</p>
+                                                                            <p className="text-[11px] text-slate-400 font-medium">Hệ thống</p>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>}
+                                                                {visibleColumns.createdAt && <td className="px-5 py-5 text-[14px] font-medium text-slate-600 text-center">{format(new Date(b.created_at), "dd/MM/yyyy")}</td>}
+                                                                {visibleColumns.actions && <td className="px-5 py-5 text-center sticky right-0 bg-white shadow-[-2px_0_5px_rgba(0,0,0,0.02)] group-hover:bg-slate-50/50 transition-colors">
+                                                                    <button className="p-1 px-2 text-slate-400 hover:bg-slate-100 rounded-md transition-all">
+                                                                        < MoreHorizontal className="w-4 h-4" />
+                                                                    </button>
+                                                                </td>}
+                                                            </tr>
+                                                        ))
+                                                    ) : (
+                                                        <tr>
+                                                            <td colSpan={16} className="px-5 py-10 text-center text-slate-400 font-medium italic bg-white">
+                                                                Không tìm thấy dữ liệu phù hợp với bộ lọc
+                                                            </td>
+                                                        </tr>
+                                                    )}
+                                                </tbody>
+                                            </table>
+                                        </div>
                                         
                                         {/* Pagination */}
                                         <div className="mt-auto border-t border-slate-50 p-4 flex items-center justify-end gap-6 text-[13px] font-bold text-slate-500 bg-white">
@@ -631,6 +1049,230 @@ export default function CustomerDetailPage() {
                     onCancel={() => setIsIDModalOpen(false)}
                 />
             </Modal>
+
+            {/* Advanced Filter Sidebar */}
+            <AnimatePresence>
+                {isFilterOpen && (
+                    <>
+                        <motion.div 
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setIsFilterOpen(false)}
+                            className="fixed inset-0 bg-slate-900/40 z-[100]"
+                        />
+                        <motion.div
+                            initial={{ x: "100%" }}
+                            animate={{ x: 0 }}
+                            exit={{ x: "100%" }}
+                            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                            className="fixed right-0 top-0 h-full w-[450px] bg-white shadow-2xl z-[101] flex flex-col"
+                        >
+                            <div className="p-6 border-b border-slate-100 flex items-center justify-between shrink-0">
+                                <h2 className="text-[18px] font-bold text-slate-800">Lọc</h2>
+                                <button 
+                                    onClick={() => setIsFilterOpen(false)}
+                                    className="p-2 hover:bg-slate-100 rounded-full transition-colors"
+                                >
+                                    <X className="w-5 h-5 text-slate-400" />
+                                </button>
+                            </div>
+
+                            <div className="flex-1 overflow-y-auto p-6 space-y-8 custom-tab-scrollbar overflow-x-hidden">
+                                {/* Dịch vụ */}
+                                <div className="space-y-4">
+                                    <h3 className="text-[14px] font-bold text-slate-800">Dịch vụ</h3>
+                                    <label className="flex items-center gap-3 cursor-pointer group">
+                                        <div className={`w-5 h-5 rounded border transition-all flex items-center justify-center ${advancedFilters.services.includes('Duplex') ? 'bg-amber-400 border-amber-400 text-white' : 'border-slate-200 bg-white'}`}>
+                                            {advancedFilters.services.includes('Duplex') && <Check className="w-3 h-3 stroke-[3]" />}
+                                        </div>
+                                        <span className="text-[14px] font-medium text-slate-600">Duplex</span>
+                                        <input type="checkbox" className="hidden" onChange={() => {
+                                            const updated = advancedFilters.services.includes('Duplex') 
+                                                ? advancedFilters.services.filter(s => s !== 'Duplex')
+                                                : [...advancedFilters.services, 'Duplex'];
+                                            setAdvancedFilters(prev => ({ ...prev, services: updated }));
+                                        }} />
+                                    </label>
+                                </div>
+
+                                {/* Trạng thái */}
+                                <div className="space-y-4">
+                                    <h3 className="text-[14px] font-bold text-slate-800">Trạng thái</h3>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        {['Đã xác nhận', 'Đã hoàn thành', 'Đang sử dụng', 'Đã huỷ'].map((st) => (
+                                            <label key={st} className="flex items-center gap-3 cursor-pointer group">
+                                                <div className={`w-5 h-5 rounded border transition-all flex items-center justify-center ${advancedFilters.statuses.includes(st) ? 'bg-amber-400 border-amber-400 text-white' : 'border-slate-200 bg-white'}`}>
+                                                    {advancedFilters.statuses.includes(st) && <Check className="w-3 h-3 stroke-[3]" />}
+                                                </div>
+                                                <span className="text-[14px] font-medium text-slate-600">{st}</span>
+                                                <input type="checkbox" className="hidden" checked={advancedFilters.statuses.includes(st)} onChange={() => {
+                                                    const updated = advancedFilters.statuses.includes(st) 
+                                                        ? advancedFilters.statuses.filter(s => s !== st)
+                                                        : [...advancedFilters.statuses, st];
+                                                    setAdvancedFilters(prev => ({ ...prev, statuses: updated }));
+                                                }} />
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Trạng thái thanh toán */}
+                                <div className="space-y-4">
+                                    <h3 className="text-[14px] font-bold text-slate-800">Trạng thái thanh toán</h3>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        {['Đang nợ', 'Một phần', 'Chờ thanh toán', 'Thu tiền kỳ tới'].map((st) => (
+                                            <label key={st} className="flex items-center gap-3 cursor-pointer group">
+                                                <div className={`w-5 h-5 rounded border transition-all flex items-center justify-center ${advancedFilters.paymentStatuses.includes(st) ? 'bg-amber-400 border-amber-400 text-white' : 'border-slate-200 bg-white'}`}>
+                                                    {advancedFilters.paymentStatuses.includes(st) && <Check className="w-3 h-3 stroke-[3]" />}
+                                                </div>
+                                                <span className="text-[14px] font-medium text-slate-600">{st}</span>
+                                                <input type="checkbox" className="hidden" checked={advancedFilters.paymentStatuses.includes(st)} onChange={() => {
+                                                    const updated = advancedFilters.paymentStatuses.includes(st) 
+                                                        ? advancedFilters.paymentStatuses.filter(s => s !== st)
+                                                        : [...advancedFilters.paymentStatuses, st];
+                                                    setAdvancedFilters(prev => ({ ...prev, paymentStatuses: updated }));
+                                                }} />
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Gói */}
+                                <div className="space-y-4">
+                                    <h3 className="text-[14px] font-bold text-slate-800">Gói</h3>
+                                    <div className="grid grid-cols-2 gap-4">
+                                        {['Ngày', 'Tháng'].map((p) => (
+                                            <label key={p} className="flex items-center gap-3 cursor-pointer group">
+                                                <div className={`w-5 h-5 rounded border transition-all flex items-center justify-center ${advancedFilters.packages.includes(p) ? 'bg-amber-400 border-amber-400 text-white' : 'border-slate-200 bg-white'}`}>
+                                                    {advancedFilters.packages.includes(p) && <Check className="w-3 h-3 stroke-[3]" />}
+                                                </div>
+                                                <span className="text-[14px] font-medium text-slate-600">{p}</span>
+                                                <input type="checkbox" className="hidden" checked={advancedFilters.packages.includes(p)} onChange={() => {
+                                                    const updated = advancedFilters.packages.includes(p) 
+                                                        ? advancedFilters.packages.filter(s => s !== p)
+                                                        : [...advancedFilters.packages, p];
+                                                    setAdvancedFilters(prev => ({ ...prev, packages: updated }));
+                                                }} />
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Khoảng ngày lưu trú */}
+                                <div className="space-y-4">
+                                    <h3 className="text-[14px] font-bold text-slate-800">Thời gian lưu trú</h3>
+                                    <div className="flex items-center gap-3 p-3 border border-slate-200 rounded-xl bg-slate-50/50">
+                                        <input 
+                                            type="date" 
+                                            placeholder="Từ ngày"
+                                            className="w-full bg-transparent text-[13px] focus:outline-none" 
+                                            value={advancedFilters.stayRange.start}
+                                            onChange={(e) => setAdvancedFilters(prev => ({ ...prev, stayRange: { ...prev.stayRange, start: e.target.value } }))}
+                                         />
+                                        <ArrowRight className="w-4 h-4 text-slate-300" />
+                                        <input 
+                                            type="date" 
+                                            placeholder="Đến ngày"
+                                            className="w-full bg-transparent text-[13px] text-right focus:outline-none" 
+                                            value={advancedFilters.stayRange.end}
+                                            onChange={(e) => setAdvancedFilters(prev => ({ ...prev, stayRange: { ...prev.stayRange, end: e.target.value } }))}
+                                         />
+                                        <Calendar className="w-4 h-4 text-slate-400" />
+                                    </div>
+                                </div>
+
+                                {/* Ngày tạo */}
+                                <div className="space-y-4">
+                                    <h3 className="text-[14px] font-bold text-slate-800">Ngày tạo</h3>
+                                    <div className="flex items-center gap-3 p-3 border border-slate-200 rounded-xl bg-slate-50/50">
+                                        <input 
+                                            type="date" 
+                                            placeholder="Từ ngày"
+                                            className="w-full bg-transparent text-[13px] focus:outline-none" 
+                                            value={advancedFilters.createRange.start}
+                                            onChange={(e) => setAdvancedFilters(prev => ({ ...prev, createRange: { ...prev.createRange, start: e.target.value } }))}
+                                         />
+                                        <ArrowRight className="w-4 h-4 text-slate-300" />
+                                        <input 
+                                            type="date" 
+                                            placeholder="Đến ngày"
+                                            className="w-full bg-transparent text-[13px] text-right focus:outline-none" 
+                                            value={advancedFilters.createRange.end}
+                                            onChange={(e) => setAdvancedFilters(prev => ({ ...prev, createRange: { ...prev.createRange, end: e.target.value } }))}
+                                         />
+                                        <Calendar className="w-4 h-4 text-slate-400" />
+                                    </div>
+                                </div>
+
+                                {/* Người tạo */}
+                                <div className="space-y-4">
+                                    <h3 className="text-[14px] font-bold text-slate-800">Người tạo</h3>
+                                    <div className="relative">
+                                        <select 
+                                            value={advancedFilters.creator}
+                                            onChange={(e) => setAdvancedFilters(prev => ({ ...prev, creator: e.target.value }))}
+                                            className="w-full p-3 border border-slate-200 rounded-xl appearance-none bg-white text-[14px] focus:outline-none focus:ring-2 focus:ring-amber-400/20"
+                                        >
+                                            <option value="">Chọn người tạo</option>
+                                            <option value="tm">Tra My</option>
+                                        </select>
+                                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                                    </div>
+                                </div>
+
+                                {/* Thuế Toggle */}
+                                <div className="flex items-center justify-between">
+                                    <h3 className="text-[14px] font-bold text-slate-800">Chỉ hiển thị đặt phòng áp dụng thuế</h3>
+                                    <button 
+                                        onClick={() => setAdvancedFilters(prev => ({ ...prev, taxOnly: !prev.taxOnly }))}
+                                        className={`w-12 h-6 rounded-full transition-all relative ${advancedFilters.taxOnly ? 'bg-amber-400' : 'bg-slate-200'}`}
+                                    >
+                                        <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${advancedFilters.taxOnly ? 'left-7' : 'left-1'}`} />
+                                    </button>
+                                </div>
+
+                                {/* Tiền phòng Slider */}
+                                <div className="space-y-6">
+                                    <h3 className="text-[14px] font-bold text-slate-800">Tiền phòng</h3>
+                                    <div className="px-2">
+                                        <div className="h-1.5 bg-slate-100 rounded-full relative">
+                                            <div className="absolute left-0 right-0 h-full bg-amber-400 rounded-full" />
+                                            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-5 h-5 bg-white border-2 border-slate-800 rounded-full shadow-sm cursor-pointer" />
+                                            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-5 h-5 bg-white border-2 border-slate-800 rounded-full shadow-sm cursor-pointer" />
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center justify-between text-[13px] font-bold">
+                                        <span className="text-slate-400">₫ 0</span>
+                                        <span className="text-slate-800">₫ 10,000,000</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="p-6 border-t border-slate-100 flex items-center justify-end gap-4 shrink-0 bg-slate-50/50">
+                                <button 
+                                    onClick={() => {
+                                        setAdvancedFilters({
+                                            services: [], statuses: [], paymentStatuses: [], packages: [],
+                                            stayRange: { start: "", end: "" }, createRange: { start: "", end: "" },
+                                            creator: "", taxOnly: false, priceRange: [0, 10000000]
+                                        });
+                                    }}
+                                    className="text-[14px] font-bold text-slate-800 hover:underline"
+                                >
+                                    Đặt lại
+                                </button>
+                                <button 
+                                    onClick={() => setIsFilterOpen(false)}
+                                    className="px-8 py-3 bg-amber-400 hover:bg-amber-500 text-slate-900 rounded-xl text-[14px] font-bold shadow-lg shadow-amber-400/20 transition-all"
+                                >
+                                    Áp dụng
+                                </button>
+                            </div>
+                        </motion.div>
+                    </>
+                )}
+            </AnimatePresence>
 
             {/* Footer Copy */}
             <div className="h-10 flex items-center justify-center border-t border-slate-50 italic text-[10px] font-black tracking-widest text-slate-300 select-none mt-auto">
