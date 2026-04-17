@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronRight, Calendar, Edit2, Plus, Trash2, Eye, MoreVertical, Check, MinusSquare, Loader2 } from "lucide-react";
+import { ChevronRight, Calendar, Edit2, Plus, Trash2, Eye, MoreVertical, MinusSquare, Loader2 } from "lucide-react";
 import { useBuilding } from "../contexts/BuildingContext";
 import { api } from "../lib/api";
 
@@ -11,7 +11,7 @@ export default function BatchInvoicesPage() {
 	const selectedBuilding = buildings.find(b => b.id === selectedBuildingId);
 	
 	const [period, setPeriod] = useState<string>("");
-	const [tempPeriod, setTempPeriod] = useState("04/2026");
+	const [tempPeriod, _setTempPeriod] = useState("04/2026");
 	const [isPeriodModalOpen, setIsPeriodModalOpen] = useState(true);
 
 	const [batchData, setBatchData] = useState<any[]>([]);
@@ -19,20 +19,15 @@ export default function BatchInvoicesPage() {
 	const [loading, setLoading] = useState(false);
 	const [saving, setSaving] = useState(false);
 
-	const [debugText, setDebugText] = useState("");
-
 	const fetchBatchPrepare = async (p: string) => {
 		if (!selectedBuilding) {
-			setDebugText("Wait! selectedBuilding is NULL in fetchBatchPrepare");
 			return;
 		}
 		setLoading(true);
-		setDebugText(`Fetching... building: ${selectedBuilding.id}, period: ${p}`);
 		try {
 			console.log("Bat dau fetch", p, selectedBuilding.id);
 			const res = await api.get<{ batchData: any[] }>(`/api/invoices/batch-prepare?building_id=${selectedBuilding.id}&period=${p}`);
 			
-			setDebugText(`Fetch done! Error: ${res.error || 'No'}. Data len: ${res.data?.batchData?.length || 0}`);
 			if (res.error) {
 				throw new Error(res.error);
 			}
@@ -45,7 +40,6 @@ export default function BatchInvoicesPage() {
 			(data?.batchData || []).forEach((r: any) => expanded[r.id] = true);
 			setExpandedRows(expanded);
 		} catch (error: any) {
-			setDebugText(`Fetch crashed! ${error.message}`);
 			console.error("Lỗi lấy dữ liệu:", error);
 			alert("API Error: " + (error?.error || error?.message || JSON.stringify(error)));
 		} finally {
@@ -136,7 +130,6 @@ export default function BatchInvoicesPage() {
 			</div>
 
 			<div className="bg-white px-6 py-5 shrink-0 flex flex-col gap-5 border-b border-slate-200">
-				{/* Title */}
 				{/* Title */}
 				<div className="flex items-center">
 					<h1 className="text-2xl font-bold text-[#1a1a1a]">
@@ -270,7 +263,7 @@ export default function BatchInvoicesPage() {
 																</tr>
 															</thead>
 															<tbody className="divide-y divide-slate-100 text-[13px] font-bold text-slate-600">
-																{room.services.map(svc => (
+																{room.services.map((svc: any) => (
 																	<tr key={svc.id} className="hover:bg-slate-50">
 																		<td className="px-4 py-3.5"><div className="flex items-center gap-2">{svc.name}</div></td>
 																		<td className="px-4 py-3.5 text-center">

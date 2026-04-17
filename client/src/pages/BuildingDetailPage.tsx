@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { ChevronLeft, Building2, MapPin, Search, Plus, ExternalLink, Box, Zap, Edit2, X, Image as ImageIcon, ChevronDown, CheckCircle2 } from "lucide-react";
 import { api } from "../lib/api";
 import Modal from "../components/modals/Modal";
@@ -85,7 +85,7 @@ export default function BuildingDetailPage() {
 	const [isServiceModalOpen, setIsServiceModalOpen] = useState(false);
 	const [serviceType, setServiceType] = useState<"fixed" | "metered">("fixed");
 	const [editingServiceIndex, setEditingServiceIndex] = useState<number | null>(null);
-	const [serviceData, setServiceData] = useState<Service>({ name: '', price: 0, unit: 'Tháng' });
+	const [serviceData, setServiceData] = useState<Service>({ id: '', name: '', price: 0, unit: 'Tháng' });
 	const [servicePriceInput, setServicePriceInput] = useState<string>('');
 
 	const [banks, setBanks] = useState<BankAccount[]>([]);
@@ -167,7 +167,7 @@ export default function BuildingDetailPage() {
 	const openAddServiceModal = (type: "fixed" | "metered") => {
 		setServiceType(type);
 		setEditingServiceIndex(null);
-		setServiceData({ name: '', price: 0, unit: type === 'fixed' ? 'Tháng' : 'Kw' });
+		setServiceData({ id: '', name: '', price: 0, unit: type === 'fixed' ? 'Tháng' : 'Kw' });
 		setServicePriceInput('');
 		setIsServiceModalOpen(true);
 	};
@@ -263,7 +263,7 @@ export default function BuildingDetailPage() {
 
 	const uniqueFloors = Array.from(new Set(building.rooms?.map(r => r.floor_name || "Trệt")));
 	const roomsData = building.rooms || [];
-	const availableRooms = roomsData.filter(r => r.status === 'available').length;
+	// const availableRooms = roomsData.filter(r => r.status === 'available').length;
 
 	return (
 		<div className="flex-1 overflow-auto bg-slate-50 relative pb-20">

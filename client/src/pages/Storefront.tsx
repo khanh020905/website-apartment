@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { api } from "../lib/api";
 import type { Listing } from "../../../shared/types";
@@ -166,7 +166,7 @@ export default function Storefront() {
 					{loading ? (
 						[1, 2, 3, 4, 5].map(i => <div key={i} className="aspect-[3/4] bg-slate-100 rounded-2xl animate-pulse" />)
 					) : (
-						listings.map((l, i) => (
+						listings.map((l, _i) => (
 							<BrokerPropertyCard key={l.id} listing={l} brokerPhone={brokerPhone} />
 						))
 					)}
@@ -215,7 +215,7 @@ export default function Storefront() {
 }
 
 // A customized property card just for the public storefront to force Call/Zalo buttons
-function BrokerPropertyCard({ listing, brokerPhone }: { listing: Listing, brokerPhone: string }) {
+function BrokerPropertyCard({ listing, brokerPhone: _brokerPhone }: { listing: Listing, brokerPhone: string }) {
 	const imageUrl = listing.images?.[0]?.url || "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=300&h=200&fit=crop";
 	const displayAddress = [listing.ward, listing.district, listing.city].filter(Boolean).join(", ");
 

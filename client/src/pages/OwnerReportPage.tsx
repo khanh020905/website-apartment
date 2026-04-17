@@ -34,10 +34,10 @@ const OwnerReportPage = () => {
 	}, []);
 
 	// Calculate totals
-	const totals = MOCK_ROWS.reduce((acc, row) => {
+	/* const totals = MOCK_ROWS.reduce((acc, row) => {
 		acc.deposit += row.deposit;
 		return acc;
-	}, { roomFee: 0, oldDebt: 0, elecFee: 0, waterFee: 0, tdf: 0, deposit: 0 });
+	}, { roomFee: 0, oldDebt: 0, elecFee: 0, waterFee: 0, tdf: 0, deposit: 0 }); */
 
 	return (
 		<div className="flex-1 flex flex-col h-full bg-[#f4f5f7] relative overflow-hidden font-sans">

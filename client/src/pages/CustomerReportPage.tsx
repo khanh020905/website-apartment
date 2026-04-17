@@ -108,7 +108,7 @@ const CustomerReportPage = () => {
 									<CartesianGrid vertical={false} stroke="#f1f5f9" />
 									<XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: "#94a3b8", fontSize: 11 }} dy={10} interval={0} />
 									<YAxis hide domain={[0, 'dataMax + 10000000']} />
-									<Tooltip cursor={{fill: 'transparent'}} contentStyle={{ borderRadius: "8px", border: "1px solid #e2e8f0" }} formatter={(value: number) => [`${(value/1000000).toFixed(1)}Tr`, "Số tiền"]} />
+									<Tooltip cursor={{fill: 'transparent'}} contentStyle={{ borderRadius: "8px", border: "1px solid #e2e8f0" }} formatter={(value: any) => [`${(value/1000000).toFixed(1)}Tr`, "Số tiền"]} />
 									<Bar dataKey="amount" fill="#d97706" barSize={16} radius={[2, 2, 0, 0]} />
 								</BarChart>
 							</ResponsiveContainer>

@@ -168,7 +168,7 @@ const OccupancyReportPage = () => {
 								<YAxis axisLine={false} tickLine={false} tick={{ fill: "#94a3b8", fontSize: 12 }} tickFormatter={(val) => `${val}%`} domain={[0, 100]} ticks={[0, 25, 50, 75, 100]} />
 								<Tooltip 
 									contentStyle={{ borderRadius: "8px", border: "1px solid #e2e8f0", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }}
-									formatter={(value: number) => [`${value}%`, "Tỷ lệ"]}
+									formatter={(value: any) => [`${value}%`, "Tỷ lệ"]}
 								/>
 								<Line type="linear" dataKey="value" stroke="#fbbf24" strokeWidth={2} dot={{ r: 3, fill: "#fbbf24", strokeWidth: 0 }} activeDot={{ r: 5 }} />
 							</LineChart>
@@ -206,10 +206,10 @@ const OccupancyReportPage = () => {
 								<Tooltip 
 									cursor={{fill: 'transparent'}}
 									contentStyle={{ borderRadius: "8px", border: "1px solid #e2e8f0", boxShadow: "0 4px 6px -1px rgb(0 0 0 / 0.1)" }}
-									formatter={(value: number) => [`${value}%`, "Tỷ lệ"]}
+									formatter={(value: any) => [`${value}%`, "Tỷ lệ"]}
 								/>
 								<Bar dataKey="value" radius={[2, 2, 0, 0]} barSize={24}>
-									{MOCK_BUILDING_CHART.map((entry, index) => (
+									{MOCK_BUILDING_CHART.map((_, index) => (
 										<Cell key={`cell-${index}`} fill="#66a1ff" />
 									))}
 								</Bar>

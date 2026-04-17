@@ -35,6 +35,8 @@ interface ListingForm {
 	guest_note: string;
 	is_discounted: boolean;
 	is_newly_built: boolean;
+	commission_rate?: string;
+	
 }
 
 const RENTAL_TYPES: Array<{ key: PropertyType; label: string }> = [
@@ -223,7 +225,7 @@ export default function CreateListingPage() {
 				guest_note: listing.guest_note || "",
 				is_discounted: Boolean(listing.is_discounted),
 				is_newly_built: Boolean(listing.is_newly_built),
-				commission_rate: listing.commission_rate != null ? String(listing.commission_rate) : "",
+				commission_rate: (listing as any).commission_rate != null ? String((listing as any).commission_rate) : "",
 			}));
 
 			setImageUploads(
@@ -667,7 +669,7 @@ export default function CreateListingPage() {
 														contact_name: l.contact_name || prev.contact_name,
 														contact_phone: l.contact_phone || prev.contact_phone,
 														property_type: l.property_type || prev.property_type,
-														furniture: l.furniture || prev.furniture,
+														
 														amenity_ids: l.amenity_ids || prev.amenity_ids,
 														max_people: l.max_people ?? prev.max_people,
 														max_vehicles: l.max_vehicles ?? prev.max_vehicles,
@@ -677,7 +679,7 @@ export default function CreateListingPage() {
 														guest_note: l.guest_note ?? prev.guest_note,
 														is_discounted: Boolean(l.is_discounted),
 														is_newly_built: Boolean(l.is_newly_built),
-														commission_rate: l.commission_rate != null ? String(l.commission_rate) : prev.commission_rate,
+														commission_rate: (l as any).commission_rate != null ? String((l as any).commission_rate) : prev.commission_rate,
 														room_features: l.room_features?.filter((v:string) => ROOM_FEATURES.includes(v)) || prev.room_features,
 														custom_amenities: l.room_features?.filter((v:string) => !ROOM_FEATURES.includes(v)) || prev.custom_amenities,
 														interior_features: l.interior_features || prev.interior_features,

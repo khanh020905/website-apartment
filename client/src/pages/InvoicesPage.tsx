@@ -31,6 +31,7 @@ import { useNavigate } from "react-router-dom";
 interface Invoice {
 	id: string;
 	invoice_code: string;
+	billing_month?: string;
 	room?: { id: string; room_number: string };
 	building: { name: string };
 	status: "paid" | "pending" | "overdue" | "cancelled" | "draft" | "partial";

@@ -151,13 +151,13 @@ export default function IncidentsPage() {
 			"Tạo bởi": "Quản trị viên"
 		}));
 
-		const worksheet = XLSX.utils.json_to_sheet(excelData, { origin: "A4" });
+		const worksheet = XLSX.utils.json_to_sheet(excelData, { origin: "A4" } as any);
 		
 		// Add title and metadata
 		XLSX.utils.sheet_add_aoa(worksheet, [
 			["Danh sách sự cố"],
 			[`Thời gian báo cáo: ${new Date().toLocaleDateString('vi-VN')}`]
-		], { origin: "A1" });
+		], { origin: "A1" } as any);
 
 		// Manual Merge (roughly for 15 columns)
 		worksheet['!merges'] = [

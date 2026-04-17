@@ -148,12 +148,12 @@ export default function ContractsPage() {
 			"Trạng thái": STATUS_MAP[c.status].label,
 		}));
 
-		const worksheet = XLSX.utils.json_to_sheet(excelData, { origin: "A4" });
+		const worksheet = XLSX.utils.json_to_sheet(excelData, { origin: "A4" } as any);
 		
 		XLSX.utils.sheet_add_aoa(worksheet, [
 			["Danh sách Hợp đồng"],
 			[`Thời gian xuất: ${new Date().toLocaleDateString('vi-VN')}`]
-		], { origin: "A1" });
+		], { origin: "A1" } as any);
 
 		worksheet['!merges'] = [
 			{ s: { r: 0, c: 0 }, e: { r: 0, c: 7 } },

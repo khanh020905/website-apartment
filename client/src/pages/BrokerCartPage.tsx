@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Save, Plus, Store, Link as LinkIcon, Share2, MapPin, EyeOff, Users, Loader2 } from "lucide-react";
+import { ArrowLeft, Save, Plus, Store, Link as LinkIcon, Share2, Users, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -42,7 +42,7 @@ export default function BrokerCartPage() {
 	};
 
 	const toggleSetting = (key: keyof typeof settings) => {
-		setSettings(prev => ({ ...prev, [key]: !prev[key as any] }));
+		setSettings(prev => ({ ...prev, [key]: !(prev as any)[key] }));
 	};
 
 	const toggleLandlord = (id: string) => {

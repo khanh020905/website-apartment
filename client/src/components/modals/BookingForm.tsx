@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { User, UserPlus, Phone, Calendar, Wallet, FileText, Building2, Upload, Plus, CalendarDays } from "lucide-react";
+import { User, Plus, CalendarDays } from "lucide-react";
 
 interface BookingFormProps {
   roomNumber: string;
