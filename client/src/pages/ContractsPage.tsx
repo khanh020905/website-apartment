@@ -21,6 +21,19 @@ import {
 import Modal from "../components/modals/Modal";
 import ContractForm from "../components/modals/ContractForm";
 import { api } from "../lib/api";
+import * as XLSX from 'xlsx';
+
+const ALL_COLUMNS = [
+  { id: 'contract_number', label: 'Mã hợp đồng' },
+  { id: 'contract_name', label: 'Tên hợp đồng' },
+  { id: 'room_number', label: 'Phòng' },
+  { id: 'tenant_name', label: 'Khách ở' },
+  { id: 'start_date', label: 'Ngày bắt đầu' },
+  { id: 'end_date', label: 'Ngày kết thúc' },
+  { id: 'attachments', label: 'Phụ lục/biên bản đính kèm' },
+  { id: 'booking_code', label: 'Mã đặt phòng' },
+  { id: 'actions', label: 'Thao tác' }
+];
 
 interface Contract {
 	id: string;
@@ -32,6 +45,7 @@ interface Contract {
 	end_date: string;
 	status: "active" | "expired" | "terminated" | "pending";
 	booking_code: string;
+	attachments: string[];
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -51,6 +65,11 @@ export default function ContractsPage() {
 	const [search, setSearch] = useState("");
 	const [filterStatus, setFilterStatus] = useState("");
 
+	const [visibleColumns, setVisibleColumns] = useState<string[]>([
+		'contract_number', 'contract_name', 'room_number', 'tenant_name', 'start_date', 'end_date', 'attachments', 'booking_code', 'actions'
+	]);
+	const [isColumnConfigOpen, setIsColumnConfigOpen] = useState(false);
+
 	const fetchContracts = async () => {
 		setLoading(true);
 		const [{ data: contractData }, { data: customerData }] = await Promise.all([
@@ -68,7 +87,8 @@ export default function ContractsPage() {
 				start_date: new Date(c.start_date).toLocaleDateString("vi-VN"),
 				end_date: c.end_date ? new Date(c.end_date).toLocaleDateString("vi-VN") : "Bền vững",
 				status: c.status,
-				booking_code: c.booking_code || "---"
+				booking_code: c.booking_code || "---",
+				attachments: c.attachments || []
 			}));
 			setContracts(formatted);
 		}
@@ -99,7 +119,11 @@ export default function ContractsPage() {
 			end_date: formData.endDate,
 			rent_amount: formData.rent_amount || 0,
 			deposit_amount: formData.deposit_amount || 0,
-			notes: formData.notes
+			notes: formData.notes,
+			contract_number: formData.contractNumber,
+			contract_name: formData.contractName,
+			booking_code: formData.bookingCode || null,
+			attachments: formData.attachments || []
 		});
 
 		if (error) {
@@ -110,6 +134,41 @@ export default function ContractsPage() {
 
 		setIsModalOpen(false);
 		fetchContracts();
+	};
+
+	const handleExportExcel = () => {
+		const excelData = contracts.map((c, index) => ({
+			"STT": index + 1,
+			"Mã hợp đồng": c.contract_number,
+			"Tên hợp đồng": c.contract_name,
+			"Phòng": c.room_number,
+			"Khách ở": c.tenant_name,
+			"Ngày bắt đầu": c.start_date,
+			"Ngày kết thúc": c.end_date,
+			"Trạng thái": STATUS_MAP[c.status].label,
+		}));
+
+		const worksheet = XLSX.utils.json_to_sheet(excelData, { origin: "A4" });
+		
+		XLSX.utils.sheet_add_aoa(worksheet, [
+			["Danh sách Hợp đồng"],
+			[`Thời gian xuất: ${new Date().toLocaleDateString('vi-VN')}`]
+		], { origin: "A1" });
+
+		worksheet['!merges'] = [
+			{ s: { r: 0, c: 0 }, e: { r: 0, c: 7 } },
+			{ s: { r: 1, c: 0 }, e: { r: 1, c: 7 } }
+		];
+
+		const workbook = XLSX.utils.book_new();
+		XLSX.utils.book_append_sheet(workbook, worksheet, "Contracts");
+
+		worksheet['!cols'] = [
+			{ wch: 6 }, { wch: 20 }, { wch: 30 }, { wch: 15 },
+			{ wch: 25 }, { wch: 15 }, { wch: 15 }, { wch: 20 }
+		];
+
+		XLSX.writeFile(workbook, `Danh_sach_hop_dong_${new Date().getTime()}.xlsx`);
 	};
 
 	const STATS = [
@@ -193,7 +252,10 @@ export default function ContractsPage() {
 					</button>
 
 					<div className="flex items-center gap-2 ml-auto">
-						<button className="flex items-center gap-1.5 px-4 py-2 bg-white border border-slate-200 text-emerald-600 rounded-lg text-[13px] font-bold transition-colors hover:bg-emerald-50 shadow-sm cursor-pointer">
+						<button 
+							onClick={handleExportExcel}
+							className="flex items-center gap-1.5 px-4 py-2 bg-white border border-slate-200 text-emerald-600 rounded-lg text-[13px] font-bold transition-colors hover:bg-emerald-50 shadow-sm cursor-pointer"
+						>
 							<Download className="w-4 h-4" /> Xuất Excel
 						</button>
 						<button
@@ -234,24 +296,66 @@ export default function ContractsPage() {
 						<table className="w-full h-full text-left">
 							<thead className="bg-[#f8f9fa] border-b border-slate-200 sticky top-0 z-10">
 								<tr>
-									{[
-										"Mã hợp đồng",
-										"Tên hợp đồng",
-										"Phòng",
-										"Khách ở",
-										"Thời hạn",
-										"Trạng thái",
-									].map((h, i) => (
+									{ALL_COLUMNS.filter(col => visibleColumns.includes(col.id)).map((col) => (
 										<th
-											key={i}
-											className="px-5 py-3.5 text-[12px] font-bold text-slate-600 tracking-wide whitespace-nowrap"
+											key={col.id}
+											className={`px-5 py-3.5 text-[12px] font-bold text-slate-600 tracking-wide whitespace-nowrap ${col.id === 'actions' ? 'w-10 text-center' : ''}`}
 										>
-											{h} <span className="inline-block ml-1 opacity-50">↕</span>
+											{col.id === 'actions' ? (
+												<div className="relative inline-block">
+													<button 
+														onClick={() => setIsColumnConfigOpen(!isColumnConfigOpen)}
+														className="p-1 hover:bg-slate-200 rounded transition-colors cursor-pointer"
+													>
+														<Settings className="w-4 h-4 text-slate-400" />
+													</button>
+													
+													<AnimatePresence>
+														{isColumnConfigOpen && (
+															<>
+																<div className="fixed inset-0 z-[60]" onClick={() => setIsColumnConfigOpen(false)} />
+																<motion.div
+																	initial={{ opacity: 0, y: 10, scale: 0.95 }}
+																	animate={{ opacity: 1, y: 0, scale: 1 }}
+																	exit={{ opacity: 0, y: 10, scale: 0.95 }}
+																	className="absolute right-0 mt-2 w-64 bg-white border border-slate-200 rounded-xl shadow-2xl z-[70] p-4 text-left font-sans"
+																>
+																	<h3 className="text-[15px] font-bold text-slate-800 mb-4">Tuỳ chỉnh cột</h3>
+																	<div className="space-y-3 max-h-80 overflow-y-auto pr-2 custom-scrollbar">
+																		{ALL_COLUMNS.map(column => (
+																			<label key={column.id} className="flex items-center gap-3 cursor-pointer group">
+																				<input 
+																					type="checkbox" 
+																					disabled={column.id === 'contract_number' || column.id === 'actions'}
+																					checked={visibleColumns.includes(column.id)}
+																					onChange={() => {
+																						setVisibleColumns(prev => 
+																							prev.includes(column.id) 
+																								? prev.filter(id => id !== column.id)
+																								: [...prev, column.id]
+																						);
+																					}}
+																					className="w-4.5 h-4.5 rounded border-slate-300 text-brand-primary focus:ring-brand-primary cursor-pointer disabled:opacity-30" 
+																				/>
+																				<span className={`text-[14px] font-medium transition-colors ${visibleColumns.includes(column.id) ? 'text-slate-900' : 'text-slate-400'} group-hover:text-slate-900`}>
+																					{column.label}
+																				</span>
+																			</label>
+																		))}
+																	</div>
+																</motion.div>
+															</>
+														)}
+													</AnimatePresence>
+												</div>
+											) : (
+												<div className="flex items-center gap-1">
+													{col.label}
+													<span className="inline-block opacity-50 text-[10px]">↕</span>
+												</div>
+											)}
 										</th>
 									))}
-									<th className="px-5 py-3.5 w-10 text-center">
-										<Settings className="w-4 h-4 text-slate-400 inline-block" />
-									</th>
 								</tr>
 							</thead>
 							<tbody className="divide-y divide-slate-100">
@@ -272,53 +376,70 @@ export default function ContractsPage() {
 											key={c.id}
 											className="hover:bg-brand-bg/20 transition-colors group"
 										>
-											<td className="px-5 py-4 whitespace-nowrap">
-												<span className="text-[13px] font-bold text-blue-600 uppercase">
-													{c.contract_number}
-												</span>
-											</td>
-											<td className="px-5 py-4">
-												<div className="flex items-center gap-2">
-													<FileText className="w-4 h-4 text-slate-400" />
-													<span className="text-[13px] font-bold text-slate-900 truncate max-w-50">
-														{c.contract_name}
+											{visibleColumns.includes('contract_number') && (
+												<td className="px-5 py-4 whitespace-nowrap">
+													<span className="text-[13px] font-bold text-blue-600 uppercase">
+														{c.contract_number}
 													</span>
-												</div>
-											</td>
-											<td className="px-5 py-4 whitespace-nowrap">
-												<div className="flex items-center gap-2 text-[13px] font-bold text-slate-700">
-													<Home className="w-4 h-4 text-slate-400" />
-													{c.room_number}
-												</div>
-											</td>
-											<td className="px-5 py-4 whitespace-nowrap">
-												<div className="flex items-center gap-2 text-[13px] font-medium text-slate-600">
-													<User className="w-4 h-4 text-slate-400" />
-													{c.tenant_name}
-												</div>
-											</td>
-											<td className="px-5 py-4 whitespace-nowrap">
-												<div className="flex flex-col text-[11px] font-bold text-slate-500 space-y-1">
+												</td>
+											)}
+											{visibleColumns.includes('contract_name') && (
+												<td className="px-5 py-4">
+													<div className="flex items-center gap-2">
+														<FileText className="w-4 h-4 text-slate-400" />
+														<span className="text-[13px] font-bold text-slate-900 truncate max-w-50">
+															{c.contract_name}
+														</span>
+													</div>
+												</td>
+											)}
+											{visibleColumns.includes('room_number') && (
+												<td className="px-5 py-4 whitespace-nowrap">
+													<div className="flex items-center gap-2 text-[13px] font-bold text-slate-700">
+														<Home className="w-4 h-4 text-slate-400" />
+														{c.room_number}
+													</div>
+												</td>
+											)}
+											{visibleColumns.includes('tenant_name') && (
+												<td className="px-5 py-4 whitespace-nowrap">
+													<div className="flex items-center gap-2 text-[13px] font-medium text-slate-600">
+														<User className="w-4 h-4 text-slate-400" />
+														{c.tenant_name}
+													</div>
+												</td>
+											)}
+											{visibleColumns.includes('start_date') && (
+												<td className="px-5 py-4 whitespace-nowrap text-[13px] font-medium text-slate-600">
 													<span className="flex items-center gap-1">
-														<Calendar className="w-3 h-3" /> Bắt đầu: {c.start_date}
+														<Calendar className="w-3.5 h-3.5 text-slate-400" /> {c.start_date}
 													</span>
+												</td>
+											)}
+											{visibleColumns.includes('end_date') && (
+												<td className="px-5 py-4 whitespace-nowrap text-[13px] font-medium text-slate-600">
 													<span className="flex items-center gap-1">
-														<Calendar className="w-3 h-3 text-slate-300" /> Kết thúc: {c.end_date}
+														<Calendar className="w-3.5 h-3.5 text-slate-400" /> {c.end_date}
 													</span>
-												</div>
-											</td>
-											<td className="px-5 py-4 whitespace-nowrap">
-												<span
-													className={`px-2 py-0.5 rounded-md text-[11px] font-bold uppercase tracking-wider border ${STATUS_MAP[c.status].color.replace("bg-", "bg-opacity-20 border-").replace("text-", "text-")}`}
-												>
-													{STATUS_MAP[c.status].label}
-												</span>
-											</td>
-											<td className="px-5 py-4 text-right">
-												<button className="opacity-0 group-hover:opacity-100 p-1 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-brand-dark transition-all">
-													<MoreHorizontal className="w-4 h-4" />
-												</button>
-											</td>
+												</td>
+											)}
+											{visibleColumns.includes('attachments') && (
+												<td className="px-5 py-4 whitespace-nowrap text-[13px] font-medium text-slate-600">
+													{c.attachments.length > 0 ? `${c.attachments.length} tệp` : '-'}
+												</td>
+											)}
+											{visibleColumns.includes('booking_code') && (
+												<td className="px-5 py-4 whitespace-nowrap text-[13px] font-medium text-brand-primary">
+													{c.booking_code}
+												</td>
+											)}
+											{visibleColumns.includes('actions') && (
+												<td className="px-5 py-4 text-right">
+													<button className="opacity-0 group-hover:opacity-100 p-1 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-brand-dark transition-all">
+														<MoreHorizontal className="w-4 h-4" />
+													</button>
+												</td>
+											)}
 										</tr>
 									))
 								}

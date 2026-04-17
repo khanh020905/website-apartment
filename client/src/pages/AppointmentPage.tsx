@@ -5,6 +5,7 @@ import { api } from "../lib/api";
 import { useBuilding } from "../contexts/BuildingContext";
 import Modal from "../components/modals/Modal";
 import AppointmentForm, { type AppointmentFormData } from "../components/modals/AppointmentForm";
+import type { BuildingWithRooms } from "../../../shared/types";
 
 interface Tour {
   id: string;
@@ -34,6 +35,15 @@ export default function AppointmentPage() {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
 
+  const [buildings, setBuildings] = useState<BuildingWithRooms[]>([]);
+  const [roomFilterSearch, setRoomFilterSearch] = useState("");
+  const [selectedRooms, setSelectedRooms] = useState<string[]>([]);
+  const [status, setStatus] = useState<string[]>([]);
+
+  const allRooms = buildings.flatMap((b) => 
+    (b.rooms || []).map(r => ({ ...r, building_name: b.name }))
+  );
+
   const fetchTours = useCallback(async () => {
     setLoading(true);
     const params = new URLSearchParams({
@@ -42,6 +52,8 @@ export default function AppointmentPage() {
     });
     if (search) params.append("search", search);
     if (selectedBuildingId) params.append("building_id", selectedBuildingId);
+    if (status.length > 0) params.append("statuses", status.join(","));
+    if (selectedRooms.length > 0) params.append("room_ids", selectedRooms.join(","));
 
     try {
       const { data } = await api.get<VisitToursResponse>(`/api/visit-tours?${params}`);
@@ -53,11 +65,18 @@ export default function AppointmentPage() {
       console.error(err);
     }
     setLoading(false);
-  }, [page, search, selectedBuildingId]);
+  }, [page, search, selectedBuildingId, status, selectedRooms]);
+
+  const fetchBuildings = useCallback(async () => {
+    const params = selectedBuildingId ? `?building_id=${selectedBuildingId}` : "";
+    const { data } = await api.get<{ buildings: BuildingWithRooms[] }>(`/api/buildings${params}`);
+    if (data) setBuildings(data.buildings);
+  }, [selectedBuildingId]);
 
   useEffect(() => {
     fetchTours();
-  }, [fetchTours]);
+    fetchBuildings();
+  }, [fetchTours, fetchBuildings]);
 
   const handleCreateAppointment = async (formData: AppointmentFormData) => {
     const payload = {
@@ -96,7 +115,7 @@ export default function AppointmentPage() {
               placeholder="Tìm kiếm bằng mã xem phòng hoặc khách hàng..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm font-bold text-slate-700 bg-white focus:outline-none focus:border-brand-primary transition-all shadow-sm"
+              className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm font-bold text-slate-700 bg-white focus:outline-none focus:border-[#14B8A6] transition-all shadow-sm"
             />
           </div>
 
@@ -109,7 +128,7 @@ export default function AppointmentPage() {
 
           <button
             onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-2 px-5 py-2 bg-brand-primary text-white rounded-lg text-sm font-black transition-colors hover:bg-brand-dark shadow-sm cursor-pointer"
+            className="flex items-center gap-2 px-5 py-2 bg-[#14B8A6] text-white rounded-lg text-sm font-black transition-colors hover:bg-[#0F766E] shadow-sm cursor-pointer"
           >
             + Đặt lịch xem phòng
           </button>
@@ -123,7 +142,7 @@ export default function AppointmentPage() {
             <table className="w-full">
               <thead className="bg-[#EDEDED] border-b border-slate-200 sticky top-0 z-10 font-bold uppercase tracking-widest text-[10px] text-slate-500">
                 <tr>
-                  <th className="px-5 py-3.5 w-10"><input type="checkbox" className="rounded border-slate-300 text-brand-primary w-4 h-4" /></th>
+                  <th className="px-5 py-3.5 w-10"><input type="checkbox" className="rounded border-slate-300 text-[#14B8A6] w-4 h-4" /></th>
                   <th className="px-5 py-3.5 text-left">Mã xem phòng</th>
                   <th className="px-5 py-3.5 text-left">Khách xem phòng</th>
                   <th className="px-5 py-3.5 text-left">Thời gian</th>
@@ -139,7 +158,7 @@ export default function AppointmentPage() {
                   <tr><td colSpan={7} className="px-6 py-28 text-center text-slate-400">Chưa có lịch hẹn nào</td></tr>
                 ) : tours.map(t => (
                   <tr key={t.id} className="hover:bg-brand-bg/20 group transition-colors">
-                    <td className="px-5 py-4"><input type="checkbox" className="rounded border-slate-300 text-brand-primary w-4 h-4" /></td>
+                    <td className="px-5 py-4"><input type="checkbox" className="rounded border-slate-300 text-[#14B8A6] w-4 h-4" /></td>
                     <td className="px-5 py-4 text-brand-dark uppercase">{t.tour_code}</td>
                     <td className="px-5 py-4">
                       <div className="flex flex-col">
@@ -153,7 +172,7 @@ export default function AppointmentPage() {
                     </td>
                     <td className="px-5 py-4">{t.room?.room_number ?? t.building?.name}</td>
                     <td className="px-5 py-4">
-                       <span className={`px-2 py-0.5 rounded text-[10px] uppercase border ${t.status === 'pending' ? 'bg-brand-bg text-brand-dark border-brand-primary/20' : 'bg-emerald-50 text-emerald-600 border-emerald-100'}`}>
+                       <span className={`px-2 py-0.5 rounded text-[10px] uppercase border ${t.status === 'pending' ? 'bg-brand-bg text-brand-dark border-[#14B8A6]/20' : 'bg-emerald-50 text-emerald-600 border-emerald-100'}`}>
                           {t.status === 'pending' ? 'Chờ xem' : 'Đã xem'}
                        </span>
                     </td>
@@ -184,14 +203,92 @@ export default function AppointmentPage() {
                 <h2 className="text-lg font-bold text-slate-900">Lọc nâng cao</h2>
                 <button onClick={() => setIsFilterOpen(false)} className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-500 transition-colors"><X className="w-5 h-5" /></button>
               </div>
-              <div className="flex-1 overflow-y-auto p-5 space-y-6">
+              <div className="flex-1 overflow-y-auto p-5 space-y-8">
                  <div>
-                    <h3 className="text-sm font-semibold text-slate-800 mb-3">Thông tin filter...</h3>
-                    <p className="text-xs text-slate-400 font-bold">Chức năng filter nâng cao đang đồng bộ...</p>
+                    <h3 className="text-sm font-semibold text-slate-800 mb-3">Trạng thái</h3>
+                    <div className="grid grid-cols-2 gap-2">
+                      {[
+                        { id: "pending", label: "Chờ xem" },
+                        { id: "viewed", label: "Đã xem" },
+                        { id: "cancelled", label: "Đã huỷ" }
+                      ].map(item => {
+                         const isSelected = status.includes(item.id);
+                         return (
+                           <label key={item.id} className={`flex items-center gap-3 cursor-pointer p-2 rounded-lg transition-colors ${isSelected ? "bg-[#14B8A6]/5" : "hover:bg-slate-50"}`}>
+                              <input 
+                                type="checkbox"
+                                checked={isSelected}
+                                onChange={() => {
+                                  if (isSelected) setStatus(prev => prev.filter(s => s !== item.id));
+                                  else setStatus(prev => [...prev, item.id]);
+                                }}
+                                className="w-4 h-4 rounded border-slate-300 text-[#14B8A6] focus:ring-[#14B8A6]/20" 
+                              />
+                              <span className={`text-sm font-medium ${isSelected ? "text-brand-dark" : "text-slate-600"}`}>{item.label}</span>
+                           </label>
+                         );
+                      })}
+                    </div>
+                 </div>
+
+                 <div className="h-px bg-slate-100" />
+
+                 <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="text-sm font-semibold text-slate-800">Chọn phòng</h3>
+                      <span className="text-xs font-bold text-[#14B8A6]">{selectedRooms.length} đã chọn</span>
+                    </div>
+                    
+                    <div className="relative mb-3">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                      <input
+                        type="text"
+                        placeholder="Tìm theo tên phòng..."
+                        value={roomFilterSearch}
+                        onChange={(e) => setRoomFilterSearch(e.target.value)}
+                        className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-[#14B8A6] transition-all bg-slate-50 focus:bg-white"
+                      />
+                    </div>
+
+                    <div className="max-h-[300px] overflow-y-auto border border-slate-100 rounded-lg p-2 bg-slate-50/50">
+                      <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 gap-y-2">
+                        {allRooms
+                          .filter(r => r.room_number.toLowerCase().includes(roomFilterSearch.toLowerCase()))
+                          .map((r) => {
+                            const isSelected = selectedRooms.includes(r.id);
+                            return (
+                              <label
+                                key={r.id}
+                                className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors ${isSelected ? "bg-[#14B8A6]/5" : "hover:bg-slate-50 hover:shadow-sm bg-white border border-transparent"}`}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={isSelected}
+                                  onChange={() => {
+                                    if (isSelected) setSelectedRooms(prev => prev.filter(id => id !== r.id));
+                                    else setSelectedRooms(prev => [...prev, r.id]);
+                                  }}
+                                  className="w-4 h-4 rounded border-slate-300 text-[#14B8A6] focus:ring-[#14B8A6]/20"
+                                />
+                                <span className={`text-sm ${isSelected ? "font-bold text-brand-dark" : "text-slate-600 font-medium"}`}>
+                                  {r.room_number} <span className="text-[10px] text-slate-400 block">{r.building_name}</span>
+                                </span>
+                              </label>
+                            );
+                        })}
+                        {allRooms.length === 0 && <span className="p-2 text-xs text-slate-400">Không có phòng</span>}
+                      </div>
+                    </div>
                  </div>
               </div>
               <div className="p-5 border-t border-slate-100 bg-white flex items-center justify-end gap-3 shrink-0">
-                <button onClick={() => setIsFilterOpen(false)} className="px-6 py-2.5 text-sm font-bold bg-brand-primary hover:bg-brand-dark text-white rounded-lg transition-colors shadow-sm cursor-pointer">Xác nhận</button>
+                <button 
+                  onClick={() => { setStatus([]); setSelectedRooms([]); }} 
+                  className="px-5 py-2.5 text-sm font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors cursor-pointer"
+                >
+                  Đặt lại
+                </button>
+                <button onClick={() => setIsFilterOpen(false)} className="px-6 py-2.5 text-sm font-bold bg-[#14B8A6] hover:bg-[#0F766E] text-white rounded-lg transition-colors shadow-sm cursor-pointer">Áp dụng</button>
               </div>
             </motion.div>
           </>

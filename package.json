@@ -1,0 +1,8 @@
+{
+  "name": "website-apartment-root",
+  "version": "1.0.0",
+  "description": "Root workspace for running client and server",
+  "scripts": {
+    "dev:all": "npx concurrently \"npm run dev --prefix server\" \"npm run dev --prefix client\""
+  }
+}

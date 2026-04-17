@@ -65,7 +65,7 @@ export default function ApiManagementPage() {
          <div className="w-full max-w-2xl">
             <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
                <div className="p-6 border-b border-slate-100 flex items-center gap-3">
-                  <div className="w-12 h-12 bg-brand-bg text-brand-dark rounded-xl flex items-center justify-center shrink-0">
+                  <div className="w-12 h-12 bg-[#14B8A6]/5 text-brand-dark rounded-xl flex items-center justify-center shrink-0">
                      <Key className="w-6 h-6" />
                   </div>
                   <div>

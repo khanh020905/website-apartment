@@ -77,7 +77,7 @@ const Navbar = () => {
 		admin: "Admin",
 	};
 	const compactActionButtonClass =
-		"w-[106px] h-9 px-3 rounded-lg text-[13px] font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer";
+		"h-9 px-4 rounded-lg text-[13px] font-black flex items-center justify-center gap-1.5 transition-all cursor-pointer whitespace-nowrap";
 
 	return (
 		<div className="h-16 bg-white border-b border-slate-100 flex items-center justify-between px-8 z-40 sticky top-0 shadow-sm shadow-slate-200/50 gap-6">

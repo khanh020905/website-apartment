@@ -9,7 +9,7 @@ router.get('/', async (req: Request, res: Response) => {
     priceMin, priceMax, areaMin, areaMax,
     bedrooms, bathrooms, propertyTypes, furniture,
     amenityIds, city, district, ward, keyword,
-    direction, isVerified, // Added filters
+    direction, isVerified, posted_by, // Added filters
     sortBy = 'newest', page = '1', limit = '20',
     lat, lng, radius, // for map-based search
   } = req.query;
@@ -18,8 +18,16 @@ router.get('/', async (req: Request, res: Response) => {
 
   let query = getSupabase()
     .from('listings')
-    .select('*, profiles!posted_by(full_name, phone, avatar_url)', { count: 'exact' })
+    .select('*, profiles!posted_by(full_name, phone, avatar_url, role)', { count: 'exact' })
     .eq('status', 'approved');
+
+  // Filter posted_by if requested
+  if (posted_by) {
+    query = query.eq('posted_by', posted_by as string);
+  } else {
+    // If not looking at a specific broker's store, hide broker private listings
+    query = query.or('target_audience.is.null,target_audience.neq.broker_private');
+  }
 
   // Price range
   if (priceMin) query = query.gte('price', Number(priceMin));
@@ -135,6 +143,7 @@ router.get('/map', async (req: Request, res: Response) => {
     .from('listings')
     .select('id, title, price, area, lat, lng, images, property_type')
     .eq('status', 'approved')
+    .or('target_audience.is.null,target_audience.neq.broker_private') // Hide broker listings from map
     .not('lat', 'is', null)
     .not('lng', 'is', null);
 

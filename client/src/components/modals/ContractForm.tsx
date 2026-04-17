@@ -50,7 +50,7 @@ const ContractForm = ({ onSubmit, onCancel }: ContractFormProps) => {
 				]);
 				setRooms(roomsRes.data?.rooms || []);
 				setCustomers(customersRes.data?.customers || []);
-				setTemplates(templatesRes.data || []);
+				setTemplates(Array.isArray(templatesRes.data) ? templatesRes.data : (templatesRes.data?.templates || []));
 			} catch (err) {
 				console.error(err);
 			}
@@ -95,6 +95,8 @@ const ContractForm = ({ onSubmit, onCancel }: ContractFormProps) => {
 						className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-4 focus:ring-brand-primary/10 focus:border-brand-primary transition-all outline-none"
 					>
 						<option value="">Chọn mẫu hợp đồng</option>
+						<option value="template-1">Hợp đồng thuê căn hộ (Mẫu chuẩn)</option>
+						<option value="template-2">Hợp đồng thuê mặt bằng</option>
 						{templates.map(t => (
 							<option key={t.id} value={t.id}>{t.name}</option>
 						))}

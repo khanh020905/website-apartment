@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import type { Listing } from "../../../shared/types";
 import { maskAddress } from "../lib/utils";
+import { useAuth } from "../contexts/AuthContext";
 
 interface PropertyCardProps {
 	listing: Listing;
@@ -11,6 +12,7 @@ interface PropertyCardProps {
 }
 
 const PropertyCard = ({ listing, index, isActive = false, onSelect }: PropertyCardProps) => {
+	const { isBroker } = useAuth();
 	const imageUrl =
 		listing.images?.[0]?.url ||
 		"https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=300&h=200&fit=crop";
@@ -19,6 +21,9 @@ const PropertyCard = ({ listing, index, isActive = false, onSelect }: PropertyCa
 		.join(", ");
 	const createdAt = listing.created_at ? new Date(listing.created_at) : null;
 	const postedTime = createdAt ? createdAt.toLocaleDateString("vi-VN") : "Mới đăng";
+	
+	// Mock commission logic for broker viewing properties (fallback to rental_meta or random for demo)
+	const commissionRate = (listing as any).commission || "50%";
 
 	return (
 		<motion.div
@@ -71,6 +76,11 @@ const PropertyCard = ({ listing, index, isActive = false, onSelect }: PropertyCa
 					</div>
 
 					<div className="ml-auto flex items-center gap-1.5 shrink-0">
+						{isBroker && (
+							<div className="h-8 px-2.5 inline-flex items-center justify-center rounded-lg bg-indigo-50 border border-indigo-200 text-[12px] font-bold text-indigo-700 whitespace-nowrap mr-1">
+								HH: {commissionRate}
+							</div>
+						)}
 						<Link
 							to={`/listings/${listing.id}`}
 							onClick={(e) => e.stopPropagation()}
@@ -81,9 +91,9 @@ const PropertyCard = ({ listing, index, isActive = false, onSelect }: PropertyCa
 						<Link
 							to={`/listings/${listing.id}?action=reserve`}
 							onClick={(e) => e.stopPropagation()}
-							className="h-8 px-2.5 inline-flex items-center justify-center rounded-lg bg-brand-primary text-[12px] font-bold text-white hover:bg-brand-dark transition-colors whitespace-nowrap"
+							className="h-8 px-2.5 inline-flex items-center justify-center rounded-lg bg-brand-primary text-[12px] font-bold text-white hover:bg-brand-dark transition-colors whitespace-nowrap cursor-pointer"
 						>
-							Thuê ngay
+							{isBroker ? "Liên hệ Chủ" : "Thuê ngay"}
 						</Link>
 					</div>
 				</div>

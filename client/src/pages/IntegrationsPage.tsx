@@ -115,7 +115,7 @@ export default function IntegrationsPage() {
       {/* Main Content Areas */}
       <div className="flex-1 overflow-auto p-5 lg:p-6 space-y-6">
         {loading ? (
-          <div className="flex justify-center p-10"><div className="w-8 h-8 border-4 border-brand-primary/20 border-t-brand-primary rounded-full animate-spin"/></div>
+          <div className="flex justify-center p-10"><div className="w-8 h-8 border-4 border-[#14B8A6]/20 border-t-brand-primary rounded-full animate-spin"/></div>
         ) : (
          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {INTEGRATION_TYPES.map(int => (
@@ -172,7 +172,7 @@ export default function IntegrationsPage() {
                         type="text" 
                         value={configParams.oa_id || ''}
                         onChange={e => setConfigParams({...configParams, oa_id: e.target.value})}
-                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 font-medium focus:outline-none focus:border-brand-primary" 
+                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 font-medium focus:outline-none focus:border-[#14B8A6]" 
                         required 
                      />
                   </div>
@@ -182,7 +182,7 @@ export default function IntegrationsPage() {
                         type="password" 
                         value={configParams.refresh_token || ''}
                         onChange={e => setConfigParams({...configParams, refresh_token: e.target.value})}
-                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 font-medium focus:outline-none focus:border-brand-primary" 
+                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 font-medium focus:outline-none focus:border-[#14B8A6]" 
                         required 
                      />
                   </div>
@@ -197,7 +197,7 @@ export default function IntegrationsPage() {
                         value={configParams.client_id || ''}
                         onChange={e => setConfigParams({...configParams, client_id: e.target.value})}
                         placeholder="Nhập Client ID cung cấp bởi đối tác" 
-                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 font-medium focus:outline-none focus:border-brand-primary" 
+                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 font-medium focus:outline-none focus:border-[#14B8A6]" 
                         required 
                      />
                   </div>
@@ -208,7 +208,7 @@ export default function IntegrationsPage() {
                         value={configParams.client_secret || ''}
                         onChange={e => setConfigParams({...configParams, client_secret: e.target.value})}
                         placeholder="Nhập Secret Key" 
-                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 font-medium focus:outline-none focus:border-brand-primary" 
+                        className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-900 font-medium focus:outline-none focus:border-[#14B8A6]" 
                         required 
                      />
                   </div>

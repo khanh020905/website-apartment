@@ -337,7 +337,7 @@ export default function MyListingsPage() {
 									className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 hover:shadow-md transition-all"
 								>
 									<div className="grid grid-cols-[112px_minmax(0,1fr)] gap-4">
-										<div className="w-full h-26 rounded-xl bg-slate-100 overflow-hidden flex items-center justify-center text-slate-400">
+										<Link to={`/listings/${listing.id}`} className="w-full h-26 rounded-xl bg-slate-100 overflow-hidden flex items-center justify-center text-slate-400 hover:opacity-80 transition-opacity">
 											{listing.images?.[0]?.url ?
 												<img
 													src={listing.images[0].url}
@@ -345,9 +345,11 @@ export default function MyListingsPage() {
 													className="w-full h-full object-cover"
 												/>
 											:	<Home className="w-7 h-7" />}
-										</div>
+										</Link>
 										<div>
-											<p className="text-lg font-bold text-slate-900 line-clamp-2 leading-tight">{listing.title}</p>
+											<Link to={`/listings/${listing.id}`} className="text-lg font-bold text-slate-900 line-clamp-2 leading-tight hover:text-brand-primary transition-colors">
+												{listing.title}
+											</Link>
 											<div className="mt-1.5 flex flex-wrap items-center gap-2">
 												<span
 													className={`px-2.5 py-1 rounded-lg text-[11px] font-black ${LISTING_STATUS_CLASS[listing.status]}`}

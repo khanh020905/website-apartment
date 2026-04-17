@@ -164,6 +164,7 @@ export interface Listing {
   width_m: number | null;
   guest_note: string | null;
   status: ListingStatus;
+  is_broker_private?: boolean;
   available_date: string | null;
   direction: HomeDirection | null;
   is_verified: boolean;
@@ -262,22 +263,43 @@ export interface ContractTemplate {
   updated_at: string;
 }
 
-export interface Invoice {
+export interface InvoiceItem {
   id: string;
-  code: string;
-  room_id: string;
-  customer_name: string | null;
-  total: number;
-  due_date: string;
-  extra_charge: number;
-  discount: number;
-  has_vat: boolean;
-  status: 'paid' | 'pending' | 'overdue' | 'cancelled';
-  creator: string | null;
+  invoice_id: string;
+  service_name: string;
+  prev_index: number | null;
+  curr_index: number | null;
+  quantity: number;
+  unit_price: number;
+  discount_amount: number;
+  line_total: number;
+  has_image: boolean;
+  editable_qty: boolean;
+  editable_price: boolean;
   created_at: string;
-  updated_at: string;
 }
 
+export interface Invoice {
+  id: string;
+  invoice_code: string;
+  room_id: string;
+  building_id: string;
+  customer_id: string | null;
+  customer_name?: string | null;
+  room_number?: string | null;
+  status: 'draft' | 'pending' | 'paid' | 'overdue' | 'cancelled' | 'partial';
+  due_date: string;
+  billing_month: string;
+  extra_charge: number;
+  discount: number;
+  total_amount: number;
+  has_vat: boolean;
+  creator_id: string | null;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+  invoice_items?: InvoiceItem[];
+}
 export interface Transaction {
   id: string;
   code: string;

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { Plus, Search, MapPin, Building2, Settings, Edit2, Trash2, X, Home, Map as MapIcon, Building, Bed, Briefcase, Zap, Droplet, Bike, ShieldCheck, Camera, Wind, Waves, User, Clock, Monitor, Heart, Shield, Trash, ChevronLeft, Navigation, Wifi, Car, Flame, ArrowUpCircle, Box, ChevronDown, QrCode } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Plus, Search, MapPin, Building2, Settings, Edit2, Eye, Image, Trash2, X, Home, Map as MapIcon, Building, Bed, Briefcase, Zap, Droplet, Bike, ShieldCheck, Camera, Wind, Waves, User, Clock, Monitor, Heart, Shield, Trash, ChevronLeft, Navigation, Wifi, Car, Flame, ArrowUpCircle, Box, ChevronDown, QrCode } from "lucide-react";
 import { QRCodeCanvas } from "qrcode.react";
 import Modal from "../components/modals/Modal";
 import { api } from "../lib/api";
@@ -175,6 +176,7 @@ interface Building {
 }
 
 export default function LocationsPage() {
+  const navigate = useNavigate();
   const [locations, setLocations] = useState<Building[]>([]);
   const [loading, setLoading] = useState(true);
   
@@ -533,7 +535,7 @@ export default function LocationsPage() {
       setFloorsList(mappedFloors);
       
       const mappedRooms = b.rooms.map((r: any, idx: number) => ({
-        id: `room_view_${idx}`,
+        id: r.id || `room_view_${idx}`,
         name: r.room_number || r.name || "",
         floorId: mappedFloors.find(f => f.name === (r.floor_name || "Trệt"))?.id || mappedFloors[0].id
       }));
@@ -836,7 +838,7 @@ export default function LocationsPage() {
       setFloorsList(mappedFloors);
       
       const mappedRooms = b.rooms.map((r: any, idx: number) => ({
-        id: `room_edit_${idx}`,
+        id: r.id || `room_edit_${idx}`,
         name: r.room_number || r.name || "",
         floorId: mappedFloors.find(f => f.name === (r.floor_name || "Trệt"))?.id || mappedFloors[0].id
       }));
@@ -938,13 +940,14 @@ export default function LocationsPage() {
           <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-slate-50/50 border-b border-slate-200">
-                  <th className="px-6 py-4 text-[11px] font-black text-slate-400 uppercase tracking-widest w-16 text-center">STT</th>
-                  <th className="px-6 py-4 text-[11px] font-black text-slate-400 uppercase tracking-widest min-w-[200px]">Tên toà nhà</th>
-                  <th className="px-6 py-4 text-[11px] font-black text-slate-400 uppercase tracking-widest">Địa chỉ</th>
-                  <th className="px-6 py-4 text-[11px] font-black text-slate-400 uppercase tracking-widest w-24 text-center">Số tầng</th>
-                  <th className="px-6 py-4 text-[11px] font-black text-slate-400 uppercase tracking-widest w-24 text-center">Phòng</th>
-                  <th className="px-6 py-4 text-[11px] font-black text-slate-400 uppercase tracking-widest w-48 text-right">Thao tác</th>
+                <tr className="bg-white border-b border-slate-200">
+                  <th className="px-6 py-5 text-[12px] font-bold text-slate-700 min-w-[200px]">Tên toà nhà</th>
+                  <th className="px-6 py-5 text-[12px] font-bold text-slate-700">Địa chỉ</th>
+                  <th className="px-6 py-5 text-[12px] font-bold text-slate-700 text-center">Số điện thoại</th>
+                  <th className="px-6 py-5 text-[12px] font-bold text-slate-700 w-24 text-center">Số tầng</th>
+                  <th className="px-6 py-5 text-[12px] font-bold text-slate-700 w-24 text-center">Số phòng</th>
+                  <th className="px-6 py-5 text-[12px] font-bold text-slate-700 w-36 text-center">Trạng thái</th>
+                  <th className="px-6 py-5 w-24 text-center"><Settings className="w-4 h-4 text-slate-400 mx-auto" /></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -965,67 +968,43 @@ export default function LocationsPage() {
                   </tr>
                 ) : (
                   filteredLocations.map((loc, idx) => (
-                    <tr key={loc.id} className="hover:bg-slate-50/50 transition-colors group">
-                      <td className="px-6 py-4 text-center text-[13px] font-bold text-slate-400">
-                        {idx + 1}
-                      </td>
+                                        <tr key={loc.id} className="hover:bg-slate-50 border-b border-slate-50 transition-colors group">
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-brand-primary/5 flex items-center justify-center text-brand-primary">
+                          <div className="w-10 h-10 rounded-xl bg-[#14B8A6]/10 flex items-center justify-center text-[#14B8A6]">
                             <Building2 className="w-5 h-5" />
                           </div>
-                          <span className="text-[15px] font-bold text-slate-900 line-clamp-1">{loc.name}</span>
+                          <span className="text-[13px] font-semibold text-slate-700 line-clamp-1">{loc.name}</span>
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="flex items-center gap-1.5 text-slate-500">
-                          <MapPin className="w-3.5 h-3.5 shrink-0" />
-                          <span className="text-[13px] font-medium line-clamp-1">{loc.address}</span>
-                        </div>
+                        <span className="text-[13px] font-medium text-slate-600 line-clamp-1">{loc.address}</span>
                       </td>
                       <td className="px-6 py-4 text-center">
-                        <span className="px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-[12px] font-bold">{loc.floors}</span>
+                         <span className="text-[13px] font-medium text-slate-600">{loc.phone || '0906417577'}</span>
                       </td>
                       <td className="px-6 py-4 text-center">
-                        <span className="px-3 py-1 bg-brand-primary/10 text-brand-primary rounded-full text-[12px] font-bold">{loc.rooms?.length || 0}</span>
+                        <span className="text-[13px] font-semibold text-slate-600">{loc.floors || 0}</span>
                       </td>
-                      <td className="px-6 py-4 text-right">
-                        <div className="flex items-center justify-end gap-2">
-                         <button 
-                             onClick={() => handleViewDiagram(loc)}
-                             className="flex items-center justify-center gap-2 px-6 py-2 bg-brand-primary text-white rounded-xl text-[12px] font-bold uppercase tracking-wider hover:bg-brand-dark transition-all shadow-sm whitespace-nowrap"
-                         >
-                            <MapIcon className="w-3.5 h-3.5" />
-                            Sơ đồ
+                      <td className="px-6 py-4 text-center">
+                        <span className="text-[13px] font-semibold text-slate-600">{loc.rooms?.length || 0}</span>
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                         <span className="inline-flex items-center justify-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded text-[11px] font-semibold whitespace-nowrap">
+                            Hoạt động
+                         </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center justify-center gap-1.5">
+                         <button onClick={() => navigate(`/locations/${loc.id}`)} className="p-1.5 text-slate-400 hover:text-[#14B8A6] rounded transition-colors" title="Chi tiết tòa nhà">
+                            <Eye className="w-4 h-4" />
                          </button>
-                         <button 
-                             onClick={() => handleShowQR(loc)}
-                             className="p-2 text-slate-300 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all tooltip"
-                             title="Mã QR"
-                         >
-                            <QrCode className="w-5 h-5" />
+                         <button onClick={() => openEditModal(loc)} className="p-1.5 text-slate-400 hover:text-[#14B8A6] rounded transition-colors" title="Sửa cấu trúc">
+                            <Edit2 className="w-4 h-4" />
                          </button>
-                            <button 
-                              onClick={() => openEditModal(loc)}
-                              className="p-2 text-slate-300 hover:text-brand-primary hover:bg-brand-primary/10 rounded-lg transition-all"
-                              title="Sửa thông tin"
-                            >
-                              <Edit2 className="w-4 h-4" />
-                            </button>
-                            <button 
-                              onClick={() => openStructureEditModal(loc)}
-                              className="p-2 text-slate-300 hover:text-orange-500 hover:bg-orange-50 rounded-lg transition-all"
-                              title="Sửa cấu trúc"
-                            >
-                              <Settings className="w-4 h-4" />
-                            </button>
-                            <button 
-                              onClick={() => handleDelete(loc.id)}
-                              className="p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all"
-                              title="Xóa"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
+                         <button onClick={() => handleDelete(loc.id)} className="p-1.5 text-slate-400 hover:text-red-500 rounded transition-colors" title="Xóa">
+                            <Trash2 className="w-4 h-4" />
+                         </button>
                         </div>
                       </td>
                     </tr>
@@ -1186,94 +1165,17 @@ export default function LocationsPage() {
                      </div>
                   </div>
 
-                  {/* Section: Dịch vụ */}
-                  <div className="space-y-5">
-                     <h3 className="text-[17px] font-bold text-slate-900 border-l-[3.5px] border-brand-primary pl-3">Dịch vụ</h3>
-                     
-                     <div className="space-y-6">
-                        <div className="space-y-3">
-                           <h4 className="text-[14px] font-bold text-slate-600 ml-1">Theo đồng hồ</h4>
-                           {meteredServices.map((s) => (
-                              <div key={s.id} className="flex items-center gap-4 bg-slate-50/50 p-4 rounded-2xl border border-transparent hover:border-slate-100 transition-all group">
-                                 <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-slate-500 shadow-sm">
-                                    <s.icon className="w-5 h-5" />
-                                 </div>
-                                 <div className="flex-1">
-                                    <p className="text-[14px] font-bold text-slate-900">{s.name}</p>
-                                    <p className="text-[13px] font-medium text-brand-primary">{s.price.toLocaleString('vi-VN')} đ / {s.unit}</p>
-                                 </div>
-                                 <button 
-                                    type="button" 
-                                    onClick={() => setMeteredServices(prev => prev.filter(item => item.id !== s.id))}
-                                    className="p-2 text-rose-400 hover:bg-rose-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
-                                 >
-                                    <X className="w-4 h-4" />
-                                 </button>
-                              </div>
-                           ))}
-                        </div>
+                  {/* Section: Dịch vụ - ĐÃ ẨN THEO YÊU CẦU FPHOST */}
 
-                        <div className="space-y-3">
-                           <h4 className="text-[14px] font-bold text-slate-600 ml-1">Cố định theo tháng</h4>
-                           {fixedServices.map((s) => (
-                              <div key={s.id} className="flex items-center gap-4 bg-slate-50/50 p-4 rounded-2xl border border-transparent hover:border-slate-100 transition-all group">
-                                 <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-slate-500 shadow-sm">
-                                    <s.icon className="w-5 h-5" />
-                                 </div>
-                                 <div className="flex-1">
-                                    <p className="text-[14px] font-bold text-slate-900">{s.name}</p>
-                                    <p className="text-[13px] font-medium text-brand-primary">{s.price.toLocaleString('vi-VN')} đ / {s.unit}</p>
-                                 </div>
-                                 <button 
-                                    type="button" 
-                                    onClick={() => setFixedServices(prev => prev.filter(item => item.id !== s.id))}
-                                    className="p-2 text-rose-400 hover:bg-rose-50 rounded-lg opacity-0 group-hover:opacity-100 transition-all cursor-pointer"
-                                 >
-                                    <X className="w-4 h-4" />
-                                 </button>
-                              </div>
-                           ))}
-                        </div>
 
-                        <div className="flex justify-end pt-1">
-                           <button type="button" className="flex items-center gap-1.5 px-5 py-2.5 border border-brand-primary text-brand-primary rounded-full text-[13px] font-bold hover:bg-brand-primary/5 transition-all active:scale-95 cursor-pointer" onClick={() => setIsAddServiceModalOpen(true)}>
-                              <Plus className="w-4 h-4" /> Thêm dịch vụ
-                           </button>
-                        </div>
-                     </div>
-                  </div>
+                  {/* Section: Tiện ích - ĐÃ ẨN THEO YÊU CẦU FPHOST */}
 
-                  {/* Section: Tiện ích */}
-                  <div className="space-y-5 pb-8">
-                     <h3 className="text-[17px] font-bold text-slate-900 border-l-[3.5px] border-brand-primary pl-3">Tiện ích</h3>
-                     
-                     <div className="flex flex-wrap gap-2.5">
-                        {allAmenities.map((a) => (
-                           <button
-                              key={a.id}
-                              type="button"
-                              onClick={() => setSelectedAmenities(prev => prev.includes(a.id) ? prev.filter(x => x !== a.id) : [...prev, a.id])}
-                              className={`flex items-center gap-2 px-4 py-2.5 rounded-full border text-[13px] font-semibold transition-all shadow-sm ${
-                                 selectedAmenities.includes(a.id) 
-                                 ? 'bg-brand-primary border-brand-primary text-white' 
-                                 : 'bg-white border-slate-100 text-slate-600 hover:border-brand-primary/30'
-                              }`}
-                           >
-                              <a.icon className={`w-4 h-4 ${selectedAmenities.includes(a.id) ? 'text-white' : 'text-slate-400'}`} />
-                              {a.label}
-                           </button>
-                        ))}
-                        <button type="button" className="flex items-center gap-1.5 px-4 py-2.5 border border-brand-primary text-brand-primary rounded-full text-[13px] font-bold hover:bg-brand-primary/5 transition-all active:scale-95 cursor-pointer" onClick={() => setIsAddAmenityModalOpen(true)}>
-                           <Plus className="w-4 h-4" /> Thêm tiện ích
-                        </button>
-                     </div>
-                  </div>
                   {/* Section: Ký gửi */}
                   <div className="pt-6 border-t border-slate-100 space-y-5">
                      <div className="bg-slate-50/80 rounded-3xl p-6 border border-slate-100">
                         <div className="flex gap-4">
                            <div className="relative shrink-0">
-                              <ShieldCheck className="w-12 h-12 text-brand-primary" strokeWidth={1.5} />
+                              <ShieldCheck className="w-12 h-12 text-[#14B8A6]" strokeWidth={1.5} />
                               <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-emerald-500 rounded-full border-2 border-white flex items-center justify-center">
                                  <Plus className="w-3 h-3 text-white" />
                               </div>
@@ -1294,13 +1196,21 @@ export default function LocationsPage() {
                               </ul>
                            </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-3 mt-6">
-                           <button type="button" className="py-2.5 px-4 bg-white border border-slate-200 text-slate-600 rounded-xl text-[13px] font-bold hover:bg-slate-50 transition-all">
-                              Để sau
-                           </button>
-                           <button type="button" className="py-2.5 px-4 bg-brand-primary text-white rounded-xl text-[13px] font-bold hover:bg-brand-dark shadow-sm transition-all">
-                              Ký gửi ngay
-                           </button>
+                        <div className="mt-5 space-y-3">
+                           <div>
+                              <label className="block text-sm font-semibold text-slate-700 mb-1.5">Mức hoa hồng cho môi giới (%)</label>
+                              <div className="flex gap-2">
+                                <input type="number" min="0" max="100" placeholder="Vd: 50" className="flex-1 px-4 py-2.5 border border-slate-200 focus:border-[#14B8A6] outline-none rounded-xl text-sm font-bold shadow-sm" />
+                              </div>
+                           </div>
+                           <div className="grid grid-cols-2 gap-3 pt-1">
+                              <button type="button" onClick={() => alert("Đã bỏ qua ký gửi")} className="py-2.5 px-4 bg-white border border-slate-200 text-slate-600 rounded-xl text-[13px] font-bold hover:bg-slate-50 transition-all">
+                                 Để sau
+                              </button>
+                              <button type="submit" onClick={() => alert("Đã lưu thông tin Ký gửi Môi giới! Đang chuyển sang bước kế tiếp...")} className="py-2.5 px-4 bg-[#14B8A6] text-white rounded-xl text-[13px] font-bold hover:bg-[#0F766E] shadow-sm transition-all">
+                                 Ký gửi ngay
+                              </button>
+                           </div>
                         </div>
                      </div>
                   </div>
@@ -1900,6 +1810,16 @@ export default function LocationsPage() {
                         }}
                         className={`w-full px-3 py-3 border border-slate-200 rounded-xl text-center text-sm font-bold text-slate-700 focus:outline-none transition-all shadow-sm ${isViewMode ? 'bg-slate-50 cursor-default' : 'bg-slate-50/50 hover:bg-white focus:border-brand-primary pr-8'}`}
                       />
+                      {isViewMode && (
+                        <div className="absolute opacity-0 group-hover:opacity-100 transition-opacity inset-0 flex items-center justify-center bg-black/60 rounded-xl backdrop-blur-sm shadow-md">
+                          <Link 
+                            to={`/create-listing?building_id=${editingBuilding?.id || 'new'}&room_id=${room.id}`}
+                            className="text-white text-[11px] font-bold bg-[#14B8A6] px-3 py-1.5 rounded-full hover:bg-[#0F766E] transition-all transform hover:scale-105 shadow-xl whitespace-nowrap"
+                          >
+                            Cập nhật phòng
+                          </Link>
+                        </div>
+                      )}
                       {!isViewMode && (
                         <button 
                           onClick={() => setRoomsList(roomsList.filter(r => r.id !== room.id))}

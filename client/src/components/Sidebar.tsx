@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion } from "framer-motion";
 import type { LucideIcon } from "lucide-react";
 import PropertyCard from "./PropertyCard";
@@ -255,10 +255,12 @@ const Sidebar = ({
 
 			return matchSearch && matchAmenities && matchFurniture && matchBedrooms;
 		});
-
-		onFilterChange(filtered);
 		return filtered;
-	}, [search, appliedAmenities, appliedOtherFilters, listings, onFilterChange]);
+	}, [search, appliedAmenities, appliedOtherFilters, listings]);
+
+	useEffect(() => {
+		onFilterChange(filteredListings);
+	}, [filteredListings, onFilterChange]);
 
 	const toggleTag = (tag: FilterTag) => {
 		if (tag.type === "amenity") {

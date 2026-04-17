@@ -12,6 +12,7 @@ import {
 	CalendarSearch,
 	CreditCard,
 	FileText,
+	ShoppingCart,
 	ArrowLeftRight,
 	CheckSquare,
 	Settings2,
@@ -51,30 +52,25 @@ interface MenuItem {
 
 const AppSidebar = () => {
 	const location = useLocation();
-	const { user, role, canPost, signOut } = useAuth();
+	const { user, role, canPost, isLandlord, isAdmin, isBroker, signOut } = useAuth();
 	const [isHovered, setIsHovered] = useState(false);
 	const [isSubCollapsed, setIsSubCollapsed] = useState(false);
+
 
 	const menuItems: MenuItem[] = [
 		{
 			icon: LayoutGrid,
 			label: "Trang tổng quan",
 			path: "/dashboard",
-			show: canPost,
+			show: isLandlord || isAdmin,
 			matchPaths: ["/dashboard"],
 		},
-		{
-			icon: Home,
-			label: "Tin đã đăng",
-			path: "/my-listings",
-			show: canPost,
-			matchPaths: ["/my-listings"],
-		},
+
 		{
 			icon: Users,
 			label: "Khách hàng",
 			path: "/customers",
-			show: canPost,
+			show: isLandlord || isAdmin,
 			matchPaths: ["/customers", "/vehicles"],
 			subItems: [
 				{ icon: User, label: "Khách hàng", path: "/customers" },
@@ -97,7 +93,7 @@ const AppSidebar = () => {
 			icon: CreditCard,
 			label: "Thanh toán",
 			path: "/invoices",
-			show: canPost,
+			show: isLandlord || isAdmin,
 			matchPaths: ["/invoices", "/transactions", "/proof-of-payment", "/transaction-config"],
 			subItems: [
 				{ icon: FileText, label: "Hóa đơn", path: "/invoices" },
@@ -110,7 +106,7 @@ const AppSidebar = () => {
 			icon: FileText,
 			label: "Hợp đồng",
 			path: "/contracts",
-			show: canPost,
+			show: isLandlord || isAdmin,
 			matchPaths: ["/contracts", "/contract-templates"],
 			subItems: [
 				{ icon: FileText, label: "Hợp đồng", path: "/contracts" },
@@ -121,7 +117,7 @@ const AppSidebar = () => {
 			icon: Wrench,
 			label: "Bảo trì",
 			path: "/incidents",
-			show: canPost,
+			show: isLandlord || isAdmin,
 			matchPaths: ["/incidents", "/incident-types"],
 			subItems: [
 				{ icon: AlertTriangle, label: "Sự cố", path: "/incidents" },
@@ -133,7 +129,7 @@ const AppSidebar = () => {
 			icon: BarChart3,
 			label: "Báo cáo",
 			path: "/operation/occupancy-rate",
-			show: canPost,
+			show: isLandlord || isAdmin,
 			matchPaths: ["/operation/occupancy-rate", "/customer-report", "/revenues", "/for-owner"],
 			subItems: [
 				{ icon: Activity, label: "Vận hành", path: "/operation/occupancy-rate" },
@@ -153,20 +149,18 @@ const AppSidebar = () => {
 			icon: Settings,
 			label: "Quản lý",
 			path: "/business-information",
-			show: canPost,
+			show: isLandlord || isAdmin || isBroker,
 			matchPaths: [
 				"/business-information",
 				"/locations",
 				"/integrations",
 				"/users",
-				"/roles",
 				"/api-management",
 			],
 			subItems: [
 				{ icon: Info, label: "Thông tin chung", path: "/business-information" },
 				{ icon: MapPin, label: "Tòa nhà", path: "/locations" },
-				{ icon: Users, label: "Nhân viên", path: "/users" },
-				{ icon: Shield, label: "Vai trò", path: "/roles" },
+				{ icon: Users, label: "Người dùng & vai trò", path: "/users" },
 				{ icon: Plug, label: "Tích hợp", path: "/integrations" },
 				{ icon: Key, label: "Quản lý API", path: "/api-management" },
 			],
@@ -176,11 +170,24 @@ const AppSidebar = () => {
 			label: "Quản lý cá nhân",
 			path: "/profile",
 			show: !!user && role === "user",
-			matchPaths: ["/profile", "/my-listings"],
+			matchPaths: ["/profile"],
 			subItems: [
 				{ icon: User, label: "Hồ sơ cá nhân", path: "/profile" },
-				{ icon: LayoutGrid, label: "Tin đăng của tôi", path: "/my-listings" },
 			],
+		},
+		{
+			icon: ShoppingCart,
+			label: "Giỏ hàng của tôi",
+			path: "/broker/cart",
+			show: isBroker,
+			matchPaths: ["/broker/cart"],
+		},
+		{
+			icon: Home,
+			label: "Trang hàng cá nhân",
+			path: `/store/${user?.id}`,
+			show: isBroker,
+			matchPaths: ["/store"],
 		},
 		{
 			icon: MapPin,
@@ -225,11 +232,15 @@ const AppSidebar = () => {
 	const showSubPanel = isHovered && hasSubItems && !isSubCollapsed;
 
 	return (
-		<div
-			className="flex h-full shrink-0 z-50"
-			onMouseEnter={() => setIsHovered(true)}
-			onMouseLeave={() => setIsHovered(false)}
-		>
+		<div className="relative h-full shrink-0 z-[100]">
+			{/* Dummy spacer to hold layout width (68px) so main content doesn't jump and cause Recharts lag */}
+			<div className="w-[68px] h-full shrink-0" />
+			
+			<div
+				className="absolute top-0 left-0 flex h-full"
+				onMouseEnter={() => setIsHovered(true)}
+				onMouseLeave={() => setIsHovered(false)}
+			>
 			{/* Primary Sidebar */}
 			<motion.div
 				animate={{ width: isHovered ? 260 : 68 }}
@@ -444,6 +455,7 @@ const AppSidebar = () => {
 					</motion.div>
 				)}
 			</AnimatePresence>
+			</div>
 		</div>
 	);
 };

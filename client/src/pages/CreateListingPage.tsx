@@ -113,6 +113,7 @@ export default function CreateListingPage() {
 	const [uploadingImages, setUploadingImages] = useState(false);
 	const [uploadingVideo, setUploadingVideo] = useState(false);
 	const [loadingInitialData, setLoadingInitialData] = useState(false);
+	const [otherListings, setOtherListings] = useState<Listing[]>([]);
 	const [didAutoRecover, setDidAutoRecover] = useState(false);
 	const [error, setError] = useState("");
 	const [success, setSuccess] = useState("");
@@ -144,15 +145,18 @@ export default function CreateListingPage() {
 		guest_note: "",
 		is_discounted: false,
 		is_newly_built: false,
+		commission_rate: "",
 	});
 
 	useEffect(() => {
 		if (!canPost) return;
 		let mounted = true;
+		
 		Promise.all([
 			api.get<{ buildings: BuildingWithRooms[] }>("/api/buildings"),
 			api.get<{ amenities: Amenity[] }>("/api/search/amenities"),
-		]).then(([buildingsRes, amenitiesRes]) => {
+			api.get<{ listings: Listing[] }>("/api/listings/my")
+		]).then(([buildingsRes, amenitiesRes, listingsRes]) => {
 			if (!mounted) return;
 			if (buildingsRes.data?.buildings) {
 				setBuildings(buildingsRes.data.buildings);
@@ -160,12 +164,25 @@ export default function CreateListingPage() {
 			if (amenitiesRes.data?.amenities) {
 				setAmenities(amenitiesRes.data.amenities);
 			}
+			if (listingsRes.data?.listings) {
+				setOtherListings(listingsRes.data.listings);
+			}
 		});
 
 		return () => {
 			mounted = false;
 		};
 	}, [canPost]);
+
+	useEffect(() => {
+		// Auto-detect if we entered create mode but a listing actually exists for this room
+		if (!listingIdParam && roomIdParam && otherListings.length > 0) {
+			const existingListing = otherListings.find(l => l.room_id === roomIdParam);
+			if (existingListing) {
+				navigate(`/create-listing?listing_id=${existingListing.id}&building_id=${buildingIdParam || form.building_id}&room_id=${roomIdParam}`, { replace: true });
+			}
+		}
+	}, [listingIdParam, roomIdParam, otherListings, navigate, buildingIdParam, form.building_id]);
 
 	useEffect(() => {
 		if (!canPost || !listingIdParam) return;
@@ -206,6 +223,7 @@ export default function CreateListingPage() {
 				guest_note: listing.guest_note || "",
 				is_discounted: Boolean(listing.is_discounted),
 				is_newly_built: Boolean(listing.is_newly_built),
+				commission_rate: listing.commission_rate != null ? String(listing.commission_rate) : "",
 			}));
 
 			setImageUploads(
@@ -501,7 +519,10 @@ export default function CreateListingPage() {
 			return;
 		}
 		setSuccess(data?.message || (listingIdParam ? "Cập nhật tin thành công" : "Tạo tin thành công"));
-		setTimeout(() => navigate("/my-listings"), 1200);
+		setTimeout(() => {
+			if (form.building_id) navigate(`/locations/${form.building_id}?tab=phong`);
+			else navigate(-1);
+		}, 1200);
 	};
 
 	if (!canPost) {
@@ -509,7 +530,7 @@ export default function CreateListingPage() {
 			<div className="flex-1 overflow-y-auto bg-slate-50">
 				<div className="max-w-3xl mx-auto p-6">
 					<div className="bg-white rounded-2xl border border-slate-200 p-6 md:p-8">
-						<h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 mb-2">Đăng tin cho thuê</h1>
+						<h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 mb-2">Thêm thông tin phòng</h1>
 						<p className="text-slate-500 mb-6">Để đăng tin, bạn cần mua gói Chủ trọ/Môi giới.</p>
 						<div className="flex flex-wrap gap-3">
 							<button
@@ -537,7 +558,7 @@ export default function CreateListingPage() {
 				<div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
 					<div className="px-5 sm:px-6 py-4 border-b border-slate-100 sticky top-0 bg-white z-10">
 						<h1 className="text-[20px] font-bold text-slate-900 tracking-tight">
-							{listingIdParam ? "Sửa tin đăng" : "Tạo tin đăng"}
+							{listingIdParam ? "Sửa thông tin phòng" : "Thêm thông tin phòng"}
 						</h1>
 					</div>
 
@@ -571,7 +592,7 @@ export default function CreateListingPage() {
 								<button
 									onClick={() => imageInputRef.current?.click()}
 									disabled={uploadingImages || imageUploads.length >= 15}
-									className="w-40 h-40 border border-dashed border-slate-300 rounded-xl flex flex-col items-center justify-center gap-2 text-slate-500 hover:border-brand-primary hover:text-brand-primary transition-all disabled:opacity-50 cursor-pointer"
+									className="w-40 h-40 border border-dashed border-slate-300 rounded-xl flex flex-col items-center justify-center gap-2 text-slate-500 hover:border-[#14B8A6] hover:text-[#14B8A6] transition-all disabled:opacity-50 cursor-pointer"
 								>
 									<ImagePlus className="w-8 h-8" />
 									<span className="font-semibold">{uploadingImages ? "Đang tải..." : "Thêm ảnh"}</span>
@@ -605,7 +626,7 @@ export default function CreateListingPage() {
 								<button
 									onClick={() => videoInputRef.current?.click()}
 									disabled={uploadingVideo}
-									className="w-full max-w-lg border border-dashed border-slate-300 rounded-xl py-4 px-4 text-left flex items-center gap-3 hover:border-brand-primary transition-all disabled:opacity-50 cursor-pointer"
+									className="w-full max-w-lg border border-dashed border-slate-300 rounded-xl py-4 px-4 text-left flex items-center gap-3 hover:border-[#14B8A6] transition-all disabled:opacity-50 cursor-pointer"
 								>
 									<Video className="w-6 h-6 text-slate-500" />
 									<span className="font-semibold text-slate-700">
@@ -621,8 +642,64 @@ export default function CreateListingPage() {
 						</section>
 
 						<section className="space-y-4">
-							<h2 className="text-[20px] font-bold text-slate-900">Mã phòng chung giá</h2>
-							<p className="text-slate-500">Chọn mã phòng giống nhau về hình ảnh và giá</p>
+							<div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+								<div>
+									<h2 className="text-[20px] font-bold text-slate-900">Mã phòng chung giá</h2>
+									<p className="text-slate-500">Chọn mã phòng giống nhau về hình ảnh và giá</p>
+								</div>
+								
+								{selectedBuilding && otherListings.filter(l => l.room_id && l.room_id !== selectedRoom?.id && selectedBuilding.rooms?.some(r => r.id === l.room_id)).length > 0 && (
+									<div className="flex flex-col items-start sm:items-end gap-1.5">
+										<label className="text-xs font-bold text-slate-600">Sao chép nhanh thiết lập:</label>
+										<select
+											className="border border-brand-primary/30 rounded-xl px-4 py-2 text-sm font-bold text-brand-primary bg-brand-bg cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-primary/20"
+											value=""
+											onChange={(e) => {
+												const lId = e.target.value;
+												if (!lId) return;
+												const l = otherListings.find(x => x.id === lId);
+												if (l && window.confirm("Bạn có chắc muốn sao chép toàn bộ cấu hình từ phòng này? Dữ liệu đang nhập sẽ bị ghi đè!")) {
+													setForm((prev) => ({
+														...prev,
+														title: l.title ?? prev.title,
+														description: l.description ?? prev.description,
+														price: l.price != null ? String(l.price) : prev.price,
+														contact_name: l.contact_name || prev.contact_name,
+														contact_phone: l.contact_phone || prev.contact_phone,
+														property_type: l.property_type || prev.property_type,
+														furniture: l.furniture || prev.furniture,
+														amenity_ids: l.amenity_ids || prev.amenity_ids,
+														max_people: l.max_people ?? prev.max_people,
+														max_vehicles: l.max_vehicles ?? prev.max_vehicles,
+														length_m: l.length_m != null ? String(l.length_m) : prev.length_m,
+														width_m: l.width_m != null ? String(l.width_m) : prev.width_m,
+														area: l.area != null ? String(l.area) : prev.area,
+														guest_note: l.guest_note ?? prev.guest_note,
+														is_discounted: Boolean(l.is_discounted),
+														is_newly_built: Boolean(l.is_newly_built),
+														commission_rate: l.commission_rate != null ? String(l.commission_rate) : prev.commission_rate,
+														room_features: l.room_features?.filter((v:string) => ROOM_FEATURES.includes(v)) || prev.room_features,
+														custom_amenities: l.room_features?.filter((v:string) => !ROOM_FEATURES.includes(v)) || prev.custom_amenities,
+														interior_features: l.interior_features || prev.interior_features,
+													}));
+													if (l.images && Array.isArray(l.images)) {
+														// @ts-ignore - Supabase JSONB returns any object
+														setImageUploads(l.images.slice().sort((a:any,b:any) => a.order - b.order).map((img:any, index:number) => ({ url: img.url, order: index })));
+													}
+													if (l.video_url) setVideoUrl(l.video_url);
+												}
+											}}
+										>
+											<option value="">-- Chọn một phòng --</option>
+											{otherListings.filter(l => l.room_id && l.room_id !== selectedRoom?.id && selectedBuilding.rooms?.some(r => r.id === l.room_id)).map(l => {
+												const rm = selectedBuilding?.rooms?.find(r => r.id === l.room_id);
+												return <option key={l.id} value={l.id}>Sao chép form của phòng {rm?.room_number}</option>
+											})}
+										</select>
+									</div>
+								)}
+							</div>
+							
 							{loadingInitialData ?
 								<div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-slate-500 font-semibold">
 									Đang tải thông tin tin đăng...
@@ -634,26 +711,26 @@ export default function CreateListingPage() {
 									</span>
 									<span className="text-sm font-semibold text-slate-500">{selectedBuilding?.name}</span>
 									<button
-										onClick={() => navigate("/my-listings")}
+										onClick={() => {
+											if (form.building_id) navigate(`/locations/${form.building_id}?tab=phong`);
+											else navigate(-1);
+										}}
 										className="ml-auto px-4 py-2 rounded-xl bg-white border border-slate-300 text-slate-700 font-bold cursor-pointer"
 									>
-										Chọn mã khác
+										Trở về Tòa nhà
 									</button>
 								</div>
-							:	<div className="rounded-xl border border-brand-primary/30 bg-brand-bg p-4 space-y-3">
-									<p className="text-brand-dark font-bold">Bạn chưa chọn mã phòng để đăng tin.</p>
+							:	<div className="rounded-xl border border-[#14B8A6]/30 bg-[#14B8A6]/5 p-4 space-y-3">
+									<p className="text-brand-dark font-bold">Bạn chưa chọn mã phòng.</p>
 									<div className="flex flex-wrap gap-2">
 										<button
-											onClick={() => navigate("/my-listings")}
+											onClick={() => {
+												if (form.building_id) navigate(`/locations/${form.building_id}?tab=phong`);
+												else navigate('/');
+											}}
 											className="px-4 py-2 rounded-lg bg-brand-primary text-white text-sm font-bold cursor-pointer hover:bg-brand-dark"
 										>
-											Chọn phòng để đăng tin
-										</button>
-										<button
-											onClick={() => navigate("/my-listings")}
-											className="px-4 py-2 rounded-lg border border-brand-primary/30 text-brand-primary bg-white text-sm font-bold cursor-pointer hover:bg-brand-bg"
-										>
-											Thêm mã phòng
+											Trở về Sơ đồ phòng
 										</button>
 									</div>
 								</div>
@@ -665,7 +742,7 @@ export default function CreateListingPage() {
 								value={form.title}
 								onChange={(e) => setForm((prev) => ({ ...prev, title: e.target.value }))}
 								placeholder="Tiêu đề tin đăng *"
-								className="w-full h-12 rounded-xl border border-slate-300 px-4 text-base font-semibold focus:outline-none focus:border-brand-primary"
+								className="w-full h-12 rounded-xl border border-slate-300 px-4 text-base font-semibold focus:outline-none focus:border-[#14B8A6]"
 								maxLength={100}
 							/>
 							<div className="relative">
@@ -673,7 +750,7 @@ export default function CreateListingPage() {
 									value={formatVnd(form.price)}
 									onChange={(e) => setForm((prev) => ({ ...prev, price: e.target.value }))}
 									placeholder="Phí thuê *"
-									className="w-full h-14 rounded-xl border border-slate-300 px-4 text-2xl font-bold tracking-tight text-slate-800 focus:outline-none focus:border-brand-primary"
+									className="w-full h-14 rounded-xl border border-slate-300 px-4 text-2xl font-bold tracking-tight text-slate-800 focus:outline-none focus:border-[#14B8A6]"
 								/>
 								<span className="absolute right-5 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">VNĐ/tháng</span>
 							</div>
@@ -706,7 +783,7 @@ export default function CreateListingPage() {
 										onClick={() => setForm((prev) => ({ ...prev, property_type: type.key }))}
 										className={`h-14 rounded-xl border text-sm font-semibold transition-all cursor-pointer ${
 											form.property_type === type.key ?
-												"bg-brand-primary text-white border-brand-primary"
+												"bg-brand-primary text-white border-[#14B8A6]"
 											:	"bg-white border-slate-200 text-slate-700 hover:border-slate-300"
 										}`}
 									>
@@ -725,7 +802,7 @@ export default function CreateListingPage() {
 											Chọn thông tin giúp khách lọc phòng nhanh và chính xác hơn.
 										</p>
 									</div>
-									<span className="px-3 py-1.5 rounded-full border border-brand-primary/20 bg-brand-bg text-brand-primary text-xs font-bold">
+									<span className="px-3 py-1.5 rounded-full border border-[#14B8A6]/20 bg-[#14B8A6]/5 text-[#14B8A6] text-xs font-bold">
 										{form.room_features.length + form.interior_features.length + form.amenity_ids.length + form.custom_amenities.length} mục đã chọn
 									</span>
 								</div>
@@ -745,7 +822,7 @@ export default function CreateListingPage() {
 												onClick={() => toggleStringArray("room_features", feature)}
 												className={`px-3.5 py-2 rounded-xl border text-sm font-semibold cursor-pointer transition-colors ${
 													form.room_features.includes(feature) ?
-														"bg-brand-bg border-brand-primary/40 text-brand-dark"
+														"bg-[#14B8A6]/5 border-[#14B8A6]/40 text-brand-dark"
 													:	"bg-white border-slate-200 text-slate-700 hover:border-slate-300"
 												}`}
 											>
@@ -770,7 +847,7 @@ export default function CreateListingPage() {
 												onClick={() => toggleStringArray("interior_features", feature)}
 												className={`px-3.5 py-2 rounded-xl border text-sm font-semibold cursor-pointer transition-colors ${
 													form.interior_features.includes(feature) ?
-														"bg-brand-bg border-brand-primary/40 text-brand-dark"
+														"bg-[#14B8A6]/5 border-[#14B8A6]/40 text-brand-dark"
 													:	"bg-white border-slate-200 text-slate-700 hover:border-slate-300"
 												}`}
 											>
@@ -803,7 +880,7 @@ export default function CreateListingPage() {
 												onClick={() => toggleAmenity(am.id)}
 												className={`px-3.5 py-2 rounded-xl border text-sm font-semibold cursor-pointer transition-colors ${
 													form.amenity_ids.includes(am.id) ?
-														"bg-brand-bg border-brand-primary/40 text-brand-dark"
+														"bg-[#14B8A6]/5 border-[#14B8A6]/40 text-brand-dark"
 													:	"bg-white border-slate-200 text-slate-700 hover:border-slate-300"
 												}`}
 											>
@@ -819,7 +896,7 @@ export default function CreateListingPage() {
 										<button
 											type="button"
 											onClick={() => setShowCustomAmenityInput((prev) => !prev)}
-											className="px-4 py-2.5 rounded-xl border border-brand-primary/40 text-brand-primary text-sm font-bold flex items-center gap-1.5 hover:bg-brand-bg cursor-pointer"
+											className="px-4 py-2.5 rounded-xl border border-[#14B8A6]/40 text-[#14B8A6] text-sm font-bold flex items-center gap-1.5 hover:bg-[#14B8A6]/5 cursor-pointer"
 										>
 											<PlusCircle className="w-4 h-4" />
 											Thêm tiện ích tùy chỉnh
@@ -882,7 +959,7 @@ export default function CreateListingPage() {
 											onClick={() => setForm((prev) => ({ ...prev, max_people: value }))}
 											className={`w-12 h-12 rounded-xl border text-base font-bold cursor-pointer ${
 												form.max_people === value ?
-													"bg-brand-bg border-brand-primary/40 text-brand-dark"
+													"bg-[#14B8A6]/5 border-[#14B8A6]/40 text-brand-dark"
 												:	"border-slate-200 text-slate-700 hover:border-slate-300"
 											}`}
 										>
@@ -904,7 +981,7 @@ export default function CreateListingPage() {
 											onClick={() => setForm((prev) => ({ ...prev, max_vehicles: value }))}
 											className={`w-12 h-12 rounded-xl border text-base font-bold cursor-pointer ${
 												form.max_vehicles === value ?
-													"bg-brand-bg border-brand-primary/40 text-brand-dark"
+													"bg-[#14B8A6]/5 border-[#14B8A6]/40 text-brand-dark"
 												:	"border-slate-200 text-slate-700 hover:border-slate-300"
 											}`}
 										>
@@ -922,14 +999,14 @@ export default function CreateListingPage() {
 									value={form.length_m}
 									onChange={(e) => setForm((prev) => ({ ...prev, length_m: e.target.value }))}
 									placeholder="Chiều dài (m)"
-									className="h-12 rounded-xl border border-slate-300 px-4 text-base font-semibold focus:outline-none focus:border-brand-primary"
+									className="h-12 rounded-xl border border-slate-300 px-4 text-base font-semibold focus:outline-none focus:border-[#14B8A6]"
 								/>
 								<span className="text-xl font-bold text-slate-700">x</span>
 								<input
 									value={form.width_m}
 									onChange={(e) => setForm((prev) => ({ ...prev, width_m: e.target.value }))}
 									placeholder="Chiều rộng (m)"
-									className="h-12 rounded-xl border border-slate-300 px-4 text-base font-semibold focus:outline-none focus:border-brand-primary"
+									className="h-12 rounded-xl border border-slate-300 px-4 text-base font-semibold focus:outline-none focus:border-[#14B8A6]"
 								/>
 							</div>
 							<div className="max-w-sm rounded-2xl border border-slate-300 px-4 py-3">
@@ -945,14 +1022,14 @@ export default function CreateListingPage() {
 								value={form.guest_note}
 								onChange={(e) => setForm((prev) => ({ ...prev, guest_note: e.target.value }))}
 								placeholder="Thông tin dành cho khách thuê, ví dụ: giảm giá nếu ở 1 mình..."
-								className="w-full rounded-xl border border-slate-300 p-4 text-sm focus:outline-none focus:border-brand-primary"
+								className="w-full rounded-xl border border-slate-300 p-4 text-sm focus:outline-none focus:border-[#14B8A6]"
 							/>
 							<textarea
 								rows={4}
 								value={form.description}
 								onChange={(e) => setForm((prev) => ({ ...prev, description: e.target.value }))}
 								placeholder="Mô tả chi tiết thêm..."
-								className="w-full rounded-xl border border-slate-300 p-4 text-sm focus:outline-none focus:border-brand-primary"
+								className="w-full rounded-xl border border-slate-300 p-4 text-sm focus:outline-none focus:border-[#14B8A6]"
 							/>
 						</section>
 
@@ -963,31 +1040,69 @@ export default function CreateListingPage() {
 									value={form.contact_name}
 									onChange={(e) => setForm((prev) => ({ ...prev, contact_name: e.target.value }))}
 									placeholder="Họ và tên"
-									className="h-12 rounded-xl border border-slate-300 px-4 text-base font-semibold focus:outline-none focus:border-brand-primary"
+									className="h-12 rounded-xl border border-slate-300 px-4 text-base font-semibold focus:outline-none focus:border-[#14B8A6]"
 								/>
 								<input
 									value={form.contact_phone}
 									onChange={(e) => setForm((prev) => ({ ...prev, contact_phone: e.target.value }))}
 									placeholder="Số điện thoại *"
-									className="h-12 rounded-xl border border-slate-300 px-4 text-base font-semibold focus:outline-none focus:border-brand-primary"
+									className="h-12 rounded-xl border border-slate-300 px-4 text-base font-semibold focus:outline-none focus:border-[#14B8A6]"
 								/>
+							</div>
+						</section>
+						
+						{/* Commission Block (Nguồn trọ môi giới) */}
+						<section className="bg-brand-bg/50 border border-brand-primary/20 rounded-2xl p-5 sm:p-6 space-y-4">
+							<div className="flex gap-4">
+								<div className="w-12 h-12 rounded-full bg-brand-bg flex items-center justify-center flex-shrink-0">
+									<svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 text-brand-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+										<path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+									</svg>
+								</div>
+								<div>
+									<h2 className="text-[18px] font-bold text-slate-900 leading-tight">Ký gửi phòng lên Nguồn Trọ Môi Giới</h2>
+									<ul className="mt-2 space-y-1 text-sm text-slate-600">
+										<li className="flex items-center gap-2"><span className="w-1 h-1 rounded-full bg-slate-400" /> Cho môi giới biết bạn đang có phòng trống</li>
+										<li className="flex items-center gap-2"><span className="w-1 h-1 rounded-full bg-slate-400" /> Môi giới có khách sẽ liên hệ bạn</li>
+										<li className="flex items-center gap-2"><span className="w-4 h-4 rounded-full bg-brand-primary text-white flex items-center justify-center text-[10px] font-bold">+</span> Tăng cơ hội lấp phòng nhanh</li>
+									</ul>
+								</div>
+							</div>
+							<div className="pt-2">
+								<label className="block text-sm font-bold text-slate-700 mb-2">Mức hoa hồng cho môi giới (%)</label>
+								<div className="relative">
+									<input
+										type="number"
+										min="0"
+										max="100"
+										value={form.commission_rate}
+										onChange={(e) => setForm(prev => ({ ...prev, commission_rate: e.target.value }))}
+										placeholder="Vd: 50"
+										className="w-full h-12 rounded-xl border border-brand-primary/30 px-4 text-base font-semibold focus:outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20"
+									/>
+								</div>
 							</div>
 						</section>
 					</div>
 				</div>
 
 				<div className="fixed bottom-0 left-0 right-0 z-20 bg-slate-50/95 backdrop-blur border-t border-slate-200 p-4 lg:static lg:bg-transparent lg:border-t-0 lg:backdrop-blur-none lg:p-0 lg:mt-6">
-					<div className="max-w-3xl mx-auto lg:max-w-none">
+					<div className="max-w-3xl mx-auto lg:max-w-none flex gap-3">
+						<button
+							onClick={() => {
+								if (form.building_id) navigate(`/locations/${form.building_id}?tab=phong`);
+								else navigate(-1);
+							}}
+							className="flex-1 lg:flex-none lg:w-40 h-12 rounded-xl border border-slate-300 bg-white text-slate-700 font-bold hover:bg-slate-50 transition-colors"
+						>
+							Trở về
+						</button>
 						<button
 							onClick={handleSubmit}
 							disabled={loading}
-							className="w-full h-12 rounded-xl bg-brand-primary text-white text-lg lg:text-base font-bold tracking-tight disabled:opacity-60 cursor-pointer hover:bg-brand-dark transition-colors"
+							className="flex-[2] lg:flex-1 h-12 rounded-xl bg-brand-primary text-white text-lg lg:text-base font-bold tracking-tight disabled:opacity-60 cursor-pointer hover:bg-brand-dark transition-colors"
 						>
-							{loading ?
-								(listingIdParam ? "Đang cập nhật..." : "Đang tạo...")
-							: listingIdParam ?
-								"Cập nhật tin"
-							:	"Tạo tin"}
+							{loading ? (listingIdParam ? "Đang cập nhật..." : "Đang tạo...") : (listingIdParam ? "Cập nhật & Ký gửi ngay" : "Ký gửi ngay")}
 						</button>
 					</div>
 				</div>

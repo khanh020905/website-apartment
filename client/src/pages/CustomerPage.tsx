@@ -499,7 +499,7 @@ export default function CustomerPage() {
 							placeholder="Tìm kiếm bằng tên khách, số điện thoại..."
 							value={search}
 							onChange={(e) => setSearch(e.target.value)}
-							className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm text-slate-700 bg-white focus:outline-none focus:border-brand-primary hover:border-slate-300 transition-all"
+							className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm text-slate-700 bg-white focus:outline-none focus:border-[#14B8A6] hover:border-slate-300 transition-all"
 						/>
 					</div>
 
@@ -836,18 +836,32 @@ export default function CustomerPage() {
 
 							<div className="flex-1 overflow-y-auto p-5">
 								<div className="grid grid-cols-2 gap-4">
-                                    {/* Phòng */}
-                                    <div className="space-y-1.5">
-                                        <select
-                                            value={filterRoom}
-                                            onChange={(e) => setFilterRoom(e.target.value)}
-                                            className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-600 focus:border-brand-primary outline-none transition-all appearance-none"
-                                        >
-                                            <option value="">Phòng</option>
+                                    <div className="col-span-2 space-y-1.5">
+                                      <h3 className="text-sm font-semibold text-slate-800 mb-2">Phòng</h3>
+                                      <div className="max-h-[200px] overflow-y-auto border border-slate-100 rounded-lg p-3 bg-white">
+                                        <div className="grid grid-cols-2 gap-x-2 gap-y-3">
+                                            <label className="flex items-center gap-2 cursor-pointer group">
+                                                <input 
+                                                    type="checkbox"
+                                                    checked={filterRoom === ""}
+                                                    onChange={() => setFilterRoom("")}
+                                                    className="w-4 h-4 rounded border-slate-300 text-[#14B8A6] focus:ring-[#14B8A6]/20 cursor-pointer"
+                                                />
+                                                <span className="text-sm text-slate-600 group-hover:text-slate-900 transition-colors">Tất cả</span>
+                                            </label>
                                             {rooms.map(r => (
-                                                <option key={r.id} value={r.id}>{r.room_number}</option>
+                                                <label key={r.id} className="flex items-center gap-2 cursor-pointer group">
+                                                    <input 
+                                                        type="checkbox"
+                                                        checked={filterRoom === r.id}
+                                                        onChange={() => setFilterRoom(r.id)}
+                                                        className="w-4 h-4 rounded border-slate-300 text-[#14B8A6] focus:ring-[#14B8A6]/20 cursor-pointer"
+                                                    />
+                                                    <span className="text-sm text-slate-600 group-hover:text-slate-900 transition-colors">{r.room_number} <span className="text-xs text-slate-400">({r.buildings?.name || ''})</span></span>
+                                                </label>
                                             ))}
-                                        </select>
+                                        </div>
+                                      </div>
                                     </div>
 
                                     {/* Trạng thái khách */}
@@ -855,7 +869,7 @@ export default function CustomerPage() {
                                         <select
                                             value={filterStatus}
                                             onChange={(e) => setFilterStatus(e.target.value)}
-                                            className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-600 focus:border-brand-primary outline-none transition-all appearance-none"
+                                            className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-600 focus:border-[#14B8A6] outline-none transition-all appearance-none"
                                         >
                                             <option value="">Trạng thái khách</option>
                                             <option value="active">Đang ở</option>
@@ -869,7 +883,7 @@ export default function CustomerPage() {
                                         <select
                                             value={filterResidency}
                                             onChange={(e) => setFilterResidency(e.target.value)}
-                                            className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-600 focus:border-brand-primary outline-none transition-all appearance-none"
+                                            className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-600 focus:border-[#14B8A6] outline-none transition-all appearance-none"
                                         >
                                             <option value="">Trạng thái tạm trú</option>
                                             <option value="completed">Đã đăng ký</option>
@@ -883,7 +897,7 @@ export default function CustomerPage() {
                                         <select
                                             value={filterGender}
                                             onChange={(e) => setFilterGender(e.target.value)}
-                                            className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-600 focus:border-brand-primary outline-none transition-all appearance-none"
+                                            className="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-600 focus:border-[#14B8A6] outline-none transition-all appearance-none"
                                         >
                                             <option value="">Giới tính</option>
                                             <option value="male">Nam</option>
@@ -904,7 +918,7 @@ export default function CustomerPage() {
 								</button>
 								<button
 									onClick={() => setIsFilterOpen(false)}
-									className="px-6 py-2.5 text-sm font-bold bg-brand-primary hover:bg-brand-dark text-white rounded-lg transition-colors shadow-sm cursor-pointer"
+									className="px-6 py-2.5 text-sm font-bold bg-[#14B8A6] hover:bg-[#0F766E] text-white rounded-lg transition-colors shadow-sm cursor-pointer"
 								>
 									Áp dụng
 								</button>

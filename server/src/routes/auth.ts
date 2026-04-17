@@ -284,6 +284,24 @@ router.post('/refresh', async (req: Request, res: Response) => {
   });
 });
 
+// GET /api/auth/profile/:id — Get a public profile
+router.get('/profile/:id', async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  const { data, error } = await getSupabase()
+    .from('profiles')
+    .select('id, full_name, phone, avatar_url, role')
+    .eq('id', id)
+    .single();
+
+  if (error) {
+    res.status(404).json({ error: 'Tài khoản không tồn tại' });
+    return;
+  }
+
+  res.json({ profile: data });
+});
+
 // PUT /api/auth/profile — Update own profile
 router.put('/profile', authenticate, async (req: AuthRequest, res: Response) => {
   const { full_name, phone, avatar_url } = req.body;

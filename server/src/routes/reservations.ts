@@ -172,10 +172,12 @@ router.get("/", authenticate, async (req: AuthRequest, res: Response) => {
     limit = "20",
     search = "",
     status,
+    statuses,
+    room_ids,
     building_id,
     start_date,
     end_date
-  } = req.query as ReservationQueryParams;
+  } = req.query as ReservationQueryParams & { statuses?: string, room_ids?: string };
 
   const pageNum = Math.max(1, parseInt(page) || 1);
   const limitNum = Math.min(100, Math.max(1, parseInt(limit) || 20));
@@ -196,7 +198,16 @@ router.get("/", authenticate, async (req: AuthRequest, res: Response) => {
       )
       .eq("building.owner_id", req.user.id);
 
-    if (status) query = query.eq("status", status);
+    if (statuses) {
+      query = query.in("status", statuses.split(","));
+    } else if (status) {
+      query = query.eq("status", status);
+    }
+    
+    if (room_ids) {
+      query = query.in("room_id", room_ids.split(","));
+    }
+    
     if (building_id) query = query.eq("building_id", building_id);
     if (start_date) query = query.gte("check_in_date", start_date);
     if (end_date) query = query.lte("check_in_date", end_date);
@@ -227,7 +238,11 @@ router.get("/", authenticate, async (req: AuthRequest, res: Response) => {
 
 // POST /api/reservations - Đăng ký giữ chỗ (Mapping UI: BookingForm)
 router.post("/", authenticate, async (req: AuthRequest, res: Response) => {
-  const { customer_name, customer_phone, customer_email, check_in_date, deposit_amount, rent_amount, room_id, building_id, notes } = req.body;
+  const { 
+    customer_name, customer_phone, customer_email, check_in_date, expected_check_out, 
+    deposit_amount, rent_amount, room_id, building_id, notes,
+    identity_number, customer_zalo, guest_count, rent_cycle, payment_cycle, payment_method, transaction_date
+  } = req.body;
   
   if (!customer_name || !customer_phone || !check_in_date || !room_id || !building_id) {
     return res.status(400).json({ error: "Thiếu thông tin bắt buộc" });
@@ -246,12 +261,21 @@ router.post("/", authenticate, async (req: AuthRequest, res: Response) => {
         customer_phone,
         customer_email,
         check_in_date,
+        expected_check_out: expected_check_out || null,
         deposit_amount: deposit_amount || 0,
         rent_amount: rent_amount || 0,
         room_id,
         building_id,
         notes,
-        status: 'confirmed'
+        status: 'confirmed',
+        
+        identity_number: identity_number || null,
+        customer_zalo: customer_zalo || null,
+        guest_count: guest_count || 1,
+        rent_cycle: rent_cycle || 'Chưa cấu hình',
+        payment_cycle: payment_cycle || '1 tháng',
+        payment_method: payment_method || 'transfer',
+        transaction_date: transaction_date || null
       })
       .select()
       .single();

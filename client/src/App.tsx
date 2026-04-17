@@ -36,6 +36,7 @@ import TransactionConfigPage from "./pages/TransactionConfigPage";
 
 import ContractsPage from "./pages/ContractsPage";
 import ContractTemplatesPage from "./pages/ContractTemplatesPage";
+import BatchInvoicesPage from "./pages/BatchInvoicesPage";
 
 import IncidentsPage from "./pages/IncidentsPage";
 import IncidentTypesPage from "./pages/IncidentTypesPage";
@@ -51,15 +52,18 @@ import OwnerReportPage from "./pages/OwnerReportPage";
 import BusinessInfoPage from "./pages/BusinessInfoPage";
 import LocationsPage from "./pages/LocationsPage";
 import UsersPage from "./pages/UsersPage";
-import RolesPage from "./pages/RolesPage";
 import IntegrationsPage from "./pages/IntegrationsPage";
 import ApiManagementPage from "./pages/ApiManagementPage";
+import BrokerCartPage from "./pages/BrokerCartPage";
+import Storefront from "./pages/Storefront";
+import BuildingDetailPage from "./pages/BuildingDetailPage";
 
 import type { Listing, Amenity } from "../../shared/types";
 import AppSidebar from "./components/AppSidebar";
 import { BuildingProvider } from "./contexts/BuildingContext";
 import { applyBusinessThemeFromSettings, applyDefaultAppTheme } from "./lib/brandTheme";
 import { ToastProvider } from "./components/Toast";
+
 
 function HomePage() {
 	const [listings, setListings] = useState<Listing[]>([]);
@@ -283,6 +287,7 @@ function App() {
 														path="/forgot-password"
 														element={<ForgotPasswordPage />}
 													/>
+
 													<Route
 														path="/pricing"
 														element={<PricingPage />}
@@ -290,6 +295,12 @@ function App() {
 													<Route
 														path="/listings/:id"
 														element={<ListingDetailPage />}
+													/>
+													<Route
+														path="/store/:brokerId"
+														element={
+															<Storefront />
+														}
 													/>
 
 													{/* Authenticated routes */}
@@ -377,6 +388,14 @@ function App() {
 															</ProtectedRoute>
 														}
 													/>
+													<Route
+														path="/broker/cart"
+														element={
+															<ProtectedRoute roles={["broker", "admin"]}>
+																<BrokerCartPage />
+															</ProtectedRoute>
+														}
+													/>
 
 													{/* ── PAYMENTS ── */}
 													<Route
@@ -384,6 +403,14 @@ function App() {
 														element={
 															<ProtectedRoute roles={["landlord", "broker", "admin"]}>
 																<InvoicesPage />
+															</ProtectedRoute>
+														}
+													/>
+													<Route
+														path="/invoices/batch-create"
+														element={
+															<ProtectedRoute roles={["landlord", "broker", "admin"]}>
+																<BatchInvoicesPage />
 															</ProtectedRoute>
 														}
 													/>
@@ -501,18 +528,18 @@ function App() {
 														}
 													/>
 													<Route
-														path="/users"
+														path="/locations/:id"
 														element={
 															<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-																<UsersPage />
+																<BuildingDetailPage />
 															</ProtectedRoute>
 														}
 													/>
 													<Route
-														path="/roles"
+														path="/users"
 														element={
 															<ProtectedRoute roles={["landlord", "broker", "admin"]}>
-																<RolesPage />
+																<UsersPage />
 															</ProtectedRoute>
 														}
 													/>

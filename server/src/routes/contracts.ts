@@ -27,7 +27,8 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response) => {
     tenant_dob, tenant_job, tenant_nationality, tenant_city,
     tenant_district, tenant_ward, tenant_address, tenant_avatar,
     tenant_notes, tenant_id_number, residence_status,
-    start_date, end_date, rent_amount, deposit_amount, notes 
+    start_date, end_date, rent_amount, deposit_amount, notes,
+    contract_number, contract_name, booking_code, attachments
   } = req.body;
 
   if (!room_id || !tenant_name || !start_date || !rent_amount) {
@@ -80,7 +81,11 @@ router.post('/', authenticate, async (req: AuthRequest, res: Response) => {
       rent_amount,
       deposit_amount: deposit_amount || 0,
       notes: notes || tenant_notes || null,
-      status: 'active'
+      status: 'active',
+      contract_number: contract_number || null,
+      contract_name: contract_name || null,
+      booking_code: booking_code || null,
+      attachments: attachments || []
     })
     .select()
     .single();

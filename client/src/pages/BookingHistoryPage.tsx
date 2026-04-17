@@ -3,6 +3,7 @@ import { Search, Settings2, X, ChevronLeft, ChevronRight } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { api } from "../lib/api";
 import { useBuilding } from "../contexts/BuildingContext";
+import type { BuildingWithRooms } from "../../../shared/types";
 
 interface Reservation {
   id: string;
@@ -24,6 +25,14 @@ export default function BookingHistoryPage() {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
 
+  const [buildings, setBuildings] = useState<BuildingWithRooms[]>([]);
+  const [roomFilterSearch, setRoomFilterSearch] = useState("");
+  const [selectedRooms, setSelectedRooms] = useState<string[]>([]);
+  
+  const allRooms = buildings.flatMap((b) => 
+    (b.rooms || []).map(r => ({ ...r, building_name: b.name }))
+  );
+
   const fetchHistory = useCallback(async () => {
     setLoading(true);
     const params = new URLSearchParams({
@@ -32,7 +41,8 @@ export default function BookingHistoryPage() {
     });
     if (search) params.append("search", search);
     if (selectedBuildingId) params.append("building_id", selectedBuildingId);
-    if (status.length > 0) params.append("status", status[0]); // Simple filter for now
+    if (status.length > 0) params.append("statuses", status.join(","));
+    if (selectedRooms.length > 0) params.append("room_ids", selectedRooms.join(","));
 
     try {
       const { data } = await api.get<any>(`/api/reservations?${params}`);
@@ -44,11 +54,18 @@ export default function BookingHistoryPage() {
       console.error(err);
     }
     setLoading(false);
-  }, [page, search, selectedBuildingId, status]);
+  }, [page, search, selectedBuildingId, status, selectedRooms]);
+
+  const fetchBuildings = useCallback(async () => {
+    const params = selectedBuildingId ? `?building_id=${selectedBuildingId}` : "";
+    const { data } = await api.get<{ buildings: BuildingWithRooms[] }>(`/api/buildings${params}`);
+    if (data) setBuildings(data.buildings);
+  }, [selectedBuildingId]);
 
   useEffect(() => {
     fetchHistory();
-  }, [fetchHistory]);
+    fetchBuildings();
+  }, [fetchHistory, fetchBuildings]);
 
 
 
@@ -78,7 +95,7 @@ export default function BookingHistoryPage() {
               placeholder="Tìm kiếm bằng mã đặt phòng..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm font-bold text-slate-700 bg-white focus:outline-none focus:border-brand-primary transition-all shadow-sm"
+              className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm font-bold text-slate-700 bg-white focus:outline-none focus:border-[#14B8A6] transition-all shadow-sm"
             />
           </div>
 
@@ -118,7 +135,7 @@ export default function BookingHistoryPage() {
                     <td className="px-5 py-4 uppercase text-[10px]">{r.package_type === 'month' ? 'Tháng' : 'Ngày'}</td>
                     <td className="px-5 py-4">{r.customer_name}</td>
                     <td className="px-5 py-4">
-                      <span className={`px-2 py-0.5 rounded text-[10px] uppercase border ${r.status === 'confirmed' ? 'bg-brand-bg text-brand-dark border-brand-primary/20' : 'bg-emerald-50 text-emerald-600 border-emerald-100'}`}>
+                      <span className={`px-2 py-0.5 rounded text-[10px] uppercase border ${r.status === 'confirmed' ? 'bg-brand-bg text-brand-dark border-[#14B8A6]/20' : 'bg-emerald-50 text-emerald-600 border-emerald-100'}`}>
                         {getStatusLabel(r.status)}
                       </span>
                     </td>
@@ -149,20 +166,93 @@ export default function BookingHistoryPage() {
                 <h2 className="text-lg font-bold text-slate-900">Lọc nâng cao</h2>
                 <button onClick={() => setIsFilterOpen(false)} className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-500 transition-colors"><X className="w-5 h-5" /></button>
               </div>
-              <div className="flex-1 overflow-y-auto p-5 space-y-6">
+              <div className="flex-1 overflow-y-auto p-5 space-y-8">
                  <div>
                     <h3 className="text-sm font-semibold text-slate-800 mb-3">Trạng thái</h3>
-                    {["Đã xác nhận", "Đang sử dụng", "Đã hoàn thành", "Đã huỷ"].map(item => (
-                       <label key={item} className="flex items-center gap-3 cursor-pointer mb-2">
-                          <input type="checkbox" className="w-4 h-4 rounded border-slate-300 text-brand-primary focus:ring-brand-primary/20" />
-                          <span className="text-sm text-slate-600">{item}</span>
-                       </label>
-                    ))}
+                    <div className="grid grid-cols-2 gap-x-2 gap-y-3">
+                      {[
+                        { id: "confirmed", label: "Đã xác nhận" },
+                        { id: "active", label: "Đang sử dụng" },
+                        { id: "completed", label: "Đã hoàn thành" },
+                        { id: "cancelled", label: "Đã huỷ" }
+                      ].map(item => {
+                         const isSelected = status.includes(item.id);
+                         return (
+                           <label key={item.id} className={`flex items-center gap-3 cursor-pointer p-2 rounded-lg transition-colors ${isSelected ? "bg-[#14B8A6]/5" : "hover:bg-slate-50"}`}>
+                              <input 
+                                type="checkbox"
+                                checked={isSelected}
+                                onChange={() => {
+                                  if (isSelected) setStatus(prev => prev.filter(s => s !== item.id));
+                                  else setStatus(prev => [...prev, item.id]);
+                                }}
+                                className="w-4 h-4 rounded border-slate-300 text-[#14B8A6] focus:ring-[#14B8A6]/20" 
+                              />
+                              <span className={`text-sm font-medium ${isSelected ? "text-brand-dark" : "text-slate-600"}`}>{item.label}</span>
+                           </label>
+                         );
+                      })}
+                    </div>
+                 </div>
+
+                 <div className="h-px bg-slate-100" />
+
+                 <div>
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="text-sm font-semibold text-slate-800">Chọn phòng</h3>
+                      <span className="text-xs font-bold text-[#14B8A6]">{selectedRooms.length} đã chọn</span>
+                    </div>
+                    
+                    <div className="relative mb-3">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                      <input
+                        type="text"
+                        placeholder="Tìm theo tên phòng..."
+                        value={roomFilterSearch}
+                        onChange={(e) => setRoomFilterSearch(e.target.value)}
+                        className="w-full pl-9 pr-3 py-2 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-[#14B8A6] transition-all bg-slate-50 focus:bg-white"
+                      />
+                    </div>
+
+                    <div className="max-h-[300px] overflow-y-auto border border-slate-100 rounded-lg p-4 bg-white">
+                      <div className="grid grid-cols-2 gap-x-2 gap-y-3">
+                        {allRooms
+                          .filter(r => r.room_number.toLowerCase().includes(roomFilterSearch.toLowerCase()))
+                          .map((r) => {
+                            const isSelected = selectedRooms.includes(r.id);
+                            return (
+                              <label
+                                key={r.id}
+                                className={`flex items-center gap-3 p-2 rounded-lg cursor-pointer transition-colors ${isSelected ? "bg-[#14B8A6]/5" : "hover:bg-slate-50 hover:shadow-sm bg-white border border-transparent"}`}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={isSelected}
+                                  onChange={() => {
+                                    if (isSelected) setSelectedRooms(prev => prev.filter(id => id !== r.id));
+                                    else setSelectedRooms(prev => [...prev, r.id]);
+                                  }}
+                                  className="w-4 h-4 rounded border-slate-300 text-[#14B8A6] focus:ring-[#14B8A6]/20"
+                                />
+                                <span className={`text-sm ${isSelected ? "font-bold text-brand-dark" : "text-slate-600 font-medium"}`}>
+                                  {r.room_number} <span className="text-[10px] text-slate-400 block">{r.building_name}</span>
+                                </span>
+                              </label>
+                            );
+                        })}
+                        {allRooms.length === 0 && <span className="p-2 text-xs text-slate-400">Không có phòng</span>}
+                      </div>
+                    </div>
                  </div>
               </div>
               <div className="p-5 border-t border-slate-100 bg-white flex items-center justify-end gap-3 shrink-0">
-                <button onClick={() => setStatus([])} className="px-5 py-2.5 text-sm font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors cursor-pointer">Đặt lại</button>
-                <button onClick={() => setIsFilterOpen(false)} className="px-6 py-2.5 text-sm font-bold bg-brand-primary hover:bg-brand-dark text-white rounded-lg transition-colors shadow-sm cursor-pointer">Áp dụng</button>
+                <button 
+                  onClick={() => { setStatus([]); setSelectedRooms([]); }} 
+                  className="px-5 py-2.5 text-sm font-bold text-slate-600 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors cursor-pointer"
+                >
+                  Đặt lại
+                </button>
+                <button onClick={() => setIsFilterOpen(false)} className="px-6 py-2.5 text-sm font-bold bg-[#14B8A6] hover:bg-[#0F766E] text-white rounded-lg transition-colors shadow-sm cursor-pointer">Áp dụng</button>
               </div>
             </motion.div>
           </>

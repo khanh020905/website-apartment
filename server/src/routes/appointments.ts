@@ -147,10 +147,12 @@ router.get("/", authenticate, async (req: AuthRequest, res: Response) => {
     limit = "20",
     search = "",
     status,
+    statuses,
+    room_ids,
     building_id,
     start_date,
     end_date
-  } = req.query as TourQueryParams;
+  } = req.query as TourQueryParams & { statuses?: string, room_ids?: string };
 
   const pageNum = Math.max(1, parseInt(page) || 1);
   const limitNum = Math.min(100, Math.max(1, parseInt(limit) || 20));
@@ -171,7 +173,16 @@ router.get("/", authenticate, async (req: AuthRequest, res: Response) => {
       )
       .eq("building.owner_id", req.user.id);
 
-    if (status) query = query.eq("status", status);
+    if (statuses) {
+      query = query.in("status", statuses.split(","));
+    } else if (status) {
+      query = query.eq("status", status);
+    }
+    
+    if (room_ids) {
+      query = query.in("room_id", room_ids.split(","));
+    }
+    
     if (building_id) query = query.eq("building_id", building_id);
     if (start_date) query = query.gte("appointment_date", start_date);
     if (end_date) query = query.lte("appointment_date", end_date);

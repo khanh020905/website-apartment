@@ -24,6 +24,9 @@ const LISTING_SCHEMA_OPTIONAL_COLUMNS = new Set([
   'guest_note',
   'room_features',
   'interior_features',
+  'target_audience',
+  'commission_rate',
+  'booking_note',
 ]);
 
 type ListingMutationResult<T> = {
@@ -476,7 +479,7 @@ router.post('/', authenticate, requireRole('landlord', 'broker', 'admin'), async
     available_date: available_date || null,
     status: 'pending' as const,
     approved_at: null,
-    target_audience: target_audience || null,
+    target_audience: req.user.role === 'broker' ? 'broker_private' : (target_audience || null),
     commission_rate: commission_rate || null,
     booking_note: booking_note || null,
   };
@@ -495,13 +498,15 @@ router.post('/', authenticate, requireRole('landlord', 'broker', 'admin'), async
   if (existingListingId) {
     const updateResult = await runListingMutationWithSchemaFallback(
       listingPayload,
-      async (payload) =>
-        getSupabase()
+      async (payload) => {
+        console.log("UPDATE payload", payload);
+        return getSupabase()
           .from('listings')
           .update(payload)
           .eq('id', existingListingId)
           .select()
-          .single(),
+          .single();
+      }
     );
 
     if (updateResult.error) { res.status(400).json({ error: updateResult.error.message }); return; }
@@ -519,12 +524,14 @@ router.post('/', authenticate, requireRole('landlord', 'broker', 'admin'), async
 
   const insertResult = await runListingMutationWithSchemaFallback(
     listingPayload,
-    async (payload) =>
-      getSupabase()
+    async (payload) => {
+      console.log("INSERT payload", payload);
+      return getSupabase()
         .from('listings')
         .insert(payload)
         .select()
-        .single(),
+        .single();
+    }
   );
 
   if (insertResult.error) { res.status(400).json({ error: insertResult.error.message }); return; }
@@ -622,6 +629,7 @@ router.put('/:id', authenticate, async (req: AuthRequest, res: Response) => {
     amenity_ids, available_date, video_url,
     is_discounted, is_newly_built, max_people, max_vehicles,
     length_m, width_m, guest_note, room_features, interior_features,
+    target_audience, commission_rate, booking_note,
   } = req.body;
 
   const updates: Record<string, unknown> = {};
@@ -660,6 +668,14 @@ router.put('/:id', authenticate, async (req: AuthRequest, res: Response) => {
   if (guest_note !== undefined) updates.guest_note = guest_note;
   if (room_features !== undefined) updates.room_features = room_features;
   if (interior_features !== undefined) updates.interior_features = interior_features;
+  
+  if (req.user.role === 'broker') {
+    updates.target_audience = 'broker_private';
+  } else if (target_audience !== undefined) {
+    updates.target_audience = target_audience;
+  }
+  if (commission_rate !== undefined) updates.commission_rate = commission_rate;
+  if (booking_note !== undefined) updates.booking_note = booking_note;
 
   // If listing was rejected, re-editing re-submits to pending
   if (existing.status === 'rejected') {
@@ -669,13 +685,15 @@ router.put('/:id', authenticate, async (req: AuthRequest, res: Response) => {
 
   const updateResult = await runListingMutationWithSchemaFallback(
     updates,
-    async (payload) =>
-      getSupabase()
+    async (payload) => {
+      console.log("PUT UPDATE payload", payload);
+      return getSupabase()
         .from('listings')
         .update(payload)
         .eq('id', id)
         .select()
-        .single(),
+        .single();
+    }
   );
 
   if (updateResult.error) { res.status(400).json({ error: updateResult.error.message }); return; }
