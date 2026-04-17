@@ -9,7 +9,7 @@ export const createPriceIcon = (listing: Listing) => {
 	const vacantRooms = listing.bedrooms || 1; // Sử dụng bedrooms làm số lượng phòng trống hoặc mặc định là 1
 
 	return L.divIcon({
-		className: "leaflet-div-icon",
+		className: "",
 		html: `
       <div 
         style="
